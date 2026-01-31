@@ -1,0 +1,11 @@
+FROM golang:alpine
+
+WORKDIR /opt/backend/
+
+COPY ./go.mod ./go.sum ./
+RUN go mod download
+
+COPY . .
+ENV GIN_MODE=debug
+
+ENTRYPOINT [ "go", "run", "./cmd/deltabase-server/" ]

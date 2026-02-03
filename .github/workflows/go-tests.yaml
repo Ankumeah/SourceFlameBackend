@@ -23,6 +23,13 @@ jobs:
         working-directory: backend/
         run: go mod download
 
+      - name: Load env vars
+        run: |
+          set -a
+          source env.d.example/backend
+          set +a
+          env >> $GITHUB_ENV
+
       - name: Run tests
         working-directory: backend/
         run: go test ./... -v

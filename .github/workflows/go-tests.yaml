@@ -24,11 +24,7 @@ jobs:
         run: go mod download
 
       - name: Load env vars
-        run: |
-          set -a
-          source env.d.example/backend
-          set +a
-          env >> $GITHUB_ENV
+        run: cat env.d.example/backend >> $GITHUB_ENV
 
       - name: Run tests
         working-directory: backend/

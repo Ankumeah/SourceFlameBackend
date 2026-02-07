@@ -47,16 +47,3 @@ func Test_Validate_jwt(t *testing.T) {
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

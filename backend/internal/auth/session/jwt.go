@@ -9,16 +9,18 @@ import (
   "strconv"
 )
 
-var _jwt_key, ok = os.LookupEnv("JWT_KEY")
-var jwt_key = []byte(_jwt_key)
+var jwt_key []byte
 
-var jwt_lifespan = 15 * time.Minute
-var jwt_leeway = 10 * time.Second
+const jwt_lifespan = 15 * time.Minute
+const jwt_leeway = 10 * time.Second
 
 func init() {
+  var key, ok = os.LookupEnv("JWT_KEY")
   if !ok {
     panic("env var JWT_KEY not set")
   }
+
+  jwt_key = []byte(key)
 }
 
 func Issue_jwt(user_id uint64) (string, error) {

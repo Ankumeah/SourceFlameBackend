@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name: backend-deployment
   labels:
-    name: backend-deployment
+    app: backend-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: backend
+      app: backend
   template:
     metadata:
       name: backend
       labels:
-        name: backend
+        app: backend
     spec:
       containers:
         - name: backend
-          image: deltabase-backend:local
+          image: deltabasebackend-backend:local

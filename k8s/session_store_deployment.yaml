@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name: session-store-deployment
   labels:
-    name: session-store-deployment
+    app: session-store-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: session-store
+      app: session-store
   template:
     metadata:
       name: session-store
       labels:
-        name: session-store
+        app: session-store
     spec:
       containers:
         - name: redis
-          image: deltabase-session-store:local
+          image: deltabasebackend-session_store:local

@@ -12,7 +12,7 @@ type driver interface {
   SetEx(ctx context.Context, key string, value string, expiration time.Duration) error
 }
 
-var Error_not_found = errors.New("key not found")
+var error_not_found = errors.New("key not found")
 
 type Session_store struct {
   db driver

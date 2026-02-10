@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      name: backend
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: deltabasebackend-backend:local
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - secretRef:
+                name: backend-session-store-secrets
+            - configMapRef:
+                name: backend-config-map
+            - configMapRef:
+                name: session-store-config-map

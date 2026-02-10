@@ -18,3 +18,8 @@ spec:
       containers:
         - name: redis
           image: deltabasebackend-session_store:local
+          envFrom:
+            - secretRef:
+                name: backend-session-store-secrets
+            - configMapRef:
+                name: session-store-config-map

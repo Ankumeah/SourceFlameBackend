@@ -18,3 +18,12 @@ spec:
       containers:
         - name: backend
           image: deltabasebackend-backend:local
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - secretRef:
+                name: backend-session-store-secrets
+            - configMapRef:
+                name: backend-config-map
+            - configMapRef:
+                name: session-store-config-map

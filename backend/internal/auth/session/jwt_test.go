@@ -8,39 +8,39 @@ import (
 
 func Test_Issue_jwt(t *testing.T) {
   tests := []struct {
-    user_id uint64
+    email string
   } {
-    {1},
+    { "beta" },
   }
 
   for _, test := range tests {
-    jwt, err := session.Issue_jwt(test.user_id)
+    jwt, err := session.Issue_jwt(test.email)
     if err != nil {
-      t.Errorf("Error: %v", err.Error())
+      t.Errorf("Error: %v\n", err.Error())
     } else if len(jwt) <= 0 {
-      t.Errorf("JWT empty: %v", jwt)
+      t.Errorf("JWT empty: %v\n", jwt)
     }
 
-    t.Logf("Resulting JWT: %v", jwt)
+    t.Logf("Resulting JWT: %v\n", jwt)
   }
 }
 
 func Test_Validate_jwt(t *testing.T) {
   tests := []struct {
-    user_id uint64
+    email string
   } {
-    {1},
+    { "beta" },
   }
 
   for _, test := range tests {
-    jwt, err := session.Issue_jwt(test.user_id)
+    jwt, err := session.Issue_jwt(test.email)
     if err != nil {
       t.Error("Error while issueing JWT")
     }
 
-    res, err := session.Validate_jwt(test.user_id, jwt)
+    res, err := session.Validate_jwt(test.email, jwt)
     if err != nil {
-      t.Errorf("Error: %v", err.Error())
+      t.Errorf("Error: %v\n", err.Error())
     } else if !res {
       t.Error("JWT was invalid")
     }

@@ -32,7 +32,7 @@ func Get_Redis_Driver(ctx context.Context, url string) (*Session_store, error) {
 func (r *redis_driver) Get(ctx context.Context, key string) (string, error) {
   res, err := r.rdb.Get(ctx, key).Result()
   if err == redis.Nil {
-    return "", Error_not_found
+    return "", error_not_found
   }
 
   return res, err

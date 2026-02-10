@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
   "log"
-  "strconv"
 )
 
 var jwt_key []byte
@@ -23,12 +22,12 @@ func init() {
   jwt_key = []byte(key)
 }
 
-func Issue_jwt(user_id uint64) (string, error) {
+func Issue_jwt(email string) (string, error) {
   now := time.Now()
 
   t := jwt.NewWithClaims(jwt.SigningMethodHS256,
     jwt.RegisteredClaims {
-      Subject: strconv.FormatUint(user_id, 10),
+      Subject: email,
       IssuedAt: jwt.NewNumericDate(now),
       ExpiresAt: jwt.NewNumericDate(now.Add(jwt_lifespan)),
     })
@@ -42,13 +41,13 @@ func Issue_jwt(user_id uint64) (string, error) {
   return signed_jwt, nil
 }
 
-func Validate_jwt(user_id uint64, target_jwt string) (bool, error) {
+func Validate_jwt(email string, target_jwt string) (bool, error) {
   token, err := jwt.ParseWithClaims(target_jwt, &jwt.RegisteredClaims{},
     func(t *jwt.Token) (any, error) {
       return jwt_key, nil
     },
     jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
-    jwt.WithSubject(strconv.FormatUint(user_id, 10)),
+    jwt.WithSubject(email),
     jwt.WithJSONNumber(),
     jwt.WithIssuedAt(),
     jwt.WithLeeway(jwt_leeway),

@@ -16,7 +16,7 @@ func Get_Fake_Driver(ctx context.Context, url string) (*Session_store, error) {
 func (r *fake_driver) Get(ctx context.Context, key string) (string, error) {
   res, ok := r.db[key]
   if !ok  {
-    return "", Error_not_found
+    return "", error_not_found
   }
 
   return res, nil

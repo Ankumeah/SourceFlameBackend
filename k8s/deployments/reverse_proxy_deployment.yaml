@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reverse-proxy
+  labels:
+    app: reverse-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reverse-proxy
+  template:
+    metadata:
+      name: reverse-proxy
+      labels:
+        app: reverse-proxy
+    spec:
+      containers:
+        - name: nginx
+          image: deltabasebackend-reverse_proxy:local
+          envFrom:
+            - configMapRef:
+                name: reverse-proxy-config-map
+            - configMapRef:
+                name: session-store-config-map
+            - configMapRef:
+                name: backend-config-map

@@ -14,10 +14,10 @@ expo *images:
   @for image in {{ images }}; do just _expo "${image}"; done
 [linux, macos]
 _expo image:
-  @echo docker image save {{ image }} -o images/$(echo {{ image }} | sed "s/:/_/g").tar
+  @echo docker image save {{ image }} -o images/$(echo {{ image }} | sed "s/:/_/g" | sed "s/\//_/g").tar
 
   @mkdir -p images/
-  @docker image save {{ image }} -o images/$(echo {{ image }} | sed "s/:/_/g").tar
+  @docker image save {{ image }} -o images/$(echo {{ image }} | sed "s/:/_/g" | sed "s/\//_/g").tar
 
 # Load docker images
 [linux, macos]

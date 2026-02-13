@@ -4,3 +4,4 @@ metadata:
   name: backend-config-map
 data:
   BACKEND_PORT: "5000"
+  BACKEND_HOSTNAME: backend-service

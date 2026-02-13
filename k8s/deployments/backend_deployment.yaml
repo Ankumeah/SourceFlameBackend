@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-deployment
+  name: backend
   labels:
-    app: backend-deployment
+    app: backend
 spec:
   replicas: 1
   selector:

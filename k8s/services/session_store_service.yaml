@@ -4,7 +4,7 @@ metadata:
   name: session-store-service
 spec:
   selector:
-    app: session-store-deployment
+    app: session-store
   ports:
     - port: 6379
       targetPort: 6379

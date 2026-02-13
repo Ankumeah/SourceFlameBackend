@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: session-store-deployment
+  name: session-store
   labels:
-    app: session-store-deployment
+    app: session-store
 spec:
   replicas: 1
   selector:

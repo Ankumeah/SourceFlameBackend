@@ -1,6 +1,0 @@
-user default off
-user $SESSION_STORE_USERNAME on >$SESSION_STORE_PASSWORD ~refresh:* +GET +SETEX +DEL +PING
-
-maxmemory 1024MB
-maxmemory-policy allkeys-lfu
-save ""

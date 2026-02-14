@@ -11,5 +11,4 @@ var Error_invalid_JWT = errors.New("Invalid JWT")
 
 var supported_JWT_types = map[string]handler {
   "google": google,
-  "beta": beta,
 }

@@ -8,4 +8,5 @@ import (
 
 func Apis(r *gin.RouterGroup, store *session_store.Session_store) {
   login(r, store)
+  logout(r, store)
 }

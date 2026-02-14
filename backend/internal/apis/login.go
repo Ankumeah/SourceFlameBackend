@@ -13,9 +13,7 @@ import (
 func login(r *gin.RouterGroup, store *session_store.Session_store) {
   r.POST("/login", func (c *gin.Context) {
     email, ok := validate_JWT(c)
-    if !ok {
-      return
-    }
+    if !ok { return }
 
     add_session(c, store, email)
   })
@@ -47,13 +45,13 @@ func validate_JWT(c *gin.Context) (string, bool) {
   return email, true
 }
 
-func add_session(c *gin.Context, store *session_store.Session_store, email string) {
+func add_session(c *gin.Context, store *session_store.Session_store, email string) bool {
   ctx := c.Request.Context()
 
   token, err := store.Add_Session(ctx, email)
   if err != nil {
     c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
-    return
+    return false
   }
 
   new_jwt, err := session.Issue_jwt(email)
@@ -61,9 +59,9 @@ func add_session(c *gin.Context, store *session_store.Session_store, email strin
     store.Delete_Session(ctx, token)
 
     c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
-    return
+    return false
   }
 
   c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
-  return
+  return  true
 }

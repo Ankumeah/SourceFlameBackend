@@ -25,3 +25,16 @@ spec:
                 name: session-store-config-map
             - configMapRef:
                 name: backend-config-map
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reverse-proxy-service
+spec:
+  selector:
+    app: reverse-proxy
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080

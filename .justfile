@@ -5,8 +5,10 @@ build *dirs:
 [linux, macos]
 _build dir:
   @echo docker build -t "$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')-$(basename "{{ dir }}" | tr '[:upper:]' '[:lower:]'):local" "{{ dir }}"
-
   @docker build -t "$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')-$(basename "{{ dir }}" | tr '[:upper:]' '[:lower:]'):local" "{{ dir }}"
+
+  @echo docker image save "$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')-$(basename "{{ dir }}" | tr '[:upper:]' '[:lower:]'):local" -o images/$(echo "$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')-$(basename "{{ dir }}" | tr '[:upper:]' '[:lower:]'):local" | sed "s/:/_/g" | sed "s/\//_/g").tar
+  @docker image save "$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')-$(basename "{{ dir }}" | tr '[:upper:]' '[:lower:]'):local" -o images/$(echo "$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')-$(basename "{{ dir }}" | tr '[:upper:]' '[:lower:]'):local" | sed "s/:/_/g" | sed "s/\//_/g").tar
 
 # Export docker images
 [linux, macos]

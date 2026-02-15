@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"fmt"
+	"log"
   "os"
   "context"
 )
@@ -17,7 +17,6 @@ var env_vars = map[string]string {
   "SESSION_STORE_PASSWORD": "",
   "SESSION_STORE_HOSTNAME": "",
   "SESSION_STORE_PORT": "",
-  "SESSION_STORE_TYPE": "",
   "JWT_KEY": "",
 }
 var Ctx = context.Background()
@@ -34,24 +33,22 @@ func init() {
     env_vars[env] = _env
   }
 
-  session_store_url := fmt.Sprintf("%v://%v:%v@%v:%v",
-    env_vars["SESSION_STORE_TYPE"],
+  _store, err := session_store.Get_Redis_Cluster_Driver(Ctx,
     env_vars["SESSION_STORE_USERNAME"],
     env_vars["SESSION_STORE_PASSWORD"],
     env_vars["SESSION_STORE_HOSTNAME"],
     env_vars["SESSION_STORE_PORT"],
   )
-
-  _store, err := session_store.Get_Redis_Driver(Ctx, session_store_url)
   if err != nil {
     panic("Error while connecting to session store: " + err.Error())
   }
 
+  log.Panicln("Connected to session store")
   store = _store
 }
 
 func main() {
-	fmt.Println("Starting http server")
+	log.Println("Starting http server")
 
 	r := gin.Default()
 
@@ -63,6 +60,6 @@ func main() {
     panic("env var BACKEND_PORT not set")
   }
 
-  fmt.Println("Running backend on port: " + port)
+  log.Println("Running backend on port: " + port)
 	r.Run(":" + port)
 }

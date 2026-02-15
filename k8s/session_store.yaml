@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: session-store
   labels:
     app: session-store
 spec:
-  replicas: 1
+  serviceName: session-store-service
+  replicas: 4
   selector:
     matchLabels:
       app: session-store
@@ -23,3 +24,15 @@ spec:
                 name: backend-session-store-secrets
             - configMapRef:
                 name: session-store-config-map
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: session-store-service
+spec:
+  clusterIP: None
+  selector:
+    app: session-store
+  ports:
+    - port: 6379
+      targetPort: 6379

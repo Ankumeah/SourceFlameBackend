@@ -8,13 +8,13 @@ import (
 
 func Test_Issue_jwt(t *testing.T) {
   tests := []struct {
-    email string
+    username string
   } {
     { "beta" },
   }
 
   for _, test := range tests {
-    jwt, err := session.Issue_jwt(test.email)
+    jwt, err := session.Issue_jwt(test.username)
     if err != nil {
       t.Errorf("Error: %v\n", err.Error())
     } else if len(jwt) <= 0 {
@@ -27,18 +27,18 @@ func Test_Issue_jwt(t *testing.T) {
 
 func Test_Validate_jwt(t *testing.T) {
   tests := []struct {
-    email string
+    username string
   } {
     { "beta" },
   }
 
   for _, test := range tests {
-    jwt, err := session.Issue_jwt(test.email)
+    jwt, err := session.Issue_jwt(test.username)
     if err != nil {
       t.Error("Error while issueing JWT")
     }
 
-    res, err := session.Validate_jwt(test.email, jwt)
+    res, err := session.Validate_jwt(test.username, jwt)
     if err != nil {
       t.Errorf("Error: %v\n", err.Error())
     } else if !res {

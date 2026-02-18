@@ -10,12 +10,12 @@ import (
 	"net/http"
 )
 
-func login(r *gin.RouterGroup, store *session_store.Session_store) {
-  r.POST("/login", func (c *gin.Context) {
-    email, ok := validate_JWT(c)
+func external_login(r *gin.RouterGroup, store *session_store.Session_store) {
+  r.POST("/external_login", func (c *gin.Context) {
+    username, ok := validate_JWT(c)
     if !ok { return }
 
-    add_session(c, store, email)
+    add_session(c, store, username)
   })
 }
 
@@ -30,7 +30,7 @@ func validate_JWT(c *gin.Context) (string, bool) {
     return "", false
   }
 
-  email, err := jwt.Validate(request.JWT_type, request.JWT)
+  username, err := jwt.Validate(request.JWT_type, request.JWT)
   if err == jwt.Error_unsupported_JWT_type {
     c.JSON(http.StatusBadRequest, gin.H { "error": "Unsupported JWT type" })
     return "", false
@@ -42,26 +42,26 @@ func validate_JWT(c *gin.Context) (string, bool) {
     return "", false
   }
 
-  return email, true
+  return username, true
 }
 
-func add_session(c *gin.Context, store *session_store.Session_store, email string) bool {
+func add_session(c *gin.Context, store *session_store.Session_store, username string) bool {
   ctx := c.Request.Context()
 
-  token, err := store.Add_Session(ctx, email)
+  token, err := store.Add_Session(ctx, username)
   if err != nil {
     c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
     return false
   }
 
-  new_jwt, err := session.Issue_jwt(email)
+  new_jwt, err := session.Issue_jwt(username)
   if err != nil {
     store.Delete_Session(ctx, token)
 
     c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
     return false
+  } else {
+    c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
+    return  true
   }
-
-  c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
-  return  true
 }

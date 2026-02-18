@@ -12,7 +12,7 @@ const token_length = 64
 const token_timeout = 24 * 30 * time.Hour
 const token_namespace = "refresh:"
 
-func (d *Session_store) Add_Session(ctx context.Context, email string) (string, error) {
+func (d *Session_store) Add_Session(ctx context.Context, username string) (string, error) {
   _token := make([]byte, token_length)
   if _, err := rand.Read(_token); err != nil {
     log.Printf("Error while genrating token: %v\n", err.Error())
@@ -21,7 +21,7 @@ func (d *Session_store) Add_Session(ctx context.Context, email string) (string, 
 
   token := base64.RawURLEncoding.EncodeToString(_token)
 
-  if err := d.db.SetEx(ctx, token_namespace + token, email, token_timeout); err != nil {
+  if err := d.db.SetEx(ctx, token_namespace + token, username, token_timeout); err != nil {
     log.Printf("Error while adding session: %v\n", err.Error())
     return "", err
   }
@@ -29,7 +29,7 @@ func (d *Session_store) Add_Session(ctx context.Context, email string) (string, 
   return token, nil
 }
 
-func (d *Session_store) Validate_Session(ctx context.Context, email string, token string) (bool, error) {
+func (d *Session_store) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
   val, err := d.db.Get(ctx, token_namespace + token)
   if err == error_not_found {
     return false, nil
@@ -38,7 +38,7 @@ func (d *Session_store) Validate_Session(ctx context.Context, email string, toke
     return false, err
   }
 
-  if val != email {
+  if val != username {
     return false, nil
   }
 

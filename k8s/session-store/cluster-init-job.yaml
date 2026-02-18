@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: session-store-cluster-init-job
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: session-store-cluster-init
+          image: deltabasebackend-cluster_init:local
+          envFrom:
+            - configMapRef:
+                name: session-store-config-map
+            - secretRef:
+                name: backend-session-store-secrets

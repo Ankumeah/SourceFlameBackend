@@ -9,17 +9,27 @@ import (
 	"time"
 )
 
+const max_host_lookup_retires = 10
+const host_lookup_rest = time.Second * 10
+
 type redis_cluster_driver struct {
   rdb *redis.ClusterClient
 }
 
 func Get_Redis_Cluster_Driver(ctx context.Context, username string, password string, hostname string, port string) (*Session_store, error) {
-  _addrs, err := net.LookupHost(hostname)
+  _addrs := []string {}
+  err := errors.New("")
+  for range max_host_lookup_retires {
+    _addrs, err = net.LookupHost(hostname)
+    if err == nil { break }
+    time.Sleep(host_lookup_rest)
+  }
+
   if err != nil {
     return &Session_store{}, errors.New("Error while looking up ips: " + err.Error())
   }
-  addrs := make([]string, len(_addrs))
 
+  addrs := make([]string, len(_addrs))
   for i, addr := range _addrs {
     addrs[i] = addr + ":" + port
   }
@@ -39,19 +49,25 @@ func Get_Redis_Cluster_Driver(ctx context.Context, username string, password str
   return &Session_store { &driver }, nil
 }
 
-func (r *redis_cluster_driver) Get(ctx context.Context, key string) (string, error) {
-  res, err := r.rdb.Get(ctx, key).Result()
+func (r *redis_cluster_driver) Add_Session(ctx context.Context, token string, username string, timeout time.Duration) error {
+  return r.rdb.SetEx(ctx, token_namespace + token, username, token_timeout).Err()
+}
+
+func (r *redis_cluster_driver) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
+  val, err := r.rdb.Get(ctx, token_namespace + token).Result()
+
   if err == redis.Nil {
-    return "", error_not_found
+    return false, nil
+  } else if err != nil {
+    return false, err
+  } else if val != username {
+    return false, nil
+  } else {
+    return true, nil
   }
-
-  return res, err
 }
 
-func (r *redis_cluster_driver) SetEx(ctx context.Context, key string, value string, expiration time.Duration) error {
-  return r.rdb.SetEx(ctx, key, value, expiration).Err()
-}
-
-func (r *redis_cluster_driver) Del(ctx context.Context, keys ...string) (int64, error) {
-  return r.rdb.Del(ctx, keys...).Result()
+func (r *redis_cluster_driver) Delete_Session(ctx context.Context, token string) error {
+  _, err := r.rdb.Del(ctx, token_namespace + token).Result();
+  return err
 }

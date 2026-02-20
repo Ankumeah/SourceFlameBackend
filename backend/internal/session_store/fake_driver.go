@@ -13,25 +13,23 @@ func Get_Fake_Driver(ctx context.Context, url string) (*Session_store, error) {
   return &Session_store { &fake_driver{ map[string]string{} } }, nil
 }
 
-func (r *fake_driver) Get(ctx context.Context, key string) (string, error) {
-  res, ok := r.db[key]
-  if !ok  {
-    return "", error_not_found
-  }
-
-  return res, nil
-}
-
-func (r *fake_driver) SetEx(ctx context.Context, key string, value string, expiration time.Duration) error {
-  r.db[key] = value
-
+func (d *fake_driver) Add_Session(ctx context.Context, token string, username string, timeout time.Duration) error {
+  d.db[token] = username
   return nil
 }
 
-func (r *fake_driver) Del(ctx context.Context, keys ...string) (int64, error) {
-  for _, key := range keys {
-    r.db[key] = ""
-  }
+func (d *fake_driver) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
+  val, ok := d.db[token]
 
-  return int64(len(keys)), nil
+  if !ok {
+    return false, nil
+  } else if val != username {
+    return false, nil
+  } else {
+    return true, nil
+  }
+}
+
+func (d *fake_driver) Delete_Session(ctx context.Context, token string) error {
+  return nil
 }

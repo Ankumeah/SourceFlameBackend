@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Ankumeah/DeltaBase/internal/apis"
   "github.com/Ankumeah/DeltaBase/internal/session_store"
+  "github.com/Ankumeah/DeltaBase/internal/middlewears"
 
 	"github.com/gin-gonic/gin"
 
@@ -43,7 +44,7 @@ func init() {
     panic("Error while connecting to session store: " + err.Error())
   }
 
-  log.Panicln("Connected to session store")
+  log.Println("Connected to session store")
   store = _store
 }
 
@@ -54,12 +55,22 @@ func main() {
 
 	apiGroup := r.Group("/api")
 	apis.Apis(apiGroup, store)
+  apiGroup.Use(
+    middlewears.Log_Middlewear(),
+  )
 
-  port, ok := os.LookupEnv("BACKEND_PORT")
-  if !ok {
-    panic("env var BACKEND_PORT not set")
-  }
+  jwtRequiredGroup := apiGroup.Group("/jwt")
+  apis.JWT_Needed_Apis(jwtRequiredGroup)
+  jwtRequiredGroup.Use(
+    middlewears.Verify_JWT_Middlewear(),
+  )
 
-  log.Println("Running backend on port: " + port)
-	r.Run(":" + port)
+  sessionRequiredGroup := r.Group("/session")
+  apis.Session_Needed_Apis(sessionRequiredGroup, store)
+  sessionRequiredGroup.Use(
+    middlewears.Verify_Session_Middlewear(store),
+  )
+
+  log.Println("Running backend on port: " + env_vars["BACKEND_PORT"])
+	r.Run(":" + env_vars["BACKEND_PORT"])
 }

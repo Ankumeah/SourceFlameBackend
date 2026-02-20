@@ -22,12 +22,12 @@ func init() {
   jwt_key = []byte(key)
 }
 
-func Issue_jwt(email string) (string, error) {
+func Issue_jwt(username string) (string, error) {
   now := time.Now()
 
   t := jwt.NewWithClaims(jwt.SigningMethodHS256,
     jwt.RegisteredClaims {
-      Subject: email,
+      Subject: username,
       IssuedAt: jwt.NewNumericDate(now),
       ExpiresAt: jwt.NewNumericDate(now.Add(jwt_lifespan)),
     })
@@ -41,13 +41,13 @@ func Issue_jwt(email string) (string, error) {
   return signed_jwt, nil
 }
 
-func Validate_jwt(email string, target_jwt string) (bool, error) {
+func Validate_jwt(username string, target_jwt string) (bool, error) {
   token, err := jwt.ParseWithClaims(target_jwt, &jwt.RegisteredClaims{},
     func(t *jwt.Token) (any, error) {
       return jwt_key, nil
     },
     jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
-    jwt.WithSubject(email),
+    jwt.WithSubject(username),
     jwt.WithJSONNumber(),
     jwt.WithIssuedAt(),
     jwt.WithLeeway(jwt_leeway),

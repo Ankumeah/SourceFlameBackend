@@ -27,14 +27,3 @@ spec:
                 name: backend-config-map
             - configMapRef:
                 name: session-store-config-map
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-service
-spec:
-  selector:
-    app: backend
-  ports:
-    - port: 5000
-      targetPort: 5000

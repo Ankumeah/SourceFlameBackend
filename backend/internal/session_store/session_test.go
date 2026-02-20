@@ -45,7 +45,7 @@ func Test_Validate_Session(t *testing.T) {
 }
 
 func Test_Delete_Session(t *testing.T) {
-   driver, err := session_store.Get_Fake_Driver(Ctx, "test")
+  driver, err := session_store.Get_Fake_Driver(Ctx, "test")
   if err != nil {
     t.Errorf("Error: %v\n", err.Error())
   }

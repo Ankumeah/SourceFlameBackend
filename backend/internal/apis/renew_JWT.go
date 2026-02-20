@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/auth/session"
+	"github.com/Ankumeah/DeltaBase/internal/jwt"
 
 	"github.com/gin-gonic/gin"
 
@@ -12,7 +12,7 @@ func renew_JWT(r *gin.RouterGroup) {
   r.POST("/renew_jwt", func (c *gin.Context) {
     username := c.GetHeader("username")
 
-    token, err := session.Issue_jwt(username)
+    token, err := jwt.Issue_jwt(username)
     if err != nil {
       c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
       return

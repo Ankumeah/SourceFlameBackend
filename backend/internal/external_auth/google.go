@@ -1,4 +1,4 @@
-package jwt
+package external_auth
 
 import (
   "errors"

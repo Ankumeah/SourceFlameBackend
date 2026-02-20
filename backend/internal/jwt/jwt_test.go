@@ -1,7 +1,7 @@
-package session_test
+package jwt_test
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/auth/session"
+	"github.com/Ankumeah/DeltaBase/internal/jwt"
 
 	"testing"
 )
@@ -14,7 +14,7 @@ func Test_Issue_jwt(t *testing.T) {
   }
 
   for _, test := range tests {
-    jwt, err := session.Issue_jwt(test.username)
+    jwt, err := jwt.Issue_jwt(test.username)
     if err != nil {
       t.Errorf("Error: %v\n", err.Error())
     } else if len(jwt) <= 0 {
@@ -33,12 +33,12 @@ func Test_Validate_jwt(t *testing.T) {
   }
 
   for _, test := range tests {
-    jwt, err := session.Issue_jwt(test.username)
+    token, err := jwt.Issue_jwt(test.username)
     if err != nil {
       t.Error("Error while issueing JWT")
     }
 
-    res, err := session.Validate_jwt(test.username, jwt)
+    res, err := jwt.Validate_jwt(test.username, token)
     if err != nil {
       t.Errorf("Error: %v\n", err.Error())
     } else if !res {

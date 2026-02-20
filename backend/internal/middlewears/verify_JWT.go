@@ -1,7 +1,7 @@
 package middlewears
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/auth/session"
+	"github.com/Ankumeah/DeltaBase/internal/jwt"
 
 	"github.com/gin-gonic/gin"
 
@@ -10,10 +10,10 @@ import (
 
 func Verify_JWT_Middlewear() gin.HandlerFunc {
   return func(c *gin.Context) {
-    jwt := c.GetHeader("JWT")
+    token := c.GetHeader("JWT")
     username := c.GetHeader("username")
 
-    valid, err := session.Validate_jwt(username, jwt)
+    valid, err := jwt.Validate_jwt(username, token)
     if err != nil {
       c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
       c.Abort()

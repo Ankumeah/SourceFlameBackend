@@ -1,8 +1,8 @@
 package apis
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/auth/jwt"
-	"github.com/Ankumeah/DeltaBase/internal/auth/session"
+	"github.com/Ankumeah/DeltaBase/internal/external_auth"
+	"github.com/Ankumeah/DeltaBase/internal/jwt"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
 
 	"github.com/gin-gonic/gin"
@@ -30,11 +30,11 @@ func validate_JWT(c *gin.Context) (string, bool) {
     return "", false
   }
 
-  username, err := jwt.Validate(request.JWT_type, request.JWT)
-  if err == jwt.Error_unsupported_JWT_type {
+  username, err := external_auth.Validate(request.JWT_type, request.JWT)
+  if err == external_auth.Error_unsupported_JWT_type {
     c.JSON(http.StatusBadRequest, gin.H { "error": "Unsupported JWT type" })
     return "", false
-  } else if err == jwt.Error_invalid_JWT {
+  } else if err == external_auth.Error_invalid_JWT {
     c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid JWT" })
     return "", false
   } else if err != nil {
@@ -54,7 +54,7 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
     return false
   }
 
-  new_jwt, err := session.Issue_jwt(username)
+  new_jwt, err := jwt.Issue_jwt(username)
   if err != nil {
     store.Delete_Session(ctx, token)
 

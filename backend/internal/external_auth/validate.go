@@ -1,4 +1,4 @@
-package jwt
+package external_auth
 
 func Validate(JWT_type string, JWT string) (string, error) {
   validatation_func, ok := supported_JWT_types[JWT_type]

@@ -4,7 +4,7 @@ build *dirs:
   @echo "==> Building {{ dirs }}"
   @for dir in {{ dirs }}; do just _build ${dir}; done
 
-  @echo "==> Exporting images  {{ dirs }}"
+  @echo "==> Exporting images {{ dirs }}"
   @for dir in {{ dirs }}; do just _expo ${dir}; done
 
   @echo
@@ -57,41 +57,6 @@ test *options:
 
   echo  "-> go test ./... {{ options }}"
   cd ./backend/ && go test ./... {{ options }}
-
-  echo
-
-[linux, macos]
-k8s base_dir = "k8s":
-  #! /bin/env zsh
-
-  echo "==> Applying all mainafests in  {{ base_dir }}"
-
-  cd {{ base_dir }}
-
-  for secret in secrets/*; do
-    echo "-> kubectl apply -f ${secret}"
-    kubectl apply -f ${secret} 1>/dev/null
-  done
-  for configmap in config-maps/*; do
-    echo "-> kubectl apply -f ${configmap}"
-    kubectl apply -f ${configmap} 1>/dev/null
-  done
-
-  echo
-
-  for file in **/*.yaml; do
-    if [[ $file == "secrets"* ]] || [[ $file == "config-maps"* ]]; then
-      continue;
-    fi
-
-    echo "-> kubectl apply -f ${file}"
-    kubectl apply -f ${file} 1>/dev/null
-  done
-
-  echo
-
-  echo "==> k8s cluster status:"
-  kubectl get all
 
   echo
 

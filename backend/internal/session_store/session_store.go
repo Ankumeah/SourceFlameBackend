@@ -18,10 +18,9 @@ func (d *Session_store) Add_Session(ctx context.Context, username string) (strin
     log.Printf("Error while genrating token: %v\n", err.Error())
     return "", err
   }
-
   token := base64.RawURLEncoding.EncodeToString(_token)
 
-  if err := d.db.SetEx(ctx, token_namespace + token, username, token_timeout); err != nil {
+  if err := d.db.Add_Session(ctx, token_namespace + token, username, token_timeout); err != nil {
     log.Printf("Error while adding session: %v\n", err.Error())
     return "", err
   }
@@ -30,24 +29,19 @@ func (d *Session_store) Add_Session(ctx context.Context, username string) (strin
 }
 
 func (d *Session_store) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
-  val, err := d.db.Get(ctx, token_namespace + token)
-  if err == error_not_found {
-    return false, nil
-  } else if err != nil {
-    log.Printf("Error while validating session: %v\n", err.Error())
+  valid, err := d.db.Validate_Session(ctx, username, token_namespace + token)
+  if err != nil {
+    log.Printf("Error while validateing session: %v\n", err)
     return false, err
   }
 
-  if val != username {
-    return false, nil
-  }
-
-  return true, nil
+  return valid, nil
 }
 
 func (d *Session_store) Delete_Session(ctx context.Context, token string) error {
-  if _, err := d.db.Del(ctx, token_namespace + token); err != nil {
+  if err := d.db.Delete_Session(ctx, token); err != nil {
     log.Printf("Error while deleting session: %v\n", err.Error())
+    return err
   }
 
   return nil

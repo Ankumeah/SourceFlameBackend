@@ -16,7 +16,13 @@ type redis_cluster_driver struct {
   rdb *redis.ClusterClient
 }
 
-func Get_Redis_Cluster_Driver(ctx context.Context, username string, password string, hostname string, port string) (*Session_store, error) {
+func Get_Redis_Cluster_Driver(
+  ctx context.Context,
+  username string,
+  password string,
+  hostname string,
+  port string,
+) (*Session_store, error) {
   _addrs := []string {}
   err := errors.New("")
   for range max_host_lookup_retires {
@@ -26,7 +32,7 @@ func Get_Redis_Cluster_Driver(ctx context.Context, username string, password str
   }
 
   if err != nil {
-    return &Session_store{}, errors.New("Error while looking up ips: " + err.Error())
+    return nil, errors.New("Error while looking up ips: " + err.Error())
   }
 
   addrs := make([]string, len(_addrs))
@@ -41,11 +47,10 @@ func Get_Redis_Cluster_Driver(ctx context.Context, username string, password str
   })
   _, err = client.Ping(ctx).Result()
   if err != nil {
-    return &Session_store{}, err
+    return nil, err
   }
 
   driver := redis_cluster_driver { client }
-
   return &Session_store { &driver }, nil
 }
 

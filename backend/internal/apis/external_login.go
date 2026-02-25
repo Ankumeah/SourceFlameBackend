@@ -2,7 +2,6 @@ package apis
 
 import (
 	"github.com/Ankumeah/DeltaBase/internal/external_auth"
-	"github.com/Ankumeah/DeltaBase/internal/jwt"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ func external_login(r *gin.RouterGroup, store *session_store.Session_store) {
     username, ok := validate_JWT(c)
     if !ok { return }
 
-    add_session(c, store, username)
+    add_session(c, store, username) // From ./login.go
   })
 }
 
@@ -45,23 +44,4 @@ func validate_JWT(c *gin.Context) (string, bool) {
   return username, true
 }
 
-func add_session(c *gin.Context, store *session_store.Session_store, username string) bool {
-  ctx := c.Request.Context()
 
-  token, err := store.Add_Session(ctx, username)
-  if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
-    return false
-  }
-
-  new_jwt, err := jwt.Issue_jwt(username)
-  if err != nil {
-    store.Delete_Session(ctx, token)
-
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
-    return false
-  } else {
-    c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
-    return  true
-  }
-}

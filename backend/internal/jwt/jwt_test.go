@@ -38,11 +38,13 @@ func Test_Validate_jwt(t *testing.T) {
       t.Error("Error while issueing JWT")
     }
 
-    res, err := jwt.Validate_jwt(test.username, token)
-    if err != nil {
+    username, err := jwt.Validate_jwt(token)
+    if err == jwt.Error_invalid_JWT {
+      t.Errorf("JWT was invalid")
+    } else if err != nil {
       t.Errorf("Error: %v\n", err.Error())
-    } else if !res {
-      t.Error("JWT was invalid")
+    } else if username != test.username {
+      t.Error("username did not match")
     }
   }
 

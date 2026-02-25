@@ -21,9 +21,13 @@ spec:
           envFrom:
             - secretRef:
                 name: backend-secrets
-            - secretRef:
-                name: backend-session-store-secrets
             - configMapRef:
                 name: backend-config-map
+            - secretRef:
+                name: session-store-secrets
             - configMapRef:
                 name: session-store-config-map
+            - secretRef:
+                name: database-secrets
+            - configMapRef:
+                name: database-config-map

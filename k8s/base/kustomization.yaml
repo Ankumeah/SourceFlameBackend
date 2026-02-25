@@ -4,5 +4,6 @@ resources:
   - secrets
   - config-maps
   - backend
+  - database
   - session-store
   - reverse-proxy

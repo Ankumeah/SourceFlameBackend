@@ -50,12 +50,12 @@ func Test_Delete_Session(t *testing.T) {
     t.Errorf("Error: %v\n", err.Error())
   }
 
-  _, err = driver.Add_Session(Ctx, "test")
+  token, err := driver.Add_Session(Ctx, "test")
   if err != nil {
     t.Errorf("Error: %v\n", err.Error())
   }
 
-  err = driver.Delete_Session(Ctx, "test")
+  err = driver.Delete_Session(Ctx, "test", token)
   if err != nil {
     t.Errorf("Error: %v\n", err.Error())
   }

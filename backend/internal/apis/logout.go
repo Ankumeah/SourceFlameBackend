@@ -12,8 +12,9 @@ func logout(r *gin.RouterGroup, store *session_store.Session_store) {
   r.POST("/logout", func (c *gin.Context) {
     ctx := c.Request.Context()
     session := c.GetHeader("session")
+    username := c.GetHeader("username")
 
-    if err := store.Delete_Session(ctx, session); err != nil {
+    if err := store.Delete_Session(ctx, username, session); err != nil {
       c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
       return
     }

@@ -22,8 +22,8 @@ func login(r *gin.RouterGroup, store *session_store.Session_store, db *database.
 func get_id(c *gin.Context, db *database.Database) (string, bool) {
   ctx := c.Request.Context()
   var request struct {
-    username string
-    password string
+    Username string `json:"username" binding:"required"`
+    Password string `json:"password" binding:"required"`
   }
 
   if err := c.ShouldBindJSON(&request); err != nil {
@@ -31,16 +31,16 @@ func get_id(c *gin.Context, db *database.Database) (string, bool) {
     return "", false
   }
 
-  _, err := db.Get_Id(ctx, request.username)
+  _, err := db.Get_Id(ctx, request.Username)
   if err == database.Error_invalid_user {
-    _, err = db.Add_User(ctx, request.username, request.password)
+    _, err = db.Add_User(ctx, request.Username, request.Password)
   }
   if err != nil {
     c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
     return "", false
   }
 
-  return request.username, true
+  return request.Username, true
 }
 
 func add_session(c *gin.Context, store *session_store.Session_store, username string) bool {
@@ -54,7 +54,7 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
 
   new_jwt, err := jwt.Issue_jwt(username)
   if err != nil {
-    store.Delete_Session(ctx, token)
+    store.Delete_Session(ctx, username, token)
 
     c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
     return false

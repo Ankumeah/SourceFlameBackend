@@ -30,6 +30,10 @@ func (d *fake_driver) Validate_Session(ctx context.Context, username string, tok
   }
 }
 
-func (d *fake_driver) Delete_Session(ctx context.Context, token string) error {
+func (d *fake_driver) Delete_Session(ctx context.Context, username string, token string) error {
   return nil
+}
+
+func (d *fake_driver) Get_Session_Count(ctx context.Context, username string) (uint8, error) {
+  return 1, nil
 }

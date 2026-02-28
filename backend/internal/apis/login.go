@@ -47,8 +47,11 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
   ctx := c.Request.Context()
 
   token, err := store.Add_Session(ctx, username)
-  if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
+  if err == session_store.Error_too_many_tokens {
+    c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
+    return false
+  } else if err != nil {
+    c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
     return false
   }
 
@@ -56,7 +59,7 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
   if err != nil {
     store.Delete_Session(ctx, username, token)
 
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
+    c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
     return false
   } else {
     c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })

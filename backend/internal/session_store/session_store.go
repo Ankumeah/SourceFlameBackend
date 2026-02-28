@@ -10,8 +10,17 @@ import (
 const token_length = 64
 const token_timeout = 24 * 30 * time.Hour
 const token_namespace = "refresh:"
+const token_limit = 10
 
 func (d *Session_store) Add_Session(ctx context.Context, username string) (string, error) {
+  count, err := d.db.Get_Session_Count(ctx, token_namespace + username)
+  if err != nil {
+    log.Printf("Error while getting session count: %v\n", err.Error())
+    return "", err
+  } else if count >= token_limit {
+    return "", Error_too_many_tokens
+  }
+
   _token := make([]byte, token_length)
   if _, err := rand.Read(_token); err != nil {
     log.Printf("Error while genrating token: %v\n", err.Error())

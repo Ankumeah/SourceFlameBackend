@@ -1,8 +1,7 @@
 package apis
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/auth/jwt"
-	"github.com/Ankumeah/DeltaBase/internal/auth/session"
+	"github.com/Ankumeah/DeltaBase/internal/external_auth"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ func external_login(r *gin.RouterGroup, store *session_store.Session_store) {
     username, ok := validate_JWT(c)
     if !ok { return }
 
-    add_session(c, store, username)
+    add_session(c, store, username) // From ./login.go
   })
 }
 
@@ -30,11 +29,11 @@ func validate_JWT(c *gin.Context) (string, bool) {
     return "", false
   }
 
-  username, err := jwt.Validate(request.JWT_type, request.JWT)
-  if err == jwt.Error_unsupported_JWT_type {
+  username, err := external_auth.Validate(request.JWT_type, request.JWT)
+  if err == external_auth.Error_unsupported_JWT_type {
     c.JSON(http.StatusBadRequest, gin.H { "error": "Unsupported JWT type" })
     return "", false
-  } else if err == jwt.Error_invalid_JWT {
+  } else if err == external_auth.Error_invalid_JWT {
     c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid JWT" })
     return "", false
   } else if err != nil {
@@ -45,23 +44,4 @@ func validate_JWT(c *gin.Context) (string, bool) {
   return username, true
 }
 
-func add_session(c *gin.Context, store *session_store.Session_store, username string) bool {
-  ctx := c.Request.Context()
 
-  token, err := store.Add_Session(ctx, username)
-  if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
-    return false
-  }
-
-  new_jwt, err := session.Issue_jwt(username)
-  if err != nil {
-    store.Delete_Session(ctx, token)
-
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Invalid server error" })
-    return false
-  } else {
-    c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
-    return  true
-  }
-}

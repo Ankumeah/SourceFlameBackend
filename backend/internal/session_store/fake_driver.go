@@ -9,11 +9,11 @@ type fake_driver struct {
   db map[string]string
 }
 
-func Get_Fake_Driver(ctx context.Context, url string) (*Session_store, error) {
-  return &Session_store { &fake_driver{ map[string]string{} } }, nil
+func Get_Fake_Driver() (*Session_store) {
+  return &Session_store { &fake_driver{ map[string]string{} } }
 }
 
-func (d *fake_driver) Add_Session(ctx context.Context, token string, username string, timeout time.Duration) error {
+func (d *fake_driver) Add_Session(ctx context.Context, username string, token string, timeout time.Duration) error {
   d.db[token] = username
   return nil
 }
@@ -30,6 +30,10 @@ func (d *fake_driver) Validate_Session(ctx context.Context, username string, tok
   }
 }
 
-func (d *fake_driver) Delete_Session(ctx context.Context, token string) error {
+func (d *fake_driver) Delete_Session(ctx context.Context, username string, token string) error {
   return nil
+}
+
+func (d *fake_driver) Get_Session_Count(ctx context.Context, username string) (uint8, error) {
+  return 1, nil
 }

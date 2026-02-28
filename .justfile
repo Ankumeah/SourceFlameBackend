@@ -4,9 +4,6 @@ build *dirs:
   @echo "==> Building {{ dirs }}"
   @for dir in {{ dirs }}; do just _build ${dir}; done
 
-  @echo "==> Exporting images {{ dirs }}"
-  @for dir in {{ dirs }}; do just _expo ${dir}; done
-
   @echo
 [linux, macos]
 _build dir:

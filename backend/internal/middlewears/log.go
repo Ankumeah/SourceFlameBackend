@@ -11,12 +11,8 @@ func Log_Middlewear() gin.HandlerFunc {
     ip := c.ClientIP()
     route := c.FullPath()
 
-    log.Printf("Got request from %v at %v\n", ip, route)
+    log.Printf("Got request: %v | %v\n", ip, route)
 
     c.Next()
-
-    status := c.Writer.Status()
-
-    log.Printf("Closed request from %v at %v with %v\n", ip, route, status)
   }
 }

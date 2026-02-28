@@ -10,10 +10,7 @@ import (
 var Ctx = context.Background()
 
 func Test_Add_Session(t *testing.T) {
-  driver, err := session_store.Get_Fake_Driver(Ctx, "test")
-  if err != nil {
-    t.Errorf("Error: %v\n", err.Error())
-  }
+  driver := session_store.Get_Fake_Driver()
 
   token, err := driver.Add_Session(Ctx, "test")
   if err != nil {
@@ -24,10 +21,7 @@ func Test_Add_Session(t *testing.T) {
 }
 
 func Test_Validate_Session(t *testing.T) {
-  driver, err := session_store.Get_Fake_Driver(Ctx, "test")
-  if err != nil {
-    t.Errorf("Error: %v\n", err.Error())
-  }
+  driver := session_store.Get_Fake_Driver()
 
   token, err := driver.Add_Session(Ctx, "test")
   if err != nil {
@@ -45,17 +39,14 @@ func Test_Validate_Session(t *testing.T) {
 }
 
 func Test_Delete_Session(t *testing.T) {
-  driver, err := session_store.Get_Fake_Driver(Ctx, "test")
+  driver := session_store.Get_Fake_Driver()
+
+  token, err := driver.Add_Session(Ctx, "test")
   if err != nil {
     t.Errorf("Error: %v\n", err.Error())
   }
 
-  _, err = driver.Add_Session(Ctx, "test")
-  if err != nil {
-    t.Errorf("Error: %v\n", err.Error())
-  }
-
-  err = driver.Delete_Session(Ctx, "test")
+  err = driver.Delete_Session(Ctx, "test", token)
   if err != nil {
     t.Errorf("Error: %v\n", err.Error())
   }

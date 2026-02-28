@@ -1,4 +1,4 @@
-package session
+package jwt
 
 import (
 	"github.com/golang-jwt/jwt/v5"
@@ -30,7 +30,8 @@ func Issue_jwt(username string) (string, error) {
       Subject: username,
       IssuedAt: jwt.NewNumericDate(now),
       ExpiresAt: jwt.NewNumericDate(now.Add(jwt_lifespan)),
-    })
+    },
+  )
 
   signed_jwt, err := t.SignedString(jwt_key)
   if err != nil {
@@ -41,25 +42,19 @@ func Issue_jwt(username string) (string, error) {
   return signed_jwt, nil
 }
 
-func Validate_jwt(username string, target_jwt string) (bool, error) {
-  token, err := jwt.ParseWithClaims(target_jwt, &jwt.RegisteredClaims{},
+func Validate_jwt(target_jwt string) (string, error) {
+  claims := &jwt.RegisteredClaims{}
+  token, err := jwt.ParseWithClaims(target_jwt, claims,
     func(t *jwt.Token) (any, error) {
       return jwt_key, nil
     },
     jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
-    jwt.WithSubject(username),
     jwt.WithJSONNumber(),
     jwt.WithIssuedAt(),
     jwt.WithLeeway(jwt_leeway),
   )
+  if err != nil { return "", err }
+  if !token.Valid { return "", Error_invalid_JWT }
 
-  if err != nil {
-    return false, err
-  }
-
-  if !token.Valid {
-    return  false, nil
-  }
-
-  return true, nil
+  return claims.Subject, nil
 }

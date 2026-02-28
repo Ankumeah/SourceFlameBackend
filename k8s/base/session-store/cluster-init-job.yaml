@@ -13,4 +13,4 @@ spec:
             - configMapRef:
                 name: session-store-config-map
             - secretRef:
-                name: backend-session-store-secrets
+                name: session-store-secrets

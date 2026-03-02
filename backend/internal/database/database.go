@@ -24,15 +24,6 @@ func (d *Database) Add_User(ctx context.Context, username string, password strin
   return user_id, err
 }
 
-//func (d *Database) Is_User_Valid(ctx context.Context, user_id uint64) (bool, error) {
-//  ok, err := d.db.Is_User_Valid(ctx, user_id)
-//  if err != nil {
-//    log.Printf("Error while checking user: %v\n", err.Error())
-//  }
-//
-//  return ok, err
-//}
-
 func (d *Database) Delete_User(ctx context.Context, user_id uint64) error {
   err := d.db.Delete_User(ctx, user_id)
   if err != nil {

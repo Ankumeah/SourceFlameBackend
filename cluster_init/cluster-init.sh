@@ -7,7 +7,14 @@ tries=0
 pong=0
 
 while [ ${max_tries} -gt ${tries} ]; do
-  redis-cli --user "${SESSION_STORE_USERNAME}" --pass "${SESSION_STORE_PASSWORD}" -h "${SESSION_STORE_HOSTNAME}" -p "${SESSION_STORE_PORT}" -t 1 ping
+  redis-cli \
+    --user "${SESSION_STORE_SESSIONS_USERNAME}" \
+    --pass "${SESSION_STORE_SESSIONS_PASSWORD}" \
+    -h "${SESSION_STORE_HOSTNAME}" \
+    -p "${SESSION_STORE_PORT}" \
+    -t 1 \
+    ping
+
   if [ $? -eq 0 ]; then
     pong=1
     break
@@ -23,7 +30,13 @@ if [ ${pong} -eq 1 ]; then
   done
   echo $addrs
 
-  echo yes | redis-cli --user "${SESSION_STORE_USERNAME}" --pass "${SESSION_STORE_PASSWORD}" -h "${SESSION_STORE_HOSTNAME}" -p "${SESSION_STORE_PORT}" --cluster create ${addrs}
+  echo yes | redis-cli \
+    --user "${SESSION_STORE_SESSIONS_USERNAME}" \
+    --pass "${SESSION_STORE_SESSIONS_PASSWORD}" \
+    -h "${SESSION_STORE_HOSTNAME}" \
+    -p "${SESSION_STORE_PORT}" \
+    --cluster create ${addrs}
+
 else
   exit 1
 fi

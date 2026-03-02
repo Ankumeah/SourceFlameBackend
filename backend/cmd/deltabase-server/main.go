@@ -15,8 +15,8 @@ import (
 
 var env_vars = map[string]string {
   "BACKEND_PORT": "",
-  "SESSION_STORE_USERNAME": "",
-  "SESSION_STORE_PASSWORD": "",
+  "SESSION_STORE_SESSIONS_USERNAME": "",
+  "SESSION_STORE_SESSIONS_PASSWORD": "",
   "SESSION_STORE_HOSTNAME": "",
   "SESSION_STORE_PORT": "",
   "DATABASE_USER": "",
@@ -48,8 +48,8 @@ func load_env() {
 
 func connect_session_store() {
   _store, err := session_store.Get_Redis_Cluster_Driver(Ctx,
-    env_vars["SESSION_STORE_USERNAME"],
-    env_vars["SESSION_STORE_PASSWORD"],
+    env_vars["SESSION_STORE_SESSIONS_USERNAME"],
+    env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
     env_vars["SESSION_STORE_HOSTNAME"],
     env_vars["SESSION_STORE_PORT"],
   )

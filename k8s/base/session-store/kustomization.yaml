@@ -4,3 +4,4 @@ resources:
   - ./stateful-set.yaml
   - ./service.yaml
   - ./cluster-init-job.yaml
+  - ./gc-cron.yaml

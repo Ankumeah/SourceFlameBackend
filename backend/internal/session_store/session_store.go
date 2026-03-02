@@ -8,7 +8,7 @@ import (
 )
 
 const token_length = 64
-const token_timeout = 5 * time.Second//24 * 30 * time.Hour
+const token_timeout = 24 * 30 * time.Hour
 const token_namespace = "refresh:"
 const token_limit = 10
 

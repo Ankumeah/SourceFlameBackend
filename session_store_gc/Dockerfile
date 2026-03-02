@@ -1,6 +1,15 @@
-FROM redis:alpine
+FROM golang:alpine AS builder
 
-COPY . /opt/session_store_gc/
-RUN chmod +x /opt/session_store_gc/cleanup.sh
+WORKDIR /opt/gc/
 
-ENTRYPOINT [ "/opt/session_store_gc/cleanup.sh" ]
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN go build -o ./bin/gc .
+
+FROM scratch
+
+COPY --from=builder /opt/gc/bin/gc .
+
+ENTRYPOINT [ "./gc" ]

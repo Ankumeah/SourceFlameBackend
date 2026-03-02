@@ -16,7 +16,7 @@ const jwt_leeway = 10 * time.Second
 func init() {
   var key, ok = os.LookupEnv("JWT_KEY")
   if !ok {
-    panic("env var JWT_KEY not set")
+    log.Fatalln("Unset env var: JWT_KEY")
   }
 
   jwt_key = []byte(key)

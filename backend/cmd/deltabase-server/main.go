@@ -32,14 +32,10 @@ var store *session_store.Session_store
 var db *database.Database
 
 func init() {
-  load_env()
-}
-
-func load_env() {
   for env := range env_vars {
     _env, ok := os.LookupEnv(env)
     if !ok {
-      panic("env var " + env + " not set")
+      log.Fatalf("Unset env var: %v\n", env)
     }
 
     env_vars[env] = _env
@@ -54,7 +50,7 @@ func connect_session_store() {
     env_vars["SESSION_STORE_PORT"],
   )
   if err != nil {
-    panic("Error while connecting to session store: " + err.Error())
+    log.Fatalf("Error while connecting to session store: %v\n", err.Error())
   }
 
   store = _store
@@ -70,7 +66,7 @@ func connect_database() {
     env_vars["DATABASE_DB"],
   )
   if err != nil {
-    panic("Error while connecting to database: " + err.Error())
+    log.Fatalf("Error while connecting to database: %v\n", err.Error())
   }
 
   db = _db

@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - ./backend-secrets.yaml
   - ./session-store-secrets.yaml
+  - ./database-secrets.yaml

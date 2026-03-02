@@ -64,12 +64,15 @@ func (r *redis_cluster_driver) Add_Session(ctx context.Context, username string,
 }
 
 func (r *redis_cluster_driver) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
-  err := r.rdb.ZScore(ctx, username, token).Err()
+  now := float64(time.Now().Unix())
+  exp, err := r.rdb.ZScore(ctx, username, token).Result()
 
   if err == redis.Nil {
     return false, nil
   } else if err != nil {
     return false, err
+  } else if exp <= now {
+    return false, nil
   } else {
     return true, nil
   }

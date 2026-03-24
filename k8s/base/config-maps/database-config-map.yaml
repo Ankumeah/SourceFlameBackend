@@ -5,3 +5,4 @@ metadata:
 data:
   DATABASE_HOST: database-service
   DATABASE_PORT: "5432"
+  DATABASE_CONFIG: "pool_max_conns=10 pool_min_conns=2 pool_min_idle_conns=2"

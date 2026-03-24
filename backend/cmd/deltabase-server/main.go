@@ -14,6 +14,7 @@ import (
 )
 
 var env_vars = map[string]string {
+  "API_VERSION": "",
   "BACKEND_PORT": "",
   "SESSION_STORE_SESSIONS_USERNAME": "",
   "SESSION_STORE_SESSIONS_PASSWORD": "",
@@ -24,12 +25,13 @@ var env_vars = map[string]string {
   "DATABASE_HOST": "",
   "DATABASE_PORT": "",
   "DATABASE_DB": "",
-  "JWT_KEY": "",
+  "DATABASE_CONFIG": "",
 }
 var Ctx = context.Background()
 
 var store *session_store.Session_store
-var db *database.Database
+var user_db *database.User_db
+var git_db *database.Git_db
 
 func init() {
   for env := range env_vars {
@@ -58,18 +60,32 @@ func connect_session_store() {
 }
 
 func connect_database() {
-  _db, err := database.Get_Postgres_Driver(Ctx,
+  _user_db, err := database.User_Postgres_Driver(Ctx,
     env_vars["DATABASE_USER"],
     env_vars["DATABASE_PASSWORD"],
     env_vars["DATABASE_HOST"],
     env_vars["DATABASE_PORT"],
     env_vars["DATABASE_DB"],
+    env_vars["DATABASE_CONFIG"],
   )
   if err != nil {
     log.Fatalf("Error while connecting to database: %v\n", err.Error())
   }
 
-  db = _db
+  _git_db, err := database.Git_Postgres_Driver(Ctx,
+    env_vars["DATABASE_USER"],
+    env_vars["DATABASE_PASSWORD"],
+    env_vars["DATABASE_HOST"],
+    env_vars["DATABASE_PORT"],
+    env_vars["DATABASE_DB"],
+    env_vars["DATABASE_CONFIG"],
+  )
+  if err != nil {
+    log.Fatalf("Error while connecting to database: %v\n", err.Error())
+  }
+
+  user_db = _user_db
+  git_db = _git_db
   log.Println("Connected to database")
 }
 
@@ -81,21 +97,12 @@ func main() {
 
 	r := gin.Default()
 
-	apiGroup := r.Group("/api",
+	apiGroup := r.Group("/api/" + env_vars["API_VERSION"] + "/",
     middlewears.Log_Middlewear(),
   )
-	apis.Apis(apiGroup, store ,db)
-
-  jwtRequiredGroup := apiGroup.Group("/jwt",
-    middlewears.Verify_JWT_Middlewear(),
-  )
-  apis.JWT_Needed_Apis(jwtRequiredGroup)
-
-  sessionRequiredGroup := apiGroup.Group("/session",
-    middlewears.Verify_Session_Middlewear(store),
-  )
-  apis.Session_Needed_Apis(sessionRequiredGroup, store)
+	apis.Apis(apiGroup, store ,user_db, git_db)
 
   log.Println("Running backend on port: " + env_vars["BACKEND_PORT"])
+  log.Println("API_VERSION: " + env_vars["API_VERSION"])
 	r.Run(":" + env_vars["BACKEND_PORT"])
 }

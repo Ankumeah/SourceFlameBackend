@@ -4,4 +4,4 @@ import (
 	"github.com/go-git/go-git/v6"
 )
 
-var Repository_exists = git.ErrTargetDirNotEmpty
+var Error_repository_exists = git.ErrTargetDirNotEmpty

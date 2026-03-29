@@ -5,12 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-  "net/http"
+	"log"
+	"net/http"
 )
 
 func Verify_JWT_Middlewear() gin.HandlerFunc {
   return func(c *gin.Context) {
-    token := c.GetHeader("JWT")
+    token := c.GetHeader("X-Authorization")
 
     username, err := jwt.Validate_jwt(token)
     if err == jwt.Error_invalid_JWT {
@@ -18,6 +19,7 @@ func Verify_JWT_Middlewear() gin.HandlerFunc {
       c.Abort()
       return
     } else if err != nil {
+      log.Printf("Error while verifying JWT: %v\n", err.Error())
       c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
       c.Abort()
       return

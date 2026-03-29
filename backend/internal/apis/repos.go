@@ -7,47 +7,106 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"net/http"
-  "fmt"
+  "strconv"
 )
 
-func repos(r *gin.RouterGroup, db *database.Git_db) {
+func repos(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db) {
   group := r.Group("/repos", middlewears.Verify_JWT_Middlewear())
 
-  group.POST("/create", func (c *gin.Context) {
+  group.POST("/:repo_name", func (c *gin.Context) {
     ctx := c.Request.Context()
-    _username, _ := c.Get("username")
-    username := fmt.Sprintf("%v", _username)
-    var request struct {
-      Repo_name string `json:"repo_name" binding:"required"`
-      Private bool `json:"private" binding:"required"`
-    }
+    repo_name := c.Param("repo_name")
 
-    if err := c.ShouldBindJSON(&request); err != nil {
-      c.JSON(http.StatusBadRequest, gin.H { "error": err.Error() })
+    private, err := strconv.ParseBool(c.Query("private"))
+    if err != nil {
+      c.JSON(bad_request(err))
       return
     }
 
-    _, err := db.Get_Id(ctx, username, request.Repo_name)
-    if err == database.Error_invalid_user {
-      c.JSON(http.StatusBadRequest, gin.H { "error": "Invalid user" })
-      return
-    } else if err != database.Error_invalid_repo && err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": " Internal server error" })
+    owner_id, ok := get_user_id(c, user_db)
+    if !ok { return }
+
+    _, err = git_db.Get_Id(ctx, owner_id, repo_name)
+    if err != database.Error_invalid_repo && err != nil {
+      c.JSON(internal_server_error())
       return
     } else if err != database.Error_invalid_repo {
       c.JSON(http.StatusConflict, gin.H { "error": "Repo alreday exists" })
       return
     }
 
-    repo_id, err := db.Create_Repo(ctx, username, request.Repo_name, request.Private)
+    repo_id, err := git_db.Create_Repo(ctx, owner_id, repo_name, private)
     if err == database.Error_invalid_user {
-      c.JSON(http.StatusBadRequest, gin.H { "error": "Invalid user" })
+      c.JSON(invalid_user())
       return
     } else if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+      c.JSON(internal_server_error())
       return
     } else {
       c.JSON(http.StatusOK, gin.H { "repo_id": repo_id })
     }
+  })
+
+  group.DELETE("/:repo_name", func(c *gin.Context) {
+    ctx := c.Request.Context()
+    username := c.GetString("username")
+    repo_name := c.Param("repo_name")
+
+    owner_id, err := user_db.Get_Id(ctx, username)
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    if err == database.Error_invalid_user {
+      c.JSON(invalid_user())
+      return
+    } else if err == database.Error_invalid_repo {
+      c.JSON(invalid_repo())
+      return
+    } else if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    if err = git_db.Delete_Repo(ctx, repo_id); err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    c.Status(http.StatusOK)
+  })
+
+  group.GET("/all", func(c *gin.Context) {
+    ctx := c.Request.Context()
+
+    _limit, err := strconv.ParseUint(c.Query("limit"), 10, 8)
+    limit := uint8(_limit)
+    if limit <= 0 { limit = 10 }
+    if err != nil {
+      c.JSON(bad_request(err))
+      return
+    }
+
+    offset, err := strconv.ParseUint(c.Query("offset"), 10, 64)
+    if err != nil {
+      c.JSON(bad_request(err))
+      return
+    }
+
+    user_id, ok := get_user_id(c, user_db)
+    if !ok { return }
+
+    repos, err := git_db.Get_Repos(ctx, user_id, true, limit, offset)
+    if err == database.Error_limit_too_big {
+      c.JSON(http.StatusBadRequest, gin.H { "error": "Limit too big" })
+      return
+    } else if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    c.JSON(http.StatusOK, gin.H { "repos": repos })
   })
 }

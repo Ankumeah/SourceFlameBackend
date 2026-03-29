@@ -47,19 +47,31 @@ func User_Postgres_Driver(
   return &User_db { &driver }, nil
 }
 
-func (p *user_postgres_driver) Add_User(ctx context.Context, username string, password_hash *hash.Hash) (uint64, error) {
-  query := "INSERT INTO users (username, created_at, password_hash, salt) VALUES ($1, $2, $3, $4) RETURNING (id);"
+func (p *user_postgres_driver) Add_User(
+  ctx context.Context,
+  username string,
+  password_hash *hash.Hash,
+) (uint64, error) {
+  query := `
+    INSERT INTO users (username, created_at, password_hash, salt)
+    VALUES ($1, $2, $3, $4) RETURNING (id);
+  `
 
   var user_id uint64
   now := time.Now().Unix()
-  if err := p.db.QueryRow(ctx, query, username, now, password_hash.Hash, password_hash.Salt).Scan(&user_id); err != nil {
+  if err := p.db.QueryRow(ctx, query,
+    username, now, password_hash.Hash, password_hash.Salt,
+  ).Scan(&user_id); err != nil {
     return 0, err
   }
 
   return user_id, nil
 }
 
-func (p *user_postgres_driver) Is_User_Valid(ctx context.Context, user_id uint64) (bool, error) {
+func (p *user_postgres_driver) Is_User_Valid(
+  ctx context.Context,
+  user_id uint64,
+) (bool, error) {
   query := "SELECT (id) FROM users WHERE (id = $1);"
 
   err := p.db.QueryRow(ctx, query, user_id).Scan()
@@ -72,14 +84,20 @@ func (p *user_postgres_driver) Is_User_Valid(ctx context.Context, user_id uint64
   }
 }
 
-func (p *user_postgres_driver) Delete_User(ctx context.Context, user_id uint64) error {
+func (p *user_postgres_driver) Delete_User(
+  ctx context.Context,
+  user_id uint64,
+) error {
   query := "DELETE FROM users WHERE (id = $1);"
 
   _, err := p.db.Exec(ctx, query, user_id)
   return err
 }
 
-func (p *user_postgres_driver) Get_Hash(ctx context.Context, user_id uint64) (*hash.Hash, error) {
+func (p *user_postgres_driver) Get_Hash(
+  ctx context.Context,
+  user_id uint64,
+) (*hash.Hash, error) {
   query := "SELECT (password_hash, salt) FROM users WHERE (id = $1);"
 
   var password_hash []byte
@@ -97,7 +115,10 @@ func (p *user_postgres_driver) Get_Hash(ctx context.Context, user_id uint64) (*h
   }
 }
 
-func (p *user_postgres_driver) Get_Id(ctx context.Context, username string) (uint64, error) {
+func (p *user_postgres_driver) Get_Id(
+  ctx context.Context,
+  username string,
+) (uint64, error) {
   query := "SELECT (id) FROM users WHERE (username = $1);"
 
   var id uint64
@@ -111,16 +132,21 @@ func (p *user_postgres_driver) Get_Id(ctx context.Context, username string) (uin
   }
 }
 
-func (p *user_postgres_driver) Get_Creation(ctx context.Context, user_id uint64) (uint64, error) {
+func (p *user_postgres_driver) Info(
+  ctx context.Context,
+  user_id uint64,
+) (*User_Info, error) {
   query := "SELECT (created_at) FROM users WHERE (id = $1);"
 
-  var timestamp uint64
-  err := p.db.QueryRow(ctx, query, user_id).Scan(&timestamp)
+  var creation uint64
+  err := p.db.QueryRow(ctx, query, user_id).Scan(&creation)
   if err == pgx.ErrNoRows {
-    return 0, Error_invalid_user
+    return nil, Error_invalid_user
   } else if err != nil {
-    return 0, err
+    return nil, err
   } else {
-    return timestamp, nil
+    return &User_Info {
+      Creation: creation,
+    }, nil
   }
 }

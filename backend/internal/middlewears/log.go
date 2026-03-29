@@ -8,10 +8,7 @@ import (
 
 func Log_Middlewear() gin.HandlerFunc {
   return func(c *gin.Context) {
-    ip := c.ClientIP()
-    route := c.FullPath()
-
-    log.Printf("Got request: %v | %v\n", ip, route)
+    log.Printf("New request from agent: %v\n", c.GetHeader("User-Agent"))
 
     c.Next()
   }

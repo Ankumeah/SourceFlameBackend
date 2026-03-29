@@ -22,7 +22,7 @@ func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *data
     }
 
     if err := c.ShouldBindJSON(&request); err != nil {
-      c.JSON(http.StatusBadRequest, gin.H { "error": err.Error() })
+      c.JSON(bad_request(err))
       return
     }
 
@@ -31,7 +31,7 @@ func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *data
       _, err = user_db.Add_User(ctx, request.Username, request.Password)
     }
     if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+      c.JSON(internal_server_error())
       return
     }
 
@@ -45,7 +45,7 @@ func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *data
     }
 
     if err := c.ShouldBindJSON(&request); err != nil {
-      c.JSON(http.StatusBadRequest, gin.H { "error": err.Error() })
+      c.JSON(bad_request(err))
       return
     }
 
@@ -57,7 +57,7 @@ func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *data
       c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid JWT" })
       return
     } else if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+      c.JSON(internal_server_error())
       return
     }
 
@@ -73,7 +73,7 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
     c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
     return false
   } else if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+    c.JSON(internal_server_error())
     return false
   }
 
@@ -81,7 +81,7 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
   if err != nil {
     store.Delete_Session(ctx, username, token)
 
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+    c.JSON(internal_server_error())
     return false
   } else {
     c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })

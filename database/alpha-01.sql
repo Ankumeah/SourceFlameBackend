@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS repos (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   private BOOLEAN NOT NULL,
-  owner TEXT NOT NULL,
+  owner_id INT REFERENCES users(id) NOT NULL,
   created_at INT NOT NULL,
   stars INT NOT NULL
 );

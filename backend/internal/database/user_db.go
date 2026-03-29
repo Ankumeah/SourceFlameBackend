@@ -9,7 +9,11 @@ import (
 
 var hasher = hash.Get_Hasher(2, 16, 64 * 1024, 4, 32)
 
-func (d *User_db) Add_User(ctx context.Context, username string, password string) (uint64, error) {
+func (d *User_db) Add_User(
+  ctx context.Context,
+  username string,
+  password string,
+) (uint64, error) {
   password_hash, err := hasher.Generate_Hash([]byte(password), []byte(""))
   if err != nil {
     log.Printf("Error while hashing password: %v\n", err.Error())
@@ -33,7 +37,11 @@ func (d *User_db) Delete_User(ctx context.Context, user_id uint64) error {
   return err
 }
 
-func (d *User_db) Verify_User(ctx context.Context, user_id uint64, password string) (bool, error) {
+func (d *User_db) Verify_User(
+  ctx context.Context,
+  user_id uint64,
+  password string,
+) (bool, error) {
   hash, err := d.db.Get_Hash(ctx, user_id)
   if err != Error_invalid_user && err != nil {
     log.Printf("Error while getting hash: %v\n", err.Error())
@@ -48,7 +56,10 @@ func (d *User_db) Verify_User(ctx context.Context, user_id uint64, password stri
   return valid, err
 }
 
-func (d *User_db) Get_Id(ctx context.Context, username string) (uint64, error) {
+func (d *User_db) Get_Id(
+  ctx context.Context,
+  username string,
+) (uint64, error) {
   id, err := d.db.Get_Id(ctx, username)
   if err != Error_invalid_user && err != nil {
     log.Printf("Error while getting id: %v\n", err.Error())
@@ -57,11 +68,14 @@ func (d *User_db) Get_Id(ctx context.Context, username string) (uint64, error) {
   return id, err
 }
 
-func (d *User_db) Get_Creation(ctx context.Context, user_id uint64) (uint64, error) {
-  timestamp, err := d.db.Get_Creation(ctx, user_id)
+func (d *User_db) Info(
+  ctx context.Context,
+  user_id uint64,
+) (*User_Info, error) {
+  info, err := d.db.Info(ctx, user_id)
   if err != Error_invalid_user && err != nil {
     log.Printf("Error while getting user creation time: %v\n", err.Error())
   }
 
-  return timestamp, err
+  return info, err
 }

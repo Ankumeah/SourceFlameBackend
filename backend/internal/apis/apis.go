@@ -14,7 +14,8 @@ func Apis(
   git_db *database.Git_db,
 ) {
   login(r, store, user_db)
-  repos(r, git_db)
+  repos(r, git_db, user_db)
+  repo(r, git_db, user_db)
   session(r, store)
-  user(r, user_db)
+  user(r, user_db, git_db)
 }

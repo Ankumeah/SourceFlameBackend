@@ -8,18 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"net/http"
-  "fmt"
 )
 
 func session(r *gin.RouterGroup, store *session_store.Session_store) {
   group := r.Group("/session", middlewears.Verify_Session_Middlewear(store))
 
   group.POST("/renew_jwt", func (c *gin.Context) {
-    username, _ := c.Get("username")
+    username := c.GetString("username")
 
-    token, err := jwt.Issue_jwt(fmt.Sprint(username))
+    token, err := jwt.Issue_jwt(username)
     if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+      c.JSON(internal_server_error())
       return
     } else {
       c.JSON(http.StatusOK, gin.H { "JWT": token })
@@ -37,24 +36,24 @@ func session(r *gin.RouterGroup, store *session_store.Session_store) {
       c.JSON(http.StatusForbidden, gin.H { "error": "Too many tokens" })
       return
     } else if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+      c.JSON(internal_server_error())
       return
     } else {
       c.JSON(http.StatusOK, gin.H { "refresh_token": token })
     }
 
     if err = store.Delete_Session(ctx, username, session); err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+      c.JSON(internal_server_error())
     }
   })
 
-  group.POST("/logout", func (c *gin.Context) {
+  group.DELETE("", func (c *gin.Context) {
     ctx := c.Request.Context()
     session := c.GetHeader("session")
     username := c.GetHeader("username")
 
     if err := store.Delete_Session(ctx, username, session); err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+      c.JSON(internal_server_error())
       return
     }
 

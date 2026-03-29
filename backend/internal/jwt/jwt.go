@@ -58,8 +58,11 @@ func Validate_jwt(target_jwt string) (string, error) {
     jwt.WithIssuedAt(),
     jwt.WithLeeway(jwt_leeway),
   )
-  if err != nil { return "", err }
-  if !token.Valid { return "", Error_invalid_JWT }
+  if err != nil {
+    return "", err
+  } else if !token.Valid {
+    return "", Error_invalid_JWT
+  }
 
   return claims.Subject, nil
 }

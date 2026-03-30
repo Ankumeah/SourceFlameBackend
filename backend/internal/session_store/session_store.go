@@ -61,7 +61,7 @@ func (d *Session_store) Add_Session(ctx context.Context, username string) (strin
 }
 
 func (d *Session_store) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
-  valid, err := d.db.Validate_Session(ctx, username, token)
+  valid, err := d.db.Validate_Session(ctx, token_namespace + username, token)
   if err != nil {
     log.Printf("Error while validateing session: %v\n", err)
     return false, err

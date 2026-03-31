@@ -8,7 +8,8 @@ import (
   "os/exec"
   "fmt"
   "context"
-  "time"
+  "log"
+  "bytes"
 )
 
 const base_path = "/srv/git/"
@@ -21,51 +22,65 @@ func Create_Repo(repo_id uint64, private bool) error {
   _, err := git.PlainInit(real_path(repo_id), true)
   if err == git.ErrTargetDirNotEmpty {
     return Error_Repository_Exists
+  } else if err != nil {
+    return err
   }
 
-  return err
+  return nil
 }
 
 func Delete_Repo(repo_id uint64) error {
   return os.RemoveAll(real_path(repo_id))
 }
 
-func Info_Refs(c context.Context, repo_id uint64, service string, writer io.Writer) error {
-  ctx, cancel := context.WithTimeout(c, time.Second * 10)
-  defer cancel()
+func Info_Refs(ctx context.Context, repo_id uint64, service string, writer io.Writer) error {
+  var buffer bytes.Buffer
+  var stderr bytes.Buffer
 
-	if service != "git-receive-pack" && service != "git-upload-pack" {
-		return Error_Unsupported_Service
-	}
+  pktLine := "# service=" + service + "\n"
+  fmt.Fprintf(&buffer, "%04x%v0000", len(pktLine)+4, pktLine)
 
-	pktLine := fmt.Sprintf("# service=%s\n", service)
-	fmt.Fprintf(writer, "%04x%s0000", len(pktLine)+4, pktLine)
-
-	cmd := exec.CommandContext(ctx, service, "--stateless-rpc", "--advertise-refs", real_path(repo_id))
-	cmd.Stdout = writer
-	cmd.Stderr = nil
+  cmd := exec.CommandContext(ctx, service, "--stateless-rpc", "--advertise-refs", real_path(repo_id))
+  cmd.Stdout = &buffer
+  cmd.Stderr = &stderr
 
   err := cmd.Run()
-  if err == context.DeadlineExceeded {
-    return Error_Timeout
-  } else {
-    return err
+  if err != nil {
+    log.Printf("Error while providing info refs: %v\n%v", err.Error(), string(stderr.Bytes()))
   }
+
+  writer.Write(buffer.Bytes())
+  return nil
 }
 
-func Receive_Pack(c context.Context, repo_id uint64, reader io.Reader, writer io.Writer) error {
-  ctx, cancel := context.WithTimeout(c, time.Second * 60)
-  defer cancel()
+func Upload_Pack(ctx context.Context, repo_id uint64, reader io.Reader, writer io.Writer) error {
+  var stderr bytes.Buffer
+
+	cmd := exec.CommandContext(ctx, "git-upload-pack", "--stateless-rpc", real_path(repo_id))
+	cmd.Stdin = reader
+	cmd.Stdout = writer
+	cmd.Stderr = &stderr
+
+  err := cmd.Run()
+  if err != nil {
+    log.Printf("Error while unloading pack: %v\n%v", err.Error(), string(stderr.Bytes()))
+  }
+
+  return err
+}
+
+func Receive_Pack(ctx context.Context, repo_id uint64, reader io.Reader, writer io.Writer) error {
+  var stderr bytes.Buffer
 
 	cmd := exec.CommandContext(ctx, "git-receive-pack", "--stateless-rpc", real_path(repo_id))
 	cmd.Stdin = reader
 	cmd.Stdout = writer
-	cmd.Stderr = nil
+	cmd.Stderr = &stderr
 
   err := cmd.Run()
-  if err == context.DeadlineExceeded {
-    return Error_Timeout
-  } else {
-  return err
+  if err != nil {
+    log.Printf("Error while receiveing pack: %v\n%v", err.Error(), string(stderr.Bytes()))
   }
+
+  return err
 }

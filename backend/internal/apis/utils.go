@@ -8,9 +8,8 @@ import (
   "net/http"
 )
 
-func get_user_id(c *gin.Context, user_db *database.User_db) (uint64, bool) {
+func get_user_id(c *gin.Context, user_db *database.User_db, username string) (uint64, bool) {
   ctx := c.Request.Context()
-  username := c.GetString("username")
 
   user_id, err := user_db.Get_Id(ctx, username)
   if err == database.Error_invalid_user {

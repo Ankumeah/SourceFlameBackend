@@ -16,6 +16,7 @@ func repos(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_d
   group.POST("/:repo_name", func (c *gin.Context) {
     ctx := c.Request.Context()
     repo_name := c.Param("repo_name")
+    username := c.GetString("username")
 
     private, err := strconv.ParseBool(c.Query("private"))
     if err != nil {
@@ -23,7 +24,7 @@ func repos(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_d
       return
     }
 
-    owner_id, ok := get_user_id(c, user_db)
+    owner_id, ok := get_user_id(c, user_db, username)
     if !ok { return }
 
     _, err = git_db.Get_Id(ctx, owner_id, repo_name)
@@ -80,6 +81,7 @@ func repos(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_d
 
   group.GET("/all", func(c *gin.Context) {
     ctx := c.Request.Context()
+    username := c.GetString("username")
 
     _limit, err := strconv.ParseUint(c.Query("limit"), 10, 8)
     limit := uint8(_limit)
@@ -95,7 +97,7 @@ func repos(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_d
       return
     }
 
-    user_id, ok := get_user_id(c, user_db)
+    user_id, ok := get_user_id(c, user_db, username)
     if !ok { return }
 
     repos, err := git_db.Get_Repos(ctx, user_id, true, limit, offset)

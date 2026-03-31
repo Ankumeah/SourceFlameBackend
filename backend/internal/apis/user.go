@@ -24,8 +24,9 @@ func user(r *gin.RouterGroup, user_db *database.User_db, git_db *database.Git_db
 
 func meta(c *gin.Context, user_db *database.User_db) {
   ctx := c.Request.Context()
+  username := c.Param("username")
 
-  user_id, ok := get_id(c, user_db)
+  user_id, ok := get_user_id(c, user_db, username)
   if !ok { return }
 
   info, err := user_db.Info(ctx, user_id)
@@ -39,6 +40,7 @@ func meta(c *gin.Context, user_db *database.User_db) {
 
 func get_repos(c *gin.Context, git_db *database.Git_db, user_db *database.User_db) {
   ctx := c.Request.Context()
+  username := c.Param("username")
 
   _limit, err := strconv.ParseUint(c.Query("limit"), 10, 8)
   limit := uint8(_limit)
@@ -54,7 +56,7 @@ func get_repos(c *gin.Context, git_db *database.Git_db, user_db *database.User_d
     return
   }
 
-  user_id, ok := get_id(c, user_db)
+  user_id, ok := get_user_id(c, user_db, username)
   if !ok { return }
 
   repos, err := git_db.Get_Repos(ctx, user_id, false, limit, offset)
@@ -67,20 +69,4 @@ func get_repos(c *gin.Context, git_db *database.Git_db, user_db *database.User_d
   }
 
   c.JSON(http.StatusOK, gin.H { "repos": repos })
-}
-
-func get_id(c *gin.Context, user_db *database.User_db) (uint64, bool) {
-  ctx := c.Request.Context()
-  username := c.Param("username")
-
-  user_id, err := user_db.Get_Id(ctx, username)
-  if err == database.Error_invalid_user {
-    c.JSON(http.StatusBadRequest, gin.H { "error": "Invalid user" })
-    return 0, false
-  } else if err != nil {
-    c.JSON(internal_server_error())
-    return 0, false
-  } else {
-    return user_id, true
-  }
 }

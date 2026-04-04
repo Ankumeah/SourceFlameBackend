@@ -1,21 +1,29 @@
 package git
 
 import (
-  "github.com/go-git/go-git/v6"
+	"github.com/go-git/go-git/v6"
+	"github.com/go-git/go-git/v6/plumbing"
 
-  "os"
-  "io"
-  "os/exec"
-  "fmt"
-  "context"
-  "log"
-  "bytes"
+	"bytes"
+	"context"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"os/exec"
+	"path"
 )
 
-const base_path = "/srv/git/"
+const max_blob_size = 2097152
+
+var base_path string
+
+func init() {
+  base_path = path.Join("srv", "git")
+}
 
 func real_path(repo_id uint64) string {
-  return fmt.Sprintf("%v%v", base_path, repo_id)
+  return path.Join(base_path, fmt.Sprintf("%v", repo_id))
 }
 
 func Create_Repo(repo_id uint64, private bool) error {
@@ -47,6 +55,7 @@ func Info_Refs(ctx context.Context, repo_id uint64, service string, writer io.Wr
   err := cmd.Run()
   if err != nil {
     log.Printf("Error while providing info refs: %v\n%v", err.Error(), string(stderr.Bytes()))
+    return err
   }
 
   writer.Write(buffer.Bytes())
@@ -63,7 +72,7 @@ func Upload_Pack(ctx context.Context, repo_id uint64, reader io.Reader, writer i
 
   err := cmd.Run()
   if err != nil {
-    log.Printf("Error while unloading pack: %v\n%v", err.Error(), string(stderr.Bytes()))
+    log.Printf("Error while uploading pack: %v\n%v", err.Error(), string(stderr.Bytes()))
   }
 
   return err
@@ -83,4 +92,39 @@ func Receive_Pack(ctx context.Context, repo_id uint64, reader io.Reader, writer 
   }
 
   return err
+}
+
+func Get_Glob(repo_id uint64, commit_hash string, path string) (string, error) {
+  repo, err := git.PlainOpen(real_path(repo_id))
+  if err != nil {
+    return "", err
+  }
+
+  hash := plumbing.NewHash(commit_hash)
+  commit, err := repo.CommitObject(hash)
+  if err == plumbing.ErrObjectNotFound {
+    return "", Error_Inavlid_Commit_Hash
+  } else if err != nil {
+    log.Printf("Error while getting commit object: %v\n", err.Error())
+    return "", err
+  }
+
+  tree, err := commit.Tree()
+  if err != nil {
+    return "", err
+  }
+
+  file, err := tree.File(path)
+  if err == plumbing.ErrObjectNotFound {
+    return "", Error_Blob_Not_Found
+  } else if err != nil {
+    log.Printf("Error while opening blob file: %v\n%v", err.Error())
+    return "", err
+  }
+
+  if file.Size >= max_blob_size {
+    return "", Error_Blob_Too_Large
+  }
+
+  return file.Contents()
 }

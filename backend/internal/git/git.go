@@ -120,7 +120,7 @@ func Get_Glob(repo_id uint64, commit_hash string, path string) (string, error) {
   if err == object.ErrFileNotFound || err == object.ErrDirectoryNotFound {
     return "", Error_Blob_Not_Found
   } else if err != nil {
-    log.Printf("Error while opening blob file: %v\n%v", err.Error())
+    log.Printf("Error while opening blob file: %v\n", err.Error())
     return "", err
   }
 

@@ -3,6 +3,7 @@ package git
 import (
 	"github.com/go-git/go-git/v6"
 	"github.com/go-git/go-git/v6/plumbing"
+	"github.com/go-git/go-git/v6/plumbing/object"
 
 	"bytes"
 	"context"
@@ -111,11 +112,12 @@ func Get_Glob(repo_id uint64, commit_hash string, path string) (string, error) {
 
   tree, err := commit.Tree()
   if err != nil {
+    log.Printf("Error while getting commit worktree: %v\n", err.Error())
     return "", err
   }
 
   file, err := tree.File(path)
-  if err == plumbing.ErrObjectNotFound {
+  if err == object.ErrFileNotFound || err == object.ErrDirectoryNotFound {
     return "", Error_Blob_Not_Found
   } else if err != nil {
     log.Printf("Error while opening blob file: %v\n%v", err.Error())

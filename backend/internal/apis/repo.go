@@ -144,7 +144,7 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     }
 
     blob, err := git.Get_Glob(repo_id, hash, path)
-    if err == git.Error_Commit_Not_Found || err == git.Error_Blob_Not_Found {
+    if err == git.Error_Inavlid_Commit_Hash || err == git.Error_Blob_Not_Found {
       c.JSON(http.StatusNotFound, gin.H { "error": err.Error() })
       return
     } else if err == git.Error_Blob_Too_Large {

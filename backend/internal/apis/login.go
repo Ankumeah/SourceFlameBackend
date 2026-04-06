@@ -4,43 +4,65 @@ import (
 	"github.com/Ankumeah/DeltaBase/internal/database"
 	"github.com/Ankumeah/DeltaBase/internal/jwt"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
+	"github.com/Ankumeah/DeltaBase/internal/external_auth"
 
 	"github.com/gin-gonic/gin"
 
 	"net/http"
 )
 
-func login(r *gin.RouterGroup, store *session_store.Session_store, db *database.Database) {
-  r.POST("/login", func(c *gin.Context) {
-    username, ok := get_id(c, db)
-    if !ok { return }
+func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *database.User_db) {
+  group := r.Group("/login")
+
+  group.POST("", func(c *gin.Context) {
+    ctx := c.Request.Context()
+    var request struct {
+      Username string `json:"username" binding:"required"`
+      Password string `json:"password" binding:"required"`
+    }
+
+    if err := c.ShouldBindJSON(&request); err != nil {
+      c.JSON(bad_request(err))
+      return
+    }
+
+    _, err := user_db.Get_Id(ctx, request.Username)
+    if err == database.Error_invalid_user {
+      _, err = user_db.Add_User(ctx, request.Username, request.Password)
+    }
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    add_session(c, store, request.Username)
+  })
+
+  group.POST("/external_login", func (c *gin.Context) {
+    var request struct {
+      JWT_type string `json:"JWT_type" binding:"required"`
+      JWT string `json:"JWT" binding:"required"`
+    }
+
+    if err := c.ShouldBindJSON(&request); err != nil {
+      c.JSON(bad_request(err))
+      return
+    }
+
+    username, err := external_auth.Validate(request.JWT_type, request.JWT)
+    if err == external_auth.Error_unsupported_JWT_type {
+      c.JSON(http.StatusBadRequest, gin.H { "error": "Unsupported JWT type" })
+      return
+    } else if err == external_auth.Error_invalid_JWT {
+      c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid JWT" })
+      return
+    } else if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
 
     add_session(c, store, username)
   })
-}
-
-func get_id(c *gin.Context, db *database.Database) (string, bool) {
-  ctx := c.Request.Context()
-  var request struct {
-    Username string `json:"username" binding:"required"`
-    Password string `json:"password" binding:"required"`
-  }
-
-  if err := c.ShouldBindJSON(&request); err != nil {
-    c.JSON(http.StatusBadRequest, gin.H { "error": err.Error() })
-    return "", false
-  }
-
-  _, err := db.Get_Id(ctx, request.Username)
-  if err == database.Error_invalid_user {
-    _, err = db.Add_User(ctx, request.Username, request.Password)
-  }
-  if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
-    return "", false
-  }
-
-  return request.Username, true
 }
 
 func add_session(c *gin.Context, store *session_store.Session_store, username string) bool {
@@ -51,7 +73,7 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
     c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
     return false
   } else if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+    c.JSON(internal_server_error())
     return false
   }
 
@@ -59,10 +81,10 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
   if err != nil {
     store.Delete_Session(ctx, username, token)
 
-    c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
+    c.JSON(internal_server_error())
     return false
   } else {
     c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
-    return  true
+    return true
   }
 }

@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: session-store-gc-cron
 spec:
-  schedule: "*/1 * * * *"
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       template:

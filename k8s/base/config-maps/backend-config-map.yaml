@@ -3,5 +3,10 @@ kind: ConfigMap
 metadata:
   name: backend-config-map
 data:
+  API_VERSION: v1
   BACKEND_PORT: "5000"
   BACKEND_HOSTNAME: backend-service
+  JWT_LIFESPAN_MINS: "15"
+  TOKEN_TIMEOUT_DAYS: "30"
+  TOKEN_NAMESPACE: "refresh:"
+  TOKEN_LIMIT: "10"

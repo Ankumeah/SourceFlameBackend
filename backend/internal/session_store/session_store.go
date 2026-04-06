@@ -1,16 +1,40 @@
 package session_store
+
 import (
   "context"
   "crypto/rand"
   "encoding/base64"
+  "strconv"
   "time"
   "log"
+  "os"
 )
 
 const token_length = 64
-const token_timeout = 24 * 30 * time.Hour
-const token_namespace = "refresh:"
-const token_limit = 10
+
+var token_timeout time.Duration
+var token_namespace string
+var token_limit uint8
+
+func init() {
+  timeout, ok := os.LookupEnv("TOKEN_TIMEOUT_DAYS")
+  if !ok { log.Fatalln("Unset env var: TOKEN_TIMEOUT_DAYS") }
+
+  val, err := strconv.Atoi(timeout)
+  if err != nil { log.Fatalf("Error while converting TOKEN_TIMEOUT_DAYS to int: %v\n", err.Error()) }
+  token_timeout = time.Duration(val) * 24 * time.Hour
+
+  limit, ok := os.LookupEnv("TOKEN_LIMIT")
+  if !ok { log.Fatalf("Unset env var: TOKEN_LIMIT") }
+
+  val, err = strconv.Atoi(limit)
+  if err != nil { log.Fatalf("Error while converting TOKEN_LIMIT to int: %v\n", err.Error()) }
+  token_limit = uint8(val)
+
+  namespace, ok := os.LookupEnv("TOKEN_NAMESPACE")
+  if !ok { log.Fatalln("Unset env var: TOKEN_NAMESPACE") }
+  token_namespace = namespace
+}
 
 func (d *Session_store) Add_Session(ctx context.Context, username string) (string, error) {
   count, err := d.db.Get_Session_Count(ctx, token_namespace + username)
@@ -47,7 +71,7 @@ func (d *Session_store) Validate_Session(ctx context.Context, username string, t
 }
 
 func (d *Session_store) Delete_Session(ctx context.Context, username string, token string) error {
-  if err := d.db.Delete_Session(ctx, username, token); err != nil {
+  if err := d.db.Delete_Session(ctx, token_namespace + username, token); err != nil {
     log.Printf("Error while deleting session: %v\n", err.Error())
     return err
   }

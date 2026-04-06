@@ -7,16 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Apis(r *gin.RouterGroup, store *session_store.Session_store, db *database.Database) {
-  external_login(r, store)
-  login(r, store, db)
-}
-
-func Session_Needed_Apis(r *gin.RouterGroup, store *session_store.Session_store) {
-  logout(r, store)
-  renew_session(r, store)
-  renew_JWT(r)
-}
-
-func JWT_Needed_Apis(r *gin.RouterGroup) {
+func Apis(
+  r *gin.RouterGroup,
+  store *session_store.Session_store,
+  user_db *database.User_db,
+  git_db *database.Git_db,
+) {
+  login(r, store, user_db)
+  repos(r, git_db, user_db)
+  repo(r, git_db, user_db)
+  session(r, store)
+  user(r, user_db, git_db)
 }

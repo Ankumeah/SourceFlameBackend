@@ -1,35 +1,36 @@
 package apis
 
 import (
+	a "github.com/Ankumeah/DeltaBase/internal/app"
 	"github.com/Ankumeah/DeltaBase/internal/database"
 
 	"github.com/gin-gonic/gin"
 
 	"net/http"
-  "strconv"
+	"strconv"
 )
 
-func user(r *gin.RouterGroup, user_db *database.User_db, git_db *database.Git_db) {
+func user(r *gin.RouterGroup, app *a.App) {
   group := r.Group("/user")
 
   group.GET("/:username/*action", func(c *gin.Context) {
     switch c.Param("action") {
       case "/meta":
-        meta(c, user_db)
+        meta(c, app)
       case "/repos":
-        get_repos(c, git_db, user_db)
+        get_repos(c, app)
     }
   })
 }
 
-func meta(c *gin.Context, user_db *database.User_db) {
+func meta(c *gin.Context, app *a.App) {
   ctx := c.Request.Context()
   username := c.Param("username")
 
-  user_id, ok := get_user_id(c, user_db, username)
+  user_id, ok := get_user_id(c, app.User_db, username)
   if !ok { return }
 
-  info, err := user_db.Info(ctx, user_id)
+  info, err := app.User_db.Info(ctx, user_id)
   if err != nil {
     c.JSON(internal_server_error())
     return
@@ -38,7 +39,7 @@ func meta(c *gin.Context, user_db *database.User_db) {
   c.JSON(http.StatusOK, info)
 }
 
-func get_repos(c *gin.Context, git_db *database.Git_db, user_db *database.User_db) {
+func get_repos(c *gin.Context, app *a.App) {
   ctx := c.Request.Context()
   username := c.Param("username")
 
@@ -56,10 +57,10 @@ func get_repos(c *gin.Context, git_db *database.Git_db, user_db *database.User_d
     return
   }
 
-  user_id, ok := get_user_id(c, user_db, username)
+  user_id, ok := get_user_id(c, app.User_db, username)
   if !ok { return }
 
-  repos, err := git_db.Get_Repos(ctx, user_id, false, limit, offset)
+  repos, err := app.Git_db.Get_Repos(ctx, user_id, false, limit, offset)
   if err == database.Error_limit_too_big {
     c.JSON(http.StatusBadRequest, gin.H { "error": "Limit too big" })
     return

@@ -15,21 +15,16 @@ type git_postgres_driver struct {
 
 func Git_Postgres_Driver(
   ctx context.Context,
-  username string,
-  password string,
-  hostname string,
-  port string,
-  dbname string,
-  db_config string,
+  conn_config Connection_Config,
 ) (*Git_db, error) {
   url_string := fmt.Sprintf(
     "user=%v password=%v host=%v port=%v dbname=%v %v",
-    username,
-    password,
-    hostname,
-    port,
-    dbname,
-    db_config,
+    conn_config.Username,
+    conn_config.Password,
+    conn_config.Hostname,
+    conn_config.Port,
+    conn_config.Db_name,
+    conn_config.Db_config,
   )
   config, err := pgxpool.ParseConfig(url_string)
   if err != nil {

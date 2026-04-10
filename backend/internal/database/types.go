@@ -36,3 +36,12 @@ type Repo_Info struct {
   Private bool `json:"private"`
   Owner string `json:"owner"`
 }
+
+type Connection_Config struct {
+  Username string
+  Password string
+  Hostname string
+  Port string
+  Db_name string
+  Db_config string
+}

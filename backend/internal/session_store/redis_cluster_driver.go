@@ -19,15 +19,12 @@ type redis_cluster_driver struct {
 
 func Get_Redis_Cluster_Driver(
   ctx context.Context,
-  username string,
-  password string,
-  hostname string,
-  port string,
+  conn_config Connection_Config,
 ) (*Session_store, error) {
   _addrs := []string {}
   err := errors.New("")
   for range max_host_lookup_retires {
-    _addrs, err = net.LookupHost(hostname)
+    _addrs, err = net.LookupHost(conn_config.Hostname)
     if err == nil { break }
     time.Sleep(timeout)
   }
@@ -38,13 +35,13 @@ func Get_Redis_Cluster_Driver(
 
   addrs := make([]string, len(_addrs))
   for i, addr := range _addrs {
-    addrs[i] = addr + ":" + port
+    addrs[i] = addr + ":" + conn_config.Port
   }
 
   client := redis.NewClusterClient(&redis.ClusterOptions {
     Addrs: addrs,
-    Username: username,
-    Password: password,
+    Username: conn_config.Username,
+    Password: conn_config.Password,
     DialTimeout: timeout,
     ReadTimeout: timeout,
     WriteTimeout: timeout,

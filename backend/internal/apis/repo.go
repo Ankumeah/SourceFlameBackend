@@ -1,19 +1,20 @@
 package apis
 
 import (
+	a "github.com/Ankumeah/DeltaBase/internal/app"
 	"github.com/Ankumeah/DeltaBase/internal/database"
 	"github.com/Ankumeah/DeltaBase/internal/git"
 	"github.com/Ankumeah/DeltaBase/internal/middlewares"
 
 	"github.com/gin-gonic/gin"
 
+	"errors"
+	"fmt"
 	"net/http"
-  "fmt"
-  "strings"
-  "errors"
+	"strings"
 )
 
-func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db) {
+func repo(r *gin.RouterGroup, app *a.App) {
   group := r.Group("/repo", middlewars.Check_Login_Middleware())
 
   group.GET("/:repo_owner/:repo_name/meta", func(c *gin.Context) {
@@ -22,10 +23,10 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     repo_owner := c.Param("repo_owner")
     username := c.GetString("username")
 
-    owner_id, ok := get_user_id(c, user_db, repo_owner)
+    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
 
-    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
     if err == database.Error_invalid_repo {
       c.JSON(invalid_repo())
       return
@@ -34,7 +35,7 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
       return
     }
 
-    info, err := git_db.Info(ctx, repo_id)
+    info, err := app.Git_db.Info(ctx, repo_id)
     if err != nil {
       c.JSON(internal_server_error())
       return
@@ -59,10 +60,10 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
       return
     }
 
-    owner_id, ok := get_user_id(c, user_db, repo_owner)
+    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
 
-    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
     if err == database.Error_invalid_repo {
       c.JSON(invalid_repo())
       return
@@ -71,7 +72,7 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
       return
     }
 
-    info, err := git_db.Info(ctx, repo_id)
+    info, err := app.Git_db.Info(ctx, repo_id)
     if err != nil {
       c.JSON(internal_server_error())
       return
@@ -98,10 +99,10 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     repo_name := c.Param("repo_name")
     username := c.GetString("username")
 
-    owner_id, ok := get_user_id(c, user_db, repo_owner)
+    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
 
-    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
     if err == database.Error_invalid_repo {
       c.JSON(invalid_repo())
       return
@@ -110,7 +111,7 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
       return
     }
 
-    info, err := git_db.Info(ctx, repo_id)
+    info, err := app.Git_db.Info(ctx, repo_id)
     if err != nil {
       c.JSON(internal_server_error())
       return
@@ -137,10 +138,10 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     repo_name := c.Param("repo_name")
     username := c.GetString("username")
 
-    owner_id, ok := get_user_id(c, user_db, repo_owner)
+    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
 
-    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
     if err == database.Error_invalid_repo {
       c.JSON(invalid_repo())
       return
@@ -149,7 +150,7 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
       return
     }
 
-    info, err := git_db.Info(ctx, repo_id)
+    info, err := app.Git_db.Info(ctx, repo_id)
     if err != nil {
       c.JSON(internal_server_error())
       return
@@ -174,10 +175,10 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     path := strings.Trim(c.Param("path"), "/")
     hash := c.Query("hash")
 
-    owner_id, ok := get_user_id(c, user_db, repo_owner)
+    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
 
-    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
     if err == database.Error_invalid_repo {
       c.JSON(invalid_repo())
       return
@@ -210,10 +211,10 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     path := strings.Trim(c.Param("path"), "/")
     hash := c.Query("hash")
 
-    owner_id, ok := get_user_id(c, user_db, repo_owner)
+    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
 
-    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
     if err == database.Error_invalid_repo {
       c.JSON(invalid_repo())
       return

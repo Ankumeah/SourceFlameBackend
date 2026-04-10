@@ -9,6 +9,7 @@ import (
 	"net/http"
   "fmt"
   "strings"
+  "errors"
 )
 
 func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db) {
@@ -144,7 +145,7 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     }
 
     blob, err := git.Get_Glob(repo_id, hash, path)
-    if err == git.Error_Inavlid_Commit_Hash || err == git.Error_Blob_Not_Found {
+    if errors.Is(err, git.Error_Not_Found) {
       c.JSON(http.StatusNotFound, gin.H { "error": err.Error() })
       return
     } else if err == git.Error_Blob_Too_Large {
@@ -158,5 +159,40 @@ func repo(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db
     blob_type := http.DetectContentType([]byte(blob))
     c.Header("Content-Type", blob_type)
     c.String(http.StatusOK, blob)
+  })
+
+  group.GET("/:username/:repo_name/list/*path", func(c *gin.Context) {
+    ctx := c.Request.Context()
+    username := c.Param("username")
+    repo_name := c.Param("repo_name")
+    path := strings.Trim(c.Param("path"), "/")
+    hash := c.Query("hash")
+
+    owner_id, ok := get_user_id(c, user_db, username)
+    if !ok { return }
+
+    repo_id, err := git_db.Get_Id(ctx, owner_id, repo_name)
+    if err == database.Error_invalid_repo {
+      c.JSON(invalid_repo())
+      return
+    } else if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    files, err := git.List_Dir(repo_id, hash, path)
+    if err == git.Error_Inavlid_Commit_Hash ||
+      err == git.Error_Blob_Not_Found ||
+      err == git.Error_Path_Not_Found ||
+      err == git.Error_Path_Too_Deep {
+
+      c.JSON(http.StatusNotFound, gin.H { "error": err.Error() })
+      return
+    } else if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    c.JSON(http.StatusOK, files)
   })
 }

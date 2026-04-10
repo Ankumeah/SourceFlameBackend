@@ -19,7 +19,7 @@ func (d *Git_db) Create_Repo(
     return 0, err
   }
 
-  err = git.Create_Repo(repo_id, private)
+  err = git.Create_Repo(repo_id)
   if err != nil {
     log.Printf("Error while creating repo dir: %v\n", err.Error())
     d.db.Delete_Repo(ctx, repo_id)

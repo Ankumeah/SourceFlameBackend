@@ -3,7 +3,7 @@ package apis
 import (
 	"github.com/Ankumeah/DeltaBase/internal/jwt"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
-	"github.com/Ankumeah/DeltaBase/internal/middlewears"
+	"github.com/Ankumeah/DeltaBase/internal/middlewares"
 
 	"github.com/gin-gonic/gin"
 
@@ -11,7 +11,7 @@ import (
 )
 
 func session(r *gin.RouterGroup, store *session_store.Session_store) {
-  group := r.Group("/session", middlewears.Verify_Session_Middlewear(store))
+  group := r.Group("/session", middlewars.Verify_Session_Middleware(store))
 
   group.POST("/renew_jwt", func (c *gin.Context) {
     username := c.GetString("username")

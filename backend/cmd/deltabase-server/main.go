@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/Ankumeah/DeltaBase/internal/apis"
   "github.com/Ankumeah/DeltaBase/internal/session_store"
-  "github.com/Ankumeah/DeltaBase/internal/middlewears"
+  "github.com/Ankumeah/DeltaBase/internal/middlewares"
   "github.com/Ankumeah/DeltaBase/internal/database"
 
 	"github.com/gin-gonic/gin"
@@ -98,7 +98,7 @@ func main() {
 	r := gin.Default()
 
 	apiGroup := r.Group("/api/" + env_vars["API_VERSION"] + "/",
-    middlewears.Log_Middlewear(),
+    middlewars.Log_Middleware(),
   )
 	apis.Apis(apiGroup, store ,user_db, git_db)
 

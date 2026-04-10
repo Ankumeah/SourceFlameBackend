@@ -1,4 +1,4 @@
-package middlewears
+package middlewars
 
 import (
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
@@ -9,7 +9,7 @@ import (
   "log"
 )
 
-func Verify_Session_Middlewear(store *session_store.Session_store) gin.HandlerFunc {
+func Verify_Session_Middleware(store *session_store.Session_store) gin.HandlerFunc {
   return func(c *gin.Context) {
     ctx := c.Request.Context()
 

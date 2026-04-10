@@ -2,7 +2,7 @@ package apis
 
 import (
 	"github.com/Ankumeah/DeltaBase/internal/database"
-	"github.com/Ankumeah/DeltaBase/internal/middlewears"
+	"github.com/Ankumeah/DeltaBase/internal/middlewares"
 
 	"github.com/gin-gonic/gin"
 
@@ -11,7 +11,7 @@ import (
 )
 
 func repos(r *gin.RouterGroup, git_db *database.Git_db, user_db *database.User_db) {
-  group := r.Group("/repos", middlewears.Verify_JWT_Middlewear())
+  group := r.Group("/repos", middlewars.Verify_JWT_Middleware())
 
   group.POST("/:repo_name", func (c *gin.Context) {
     ctx := c.Request.Context()

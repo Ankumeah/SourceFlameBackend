@@ -1,4 +1,4 @@
-package middlewears
+package middlewars
 
 import (
 	"github.com/Ankumeah/DeltaBase/internal/jwt"
@@ -8,9 +8,13 @@ import (
 	"net/http"
 )
 
-func Verify_JWT_Middlewear() gin.HandlerFunc {
+func Check_Login_Middleware() gin.HandlerFunc {
   return func(c *gin.Context) {
     token := c.GetHeader("X-Authorization")
+    if token == "" {
+      c.Next()
+      return
+    }
 
     username, err := jwt.Validate_jwt(token)
     if err == jwt.Error_invalid_JWT {

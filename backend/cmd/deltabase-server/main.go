@@ -2,15 +2,16 @@ package main
 
 import (
 	"github.com/Ankumeah/DeltaBase/internal/apis"
-  "github.com/Ankumeah/DeltaBase/internal/session_store"
-  "github.com/Ankumeah/DeltaBase/internal/middlewares"
-  "github.com/Ankumeah/DeltaBase/internal/database"
+	a "github.com/Ankumeah/DeltaBase/internal/app"
+	"github.com/Ankumeah/DeltaBase/internal/database"
+	"github.com/Ankumeah/DeltaBase/internal/middlewares"
+	"github.com/Ankumeah/DeltaBase/internal/session_store"
 
 	"github.com/gin-gonic/gin"
 
+	"context"
 	"log"
-  "os"
-  "context"
+	"os"
 )
 
 var env_vars = map[string]string {
@@ -27,13 +28,12 @@ var env_vars = map[string]string {
   "DATABASE_DB": "",
   "DATABASE_CONFIG": "",
 }
+
 var Ctx = context.Background()
 
-var store *session_store.Session_store
-var user_db *database.User_db
-var git_db *database.Git_db
+var app *a.App
 
-func init() {
+func load_env() {
   for env := range env_vars {
     _env, ok := os.LookupEnv(env)
     if !ok {
@@ -45,62 +45,62 @@ func init() {
 }
 
 func connect_session_store() {
-  _store, err := session_store.Get_Redis_Cluster_Driver(Ctx,
-    env_vars["SESSION_STORE_SESSIONS_USERNAME"],
-    env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
-    env_vars["SESSION_STORE_HOSTNAME"],
-    env_vars["SESSION_STORE_PORT"],
-  )
+  conn_config := session_store.Connection_Config {
+    Username: env_vars["SESSION_STORE_SESSIONS_USERNAME"],
+    Password: env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
+    Hostname: env_vars["SESSION_STORE_HOSTNAME"],
+    Port: env_vars["SESSION_STORE_PORT"],
+  }
+
+  store, err := session_store.Get_Redis_Cluster_Driver(Ctx, conn_config)
   if err != nil {
     log.Fatalf("Error while connecting to session store: %v\n", err.Error())
   }
 
-  store = _store
+  app.Store = store
   log.Println("Connected to session store")
 }
 
 func connect_database() {
-  _user_db, err := database.User_Postgres_Driver(Ctx,
-    env_vars["DATABASE_USER"],
-    env_vars["DATABASE_PASSWORD"],
-    env_vars["DATABASE_HOST"],
-    env_vars["DATABASE_PORT"],
-    env_vars["DATABASE_DB"],
-    env_vars["DATABASE_CONFIG"],
-  )
+  conn_config := database.Connection_Config {
+    Username: env_vars["DATABASE_SESSIONS_USERNAME"],
+    Password: env_vars["DATABASE_SESSIONS_PASSWORD"],
+    Hostname: env_vars["DATABASE_HOSTNAME"],
+    Port: env_vars["DATABASE_PORT"],
+    Db_name: env_vars["DATABASE_DB"],
+    Db_config: env_vars["DATABASE_CONFIG"],
+  }
+
+  user_db, err := database.User_Postgres_Driver(Ctx, conn_config)
   if err != nil {
     log.Fatalf("Error while connecting to database: %v\n", err.Error())
   }
 
-  _git_db, err := database.Git_Postgres_Driver(Ctx,
-    env_vars["DATABASE_USER"],
-    env_vars["DATABASE_PASSWORD"],
-    env_vars["DATABASE_HOST"],
-    env_vars["DATABASE_PORT"],
-    env_vars["DATABASE_DB"],
-    env_vars["DATABASE_CONFIG"],
-  )
+  git_db, err := database.Git_Postgres_Driver(Ctx, conn_config)
   if err != nil {
     log.Fatalf("Error while connecting to database: %v\n", err.Error())
   }
 
-  user_db = _user_db
-  git_db = _git_db
+  app.User_db = user_db
+  app.Git_db = git_db
   log.Println("Connected to database")
 }
 
 func main() {
-	log.Println("Starting http server")
+	log.Println("Loading env")
+  load_env()
 
+	log.Println("Connecting to DBs")
   connect_session_store()
   connect_database()
 
+	log.Println("String http server")
 	r := gin.Default()
-
-	apiGroup := r.Group("/api/" + env_vars["API_VERSION"] + "/",
+	apiGroup := r.Group(
+    "/api/" + env_vars["API_VERSION"] + "/",
     middlewars.Log_Middleware(),
   )
-	apis.Apis(apiGroup, store ,user_db, git_db)
+	apis.Apis(apiGroup, app)
 
   log.Println("Running backend on port: " + env_vars["BACKEND_PORT"])
   log.Println("API_VERSION: " + env_vars["API_VERSION"])

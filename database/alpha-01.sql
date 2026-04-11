@@ -14,3 +14,11 @@ CREATE TABLE IF NOT EXISTS repos (
   created_at INT NOT NULL,
   stars INT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS pats (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  hash BYTEA NOT NULL,
+  owner_id INT REFERENCES users(id) NOT NULL,
+  created_at INT NOT NULL,
+);

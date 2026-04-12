@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"context"
-	"fmt"
   "time"
 )
 
@@ -15,31 +14,10 @@ type user_postgres_driver struct {
   db *pgxpool.Pool
 }
 
-func User_Postgres_Driver(
-  ctx context.Context,
-  conn_config Connection_Config,
-) (*User_db, error) {
-  url_string := fmt.Sprintf(
-    "user=%v password=%v host=%v port=%v dbname=%v %v",
-    conn_config.Username,
-    conn_config.Password,
-    conn_config.Hostname,
-    conn_config.Port,
-    conn_config.Db_name,
-    conn_config.Db_config,
-  )
-  config, err := pgxpool.ParseConfig(url_string)
-  if err != nil {
-    return nil, err
+func User_Postgres_Driver( pool *pgxpool.Pool) *User_db {
+  return &User_db {
+    &user_postgres_driver { pool },
   }
-
-  conn, err := pgxpool.NewWithConfig(ctx, config)
-  if err != nil {
-    return nil, err
-  }
-
-  driver := user_postgres_driver { conn }
-  return &User_db { &driver }, nil
 }
 
 func (p *user_postgres_driver) Add_User(

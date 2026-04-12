@@ -31,7 +31,7 @@ var env_vars = map[string]string {
 
 var Ctx = context.Background()
 
-var app *a.App
+var app = &a.App{}
 
 func load_env() {
   for env := range env_vars {
@@ -71,15 +71,13 @@ func connect_database() {
     Db_config: env_vars["DATABASE_CONFIG"],
   }
 
-  user_db, err := database.User_Postgres_Driver(Ctx, conn_config)
+  pool, err := database.Get_Connection_Pool(Ctx, conn_config)
   if err != nil {
     log.Fatalf("Error while connecting to database: %v\n", err.Error())
   }
 
-  git_db, err := database.Git_Postgres_Driver(Ctx, conn_config)
-  if err != nil {
-    log.Fatalf("Error while connecting to database: %v\n", err.Error())
-  }
+  user_db := database.User_Postgres_Driver(pool)
+  git_db := database.Git_Postgres_Driver(pool)
 
   app.User_db = user_db
   app.Git_db = git_db
@@ -90,8 +88,10 @@ func main() {
 	log.Println("Loading env")
   load_env()
 
-	log.Println("Connecting to DBs")
+	log.Println("Connecting to session store")
   connect_session_store()
+
+	log.Println("Connecting to database")
   connect_database()
 
 	log.Println("String http server")

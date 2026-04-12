@@ -21,4 +21,5 @@ CREATE TABLE IF NOT EXISTS pats (
   hash BYTEA NOT NULL,
   owner_id INT REFERENCES users(id) NOT NULL,
   created_at INT NOT NULL,
+  last_used INT,
 );

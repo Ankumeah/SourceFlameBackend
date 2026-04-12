@@ -5,7 +5,6 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"context"
-	"fmt"
   "time"
 )
 
@@ -13,31 +12,10 @@ type git_postgres_driver struct {
   db *pgxpool.Pool
 }
 
-func Git_Postgres_Driver(
-  ctx context.Context,
-  conn_config Connection_Config,
-) (*Git_db, error) {
-  url_string := fmt.Sprintf(
-    "user=%v password=%v host=%v port=%v dbname=%v %v",
-    conn_config.Username,
-    conn_config.Password,
-    conn_config.Hostname,
-    conn_config.Port,
-    conn_config.Db_name,
-    conn_config.Db_config,
-  )
-  config, err := pgxpool.ParseConfig(url_string)
-  if err != nil {
-    return nil, err
+func Git_Postgres_Driver( pool *pgxpool.Pool) *Git_db {
+  return &Git_db {
+    &git_postgres_driver { pool },
   }
-
-  conn, err := pgxpool.NewWithConfig(ctx, config)
-  if err != nil {
-    return nil, err
-  }
-
-  driver := git_postgres_driver { conn }
-  return &Git_db { &driver }, nil
 }
 
 func (p *git_postgres_driver) Create_Repo(
@@ -92,24 +70,6 @@ func (p *git_postgres_driver) Delete_Repo(
     return Error_invalid_repo
   }
   return err
-}
-
-func (p *git_postgres_driver) Get_Creation( // TODO("Remove")
-  ctx context.Context,
-  repo_id uint64,
-) (uint64, error) {
-  query := `
-    SELECT created_at FROM repos
-    WHERE (id = $1);
-  `
-
-  var created_at uint64
-  err := p.db.QueryRow(ctx, query, repo_id).Scan(&created_at)
-  if err == pgx.ErrNoRows {
-    return 0, Error_invalid_repo
-  } else {
-    return created_at, err
-  }
 }
 
 func (p *git_postgres_driver) Get_Repos(

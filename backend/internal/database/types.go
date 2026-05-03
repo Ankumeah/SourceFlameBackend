@@ -9,7 +9,6 @@ import (
 type user_driver interface {
   Add_User(ctx context.Context, username string, password_hash *hash.Hash) (uint64, error)
   Get_Id(ctx context.Context, username string) (uint64, error)
-  Is_User_Valid(ctx context.Context, user_id uint64) (bool, error)
   Delete_User(ctx context.Context, user_id uint64) error
   Get_Hash(ctx context.Context, user_id uint64) (*hash.Hash, error)
   Info(ctx context.Context, user_id uint64) (*User_Info, error)
@@ -24,8 +23,8 @@ type git_driver interface {
 }
 
 type pat_driver interface {
-  Create_PAT(ctx context.Context, owner_id uint64, hash string, pat_name string) (uint64, error)
-  Get_Id(ctx context.Context, owner_id uint64, pat string) (uint64, error)
+  Add_PAT(ctx context.Context, owner_id uint64, hash string, pat_name string) (uint64, error)
+  Get_Id(ctx context.Context, owner_id uint64, pat_name string) (uint64, error)
   Delete_PAT(ctx context.Context, pat_id uint64) error
   Get_PATs(ctx context.Context, user_id uint64) ([]string, error)
   Info(ctx context.Context, pat_id uint64) (*PAT_Info, error)
@@ -49,7 +48,7 @@ type Repo_Info struct {
 type PAT_Info struct {
   Name string `json:"name"`
   Creation uint64 `json:"creation"`
-  Last_Used uint64 `json:"last_used"`
+  Last_Used *uint64 `json:"last_used"`
 }
 
 type Connection_Config struct {

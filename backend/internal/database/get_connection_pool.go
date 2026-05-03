@@ -33,5 +33,10 @@ func Get_Connection_Pool(
     return nil, err
   }
 
+  err = conn.Ping(ctx)
+  if err != nil {
+    return nil, err
+  }
+
   return conn, nil
 }

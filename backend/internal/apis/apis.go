@@ -12,4 +12,5 @@ func Apis(r *gin.RouterGroup, app *a.App) {
   repo(r, app)
   session(r, app)
   user(r, app)
+  pat(r, app)
 }

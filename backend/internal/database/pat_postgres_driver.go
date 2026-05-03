@@ -5,6 +5,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"context"
+	"errors"
 	"time"
 )
 
@@ -18,7 +19,7 @@ func PAT_Postgres_Driver( pool *pgxpool.Pool) *PAT_db {
   }
 }
 
-func (p *pat_postgres_driver) Create_PAT(ctx context.Context, owner_id uint64, hash string, pat_name string) (uint64, error) {
+func (p *pat_postgres_driver) Add_PAT(ctx context.Context, owner_id uint64, hash string, pat_name string) (uint64, error) {
   query := `
     INSERT INTO pats (name, hash, owner_id, created_at)
     VALUES ($1, $2, $3, $4)
@@ -27,19 +28,22 @@ func (p *pat_postgres_driver) Create_PAT(ctx context.Context, owner_id uint64, h
 
   var pat_id uint64
   now := time.Now().Unix()
-  err := p.db.QueryRow(ctx, query, hash, owner_id, now).Scan(&pat_id)
+  err := p.db.QueryRow(ctx, query, pat_name, hash, owner_id, now).Scan(&pat_id)
 
   return pat_id, err
 }
 
-func (p *pat_postgres_driver) Get_Id(ctx context.Context, owner_id uint64, pat string) (uint64, error) {
+func (p *pat_postgres_driver) Get_Id(ctx context.Context, owner_id uint64, pat_name string) (uint64, error) {
   query := `
     SELECT id FROM pats
-    WHERE (owner_id = $1 AND hash = $2);
+    WHERE (owner_id = $1 AND name = $2);
   `
 
   var pat_id uint64
-  err := p.db.QueryRow(ctx, query, owner_id, pat).Scan(&pat_id)
+  err := p.db.QueryRow(ctx, query, owner_id, pat_name).Scan(&pat_id)
+  if errors.Is(err, pgx.ErrNoRows) {
+    err = Error_invalid_pat
+  }
 
   return pat_id, err
 }

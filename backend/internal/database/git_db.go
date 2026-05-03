@@ -5,6 +5,7 @@ import (
 
   "context"
   "log"
+  "errors"
 )
 
 func (d *Git_db) Create_Repo(
@@ -36,7 +37,7 @@ func (d *Git_db) Get_Id(
   repo_name string,
 ) (uint64, error) {
   repo_id, err := d.db.Get_Id(ctx, owner_id, repo_name)
-  if err != Error_invalid_repo && err != nil {
+  if !errors.Is(err, Error_Invalid) && err != nil {
     log.Printf("Error while getting repo id: %v\n", err.Error())
   }
 
@@ -52,7 +53,7 @@ func (d *Git_db) Delete_Repo(
   }
 
   err := d.db.Delete_Repo(ctx, repo_id)
-  if err != Error_invalid_repo && err != nil {
+  if !errors.Is(err, Error_Invalid) && err != nil {
     log.Printf("Error while removeing repo: %v\n", err.Error())
   }
 
@@ -72,7 +73,7 @@ func (d *Git_db) Get_Repos(
   }
 
   repos, err := d.db.Get_Repos(ctx, user_id, all, limit, offset)
-  if err != nil {
+  if !errors.Is(err, Error_Invalid) && err != nil {
     log.Printf("Error while getting repos: %v\n", err.Error())
   }
 
@@ -84,7 +85,7 @@ func (d *Git_db) Info(
   repo_id uint64,
 ) (*Repo_Info, error) {
   info, err := d.db.Info(ctx, repo_id)
-  if err != Error_invalid_repo && err != nil {
+  if !errors.Is(err, Error_Invalid) && err != nil {
     log.Printf("Error while getting repo info: %v\n", err.Error())
     return nil, err
   }

@@ -37,16 +37,16 @@ func repos(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    repo_id, err := app.Git_db.Create_Repo(ctx, owner_id, repo_name, private)
+    _, err = app.Git_db.Create_Repo(ctx, owner_id, repo_name, private)
     if err == database.Error_invalid_user {
       c.JSON(invalid_user())
       return
     } else if err != nil {
       c.JSON(internal_server_error())
       return
-    } else {
-      c.JSON(http.StatusOK, gin.H { "repo_id": repo_id })
     }
+
+    c.Status(http.StatusOK)
   })
 
   group.DELETE("/:repo_name", func(c *gin.Context) {

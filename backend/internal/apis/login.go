@@ -27,16 +27,26 @@ func login(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    _, err := app.User_db.Get_Id(ctx, request.Username)
+    user_id, err := app.User_db.Get_Id(ctx, request.Username)
     if err == database.Error_invalid_user {
       _, err = app.User_db.Add_User(ctx, request.Username, request.Password)
-    }
-    if err != nil {
+      add_session(c, app.Store, request.Username)
+      return
+    } else if err != nil {
       c.JSON(internal_server_error())
       return
     }
 
-    add_session(c, app.Store, request.Username)
+    valid, err := app.User_db.Verify_User(ctx, user_id, request.Password)
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    } else if !valid {
+      c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid password" })
+      return
+    } else {
+      add_session(c, app.Store, request.Username)
+    }
   })
 
   group.POST("/external_login", func (c *gin.Context) {

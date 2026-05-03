@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/apis"
 	a "github.com/Ankumeah/DeltaBase/internal/app"
+	"github.com/Ankumeah/DeltaBase/internal/apis"
 	"github.com/Ankumeah/DeltaBase/internal/database"
 	"github.com/Ankumeah/DeltaBase/internal/middlewares"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
+	"github.com/Ankumeah/DeltaBase/internal/pat"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,6 +15,10 @@ import (
 	"os"
 )
 
+var Ctx = context.Background()
+var app = &a.App{}
+const pat_prefix = "gho_"
+const pat_length = 32
 var env_vars = map[string]string {
   "API_VERSION": "",
   "BACKEND_PORT": "",
@@ -28,10 +33,6 @@ var env_vars = map[string]string {
   "DATABASE_DB": "",
   "DATABASE_CONFIG": "",
 }
-
-var Ctx = context.Background()
-
-var app = &a.App{}
 
 func load_env() {
   for env := range env_vars {
@@ -63,9 +64,9 @@ func connect_session_store() {
 
 func connect_database() {
   conn_config := database.Connection_Config {
-    Username: env_vars["DATABASE_SESSIONS_USERNAME"],
-    Password: env_vars["DATABASE_SESSIONS_PASSWORD"],
-    Hostname: env_vars["DATABASE_HOSTNAME"],
+    Username: env_vars["DATABASE_USER"],
+    Password: env_vars["DATABASE_PASSWORD"],
+    Hostname: env_vars["DATABASE_HOST"],
     Port: env_vars["DATABASE_PORT"],
     Db_name: env_vars["DATABASE_DB"],
     Db_config: env_vars["DATABASE_CONFIG"],
@@ -76,12 +77,16 @@ func connect_database() {
     log.Fatalf("Error while connecting to database: %v\n", err.Error())
   }
 
-  user_db := database.User_Postgres_Driver(pool)
-  git_db := database.Git_Postgres_Driver(pool)
+  app.User_db = database.User_Postgres_Driver(pool)
+  app.Git_db = database.Git_Postgres_Driver(pool)
+  app.PAT_db = database.PAT_Postgres_Driver(pool)
 
-  app.User_db = user_db
-  app.Git_db = git_db
   log.Println("Connected to database")
+}
+
+func get_pat_handler() {
+  app.PAT_Handler = pat.Get_PAT_Handler(pat_prefix, pat_length)
+  log.Println("Got PAT Handler")
 }
 
 func main() {
@@ -94,7 +99,10 @@ func main() {
 	log.Println("Connecting to database")
   connect_database()
 
-	log.Println("String http server")
+	log.Println("Getting PAT Handler")
+  get_pat_handler()
+
+	log.Println("Startingn http server")
 	r := gin.Default()
 	apiGroup := r.Group(
     "/api/" + env_vars["API_VERSION"] + "/",

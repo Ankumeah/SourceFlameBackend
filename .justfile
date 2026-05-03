@@ -53,7 +53,8 @@ test *options:
   echo "==> Running tests"
 
   echo  "-> go test ./... {{ options }}"
-  cd ./backend/ && go test ./... {{ options }}
+  cd ./backend/
+  go test ./... {{ options }} | column -t -s $'\t'
 
   echo
 

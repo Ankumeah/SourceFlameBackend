@@ -15,7 +15,10 @@ import (
 )
 
 func repo(r *gin.RouterGroup, app *a.App) {
-  group := r.Group("/repo", middlewars.Check_Login_Middleware())
+  group := r.Group("/repo",
+    middlewars.Check_Login_Middleware(),
+    middlewars.Check_PAT_Middleware(app),
+  )
 
   group.GET("/:repo_owner/:repo_name/meta", func(c *gin.Context) {
     ctx := c.Request.Context()
@@ -53,7 +56,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
     service := c.Query("service")
     repo_owner := c.Param("repo_owner")
     repo_name := c.Param("repo_name")
-    username := c.GetString("username")
+    user_id := c.GetUint64("user_id")
+    authed := c.GetBool("authed")
 
     if service != "git-receive-pack" && service != "git-upload-pack" {
       c.JSON(http.StatusForbidden, gin.H { "error": "Unsupported Service" })
@@ -78,7 +82,11 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    if info.Private && username != repo_owner {
+    if info.Private && !authed {
+      c.Header("WWW-Authenticate", auth_challenge_header)
+      c.JSON(unauthorised_request())
+      return
+    } else if info.Private && user_id != owner_id {
       c.JSON(bad_request(database.Error_invalid_repo))
       return
     }
@@ -97,7 +105,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
     ctx := c.Request.Context()
     repo_owner := c.Param("repo_owner")
     repo_name := c.Param("repo_name")
-    username := c.GetString("username")
+    user_id := c.GetUint64("user_id")
+    authed := c.GetBool("authed")
 
     owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
@@ -117,7 +126,11 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    if info.Private && username != repo_owner {
+    if info.Private && !authed {
+      c.Header("WWW-Authenticate", auth_challenge_header)
+      c.JSON(unauthorised_request())
+      return
+    } else if info.Private && user_id != owner_id {
       c.JSON(bad_request(database.Error_invalid_repo))
       return
     }
@@ -136,7 +149,50 @@ func repo(r *gin.RouterGroup, app *a.App) {
     ctx := c.Request.Context()
     repo_owner := c.Param("repo_owner")
     repo_name := c.Param("repo_name")
+    user_id := c.GetUint64("user_id")
+    authed := c.GetBool("authed")
+
+    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
+    if !ok { return }
+
+    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
+    if err == database.Error_invalid_repo {
+      c.JSON(invalid_repo())
+      return
+    } else if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    info, err := app.Git_db.Info(ctx, repo_id)
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    if info.Private && !authed {
+      c.Header("WWW-Authenticate", auth_challenge_header)
+      c.JSON(unauthorised_request())
+      return
+    } else if info.Private && user_id != owner_id {
+      c.JSON(bad_request(database.Error_invalid_repo))
+      return
+    }
+
+    err = git.Receive_Pack(ctx, repo_id, c.Request.Body, c.Writer)
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+  })
+
+  group.GET("/:repo_owner/:repo_name/blob/*path", func(c *gin.Context) {
+    ctx := c.Request.Context()
+    repo_owner := c.Param("repo_owner")
+    repo_name := c.Param("repo_name")
     username := c.GetString("username")
+    path := strings.Trim(c.Param("path"), "/")
+    hash := c.Query("hash")
 
     owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
@@ -158,32 +214,6 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
     if info.Private && username != repo_owner {
       c.JSON(bad_request(database.Error_invalid_repo))
-      return
-    }
-
-    err = git.Receive_Pack(ctx, repo_id, c.Request.Body, c.Writer)
-    if err != nil {
-      c.JSON(internal_server_error())
-      return
-    }
-  })
-
-  group.GET("/:repo_owner/:repo_name/blob/*path", func(c *gin.Context) {
-    ctx := c.Request.Context()
-    repo_owner := c.Param("repo_owner")
-    repo_name := c.Param("repo_name")
-    path := strings.Trim(c.Param("path"), "/")
-    hash := c.Query("hash")
-
-    owner_id, ok := get_user_id(c, app.User_db, repo_owner)
-    if !ok { return }
-
-    repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
-    if err == database.Error_invalid_repo {
-      c.JSON(invalid_repo())
-      return
-    } else if err != nil {
-      c.JSON(internal_server_error())
       return
     }
 
@@ -208,6 +238,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
     ctx := c.Request.Context()
     repo_owner := c.Param("repo_owner")
     repo_name := c.Param("repo_name")
+    username := c.GetString("username")
     path := strings.Trim(c.Param("path"), "/")
     hash := c.Query("hash")
 
@@ -220,6 +251,17 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     } else if err != nil {
       c.JSON(internal_server_error())
+      return
+    }
+
+    info, err := app.Git_db.Info(ctx, repo_id)
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    if info.Private && username != repo_owner {
+      c.JSON(bad_request(database.Error_invalid_repo))
       return
     }
 

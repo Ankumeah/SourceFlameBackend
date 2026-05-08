@@ -24,6 +24,7 @@ type git_driver interface {
 
 type pat_driver interface {
   Add_PAT(ctx context.Context, owner_id uint64, hash string, pat_name string) (uint64, error)
+  Validate_PAT(ctx context.Context, owner_id uint64, hash string) (uint64, error)
   Get_Id(ctx context.Context, owner_id uint64, pat_name string) (uint64, error)
   Delete_PAT(ctx context.Context, pat_id uint64) error
   Get_PATs(ctx context.Context, user_id uint64) ([]string, error)

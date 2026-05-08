@@ -33,6 +33,21 @@ func (p *pat_postgres_driver) Add_PAT(ctx context.Context, owner_id uint64, hash
   return pat_id, err
 }
 
+func (p *pat_postgres_driver) Validate_PAT(ctx context.Context, owner_id uint64, hash string) (uint64, error) {
+  query := `
+    SELECT id FROM pats
+    WHERE (owner_id = $1 AND hash = $2)
+  `
+
+  var pat_id uint64
+  err := p.db.QueryRow(ctx, query, owner_id, hash).Scan(&pat_id)
+  if errors.Is(err, pgx.ErrNoRows) {
+    err = Error_invalid_pat
+  }
+
+  return pat_id, err
+}
+
 func (p *pat_postgres_driver) Get_Id(ctx context.Context, owner_id uint64, pat_name string) (uint64, error) {
   query := `
     SELECT id FROM pats

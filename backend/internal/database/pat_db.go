@@ -21,6 +21,20 @@ func (d *PAT_db) Add_PAT(
   return pat_id, nil
 }
 
+func (d *PAT_db) Validate_PAT(
+  ctx context.Context,
+  owner_id uint64,
+  hash string,
+) (uint64, error) {
+  pat_id, err := d.db.Validate_PAT(ctx, owner_id, hash)
+  if !errors.Is(err, Error_Invalid) && err != nil {
+    log.Printf("Error while adding PAT: %v\n", err.Error())
+    return 0, err
+  }
+
+  return pat_id, nil
+}
+
 func (d *PAT_db) Get_Id(
   ctx context.Context,
   owner_id uint64,

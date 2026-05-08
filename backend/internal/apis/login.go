@@ -5,13 +5,14 @@ import (
 	"github.com/Ankumeah/DeltaBase/internal/jwt"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
 	"github.com/Ankumeah/DeltaBase/internal/external_auth"
+	a "github.com/Ankumeah/DeltaBase/internal/app"
 
 	"github.com/gin-gonic/gin"
 
 	"net/http"
 )
 
-func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *database.User_db) {
+func login(r *gin.RouterGroup, app *a.App) {
   group := r.Group("/login")
 
   group.POST("", func(c *gin.Context) {
@@ -26,16 +27,26 @@ func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *data
       return
     }
 
-    _, err := user_db.Get_Id(ctx, request.Username)
+    user_id, err := app.User_db.Get_Id(ctx, request.Username)
     if err == database.Error_invalid_user {
-      _, err = user_db.Add_User(ctx, request.Username, request.Password)
-    }
-    if err != nil {
+      _, err = app.User_db.Add_User(ctx, request.Username, request.Password)
+      add_session(c, app.Store, request.Username)
+      return
+    } else if err != nil {
       c.JSON(internal_server_error())
       return
     }
 
-    add_session(c, store, request.Username)
+    valid, err := app.User_db.Verify_User(ctx, user_id, request.Password)
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    } else if !valid {
+      c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid password" })
+      return
+    } else {
+      add_session(c, app.Store, request.Username)
+    }
   })
 
   group.POST("/external_login", func (c *gin.Context) {
@@ -61,7 +72,7 @@ func login(r *gin.RouterGroup, store *session_store.Session_store, user_db *data
       return
     }
 
-    add_session(c, store, username)
+    add_session(c, app.Store, username)
   })
 }
 

@@ -5,7 +5,6 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"context"
-	"fmt"
   "time"
 )
 
@@ -13,36 +12,10 @@ type git_postgres_driver struct {
   db *pgxpool.Pool
 }
 
-func Git_Postgres_Driver(
-  ctx context.Context,
-  username string,
-  password string,
-  hostname string,
-  port string,
-  dbname string,
-  db_config string,
-) (*Git_db, error) {
-  url_string := fmt.Sprintf(
-    "user=%v password=%v host=%v port=%v dbname=%v %v",
-    username,
-    password,
-    hostname,
-    port,
-    dbname,
-    db_config,
-  )
-  config, err := pgxpool.ParseConfig(url_string)
-  if err != nil {
-    return nil, err
+func Git_Postgres_Driver( pool *pgxpool.Pool) *Git_db {
+  return &Git_db {
+    &git_postgres_driver { pool },
   }
-
-  conn, err := pgxpool.NewWithConfig(ctx, config)
-  if err != nil {
-    return nil, err
-  }
-
-  driver := git_postgres_driver { conn }
-  return &Git_db { &driver }, nil
 }
 
 func (p *git_postgres_driver) Create_Repo(
@@ -97,24 +70,6 @@ func (p *git_postgres_driver) Delete_Repo(
     return Error_invalid_repo
   }
   return err
-}
-
-func (p *git_postgres_driver) Get_Creation(
-  ctx context.Context,
-  repo_id uint64,
-) (uint64, error) {
-  query := `
-    SELECT created_at FROM repos
-    WHERE (id = $1);
-  `
-
-  var created_at uint64
-  err := p.db.QueryRow(ctx, query, repo_id).Scan(&created_at)
-  if err == pgx.ErrNoRows {
-    return 0, Error_invalid_repo
-  } else {
-    return created_at, err
-  }
 }
 
 func (p *git_postgres_driver) Get_Repos(

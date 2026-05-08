@@ -1,4 +1,4 @@
-package middlewears
+package middlewars
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,7 +6,7 @@ import (
   "log"
 )
 
-func Log_Middlewear() gin.HandlerFunc {
+func Log_Middleware() gin.HandlerFunc {
   return func(c *gin.Context) {
     log.Printf("New request from agent: %v\n", c.GetHeader("User-Agent"))
 

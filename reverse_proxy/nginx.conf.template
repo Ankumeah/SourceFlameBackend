@@ -29,9 +29,9 @@ http {
       proxy_set_header X-Real-IP $remote_addr;
     }
 
-
-    location / {
-      root /opt/nginx/static/;
+    location /coffee {
+      default_type application/json;
+      return 418 '{"client": "brew coffee", "server": { "error": "refusing to brew coffee", "message": "i am permanently a teapot" }}';
     }
   }
 }

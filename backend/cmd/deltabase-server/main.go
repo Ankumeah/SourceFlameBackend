@@ -13,6 +13,7 @@ import (
 	"context"
 	"log"
 	"os"
+  "sync"
 )
 
 var Ctx = context.Background()
@@ -90,19 +91,25 @@ func get_pat_handler() {
 }
 
 func main() {
-	log.Println("Loading env")
+  log.Println("Loading env")
   load_env()
 
-	log.Println("Connecting to session store")
-  connect_session_store()
+  var wg sync.WaitGroup
+  wg.Go(func() {
+	  log.Println("Connecting to session store")
+    connect_session_store()
+  })
+  wg.Go(func() {
+	  log.Println("Connecting to database")
+    connect_database()
+  })
+  wg.Go(func() {
+	  log.Println("Getting PAT Handler")
+    get_pat_handler()
+  })
+  wg.Wait()
 
-	log.Println("Connecting to database")
-  connect_database()
-
-	log.Println("Getting PAT Handler")
-  get_pat_handler()
-
-	log.Println("Startingn http server")
+	log.Println("Starting http server")
 	r := gin.Default()
 	apiGroup := r.Group(
     "/api/" + env_vars["API_VERSION"] + "/",

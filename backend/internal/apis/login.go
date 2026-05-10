@@ -1,15 +1,16 @@
 package apis
 
 import (
+	a "github.com/Ankumeah/DeltaBase/internal/app"
 	"github.com/Ankumeah/DeltaBase/internal/database"
+	"github.com/Ankumeah/DeltaBase/internal/external_auth"
 	"github.com/Ankumeah/DeltaBase/internal/jwt"
 	"github.com/Ankumeah/DeltaBase/internal/session_store"
-	"github.com/Ankumeah/DeltaBase/internal/external_auth"
-	a "github.com/Ankumeah/DeltaBase/internal/app"
 
 	"github.com/gin-gonic/gin"
 
 	"net/http"
+	"sync"
 )
 
 func login(r *gin.RouterGroup, app *a.App) {
@@ -78,21 +79,31 @@ func login(r *gin.RouterGroup, app *a.App) {
 
 func add_session(c *gin.Context, store *session_store.Session_store, username string) bool {
   ctx := c.Request.Context()
+  var wg sync.WaitGroup
 
-  token, err := store.Add_Session(ctx, username)
-  if err == session_store.Error_too_many_tokens {
-    c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
-    return false
-  } else if err != nil {
-    c.JSON(internal_server_error())
-    return false
-  }
+  var token string
+  var token_err error
+  var new_jwt string
+  var jwt_err error
 
-  new_jwt, err := jwt.Issue_jwt(username)
-  if err != nil {
-    store.Delete_Session(ctx, username, token)
+  wg.Go(func() {
+    token, token_err = store.Add_Session(ctx, username)
+    if token_err == session_store.Error_too_many_tokens {
+      c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
+    } else if token_err != nil {
+      c.JSON(internal_server_error())
+    }
+  })
+  wg.Go(func() {
+    new_jwt, jwt_err = jwt.Issue_jwt(username)
+    if jwt_err != nil {
+      store.Delete_Session(ctx, username, token)
+      c.JSON(internal_server_error())
+    }
+  })
+  wg.Wait()
 
-    c.JSON(internal_server_error())
+  if token_err != nil || jwt_err != nil {
     return false
   } else {
     c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })

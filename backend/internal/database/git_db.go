@@ -1,11 +1,12 @@
 package database
 
 import (
-  "github.com/Ankumeah/DeltaBase/internal/git"
+	"github.com/Ankumeah/DeltaBase/internal/git"
 
-  "context"
-  "log"
-  "errors"
+	"context"
+	"errors"
+	"log"
+	"sync"
 )
 
 func (d *Git_db) Create_Repo(
@@ -48,16 +49,27 @@ func (d *Git_db) Delete_Repo(
   ctx context.Context,
   repo_id uint64,
 ) error {
-  if err := git.Delete_Repo(repo_id); err != nil {
-    log.Printf("Error while deleteing repo dir: %v\n", err.Error())
-  }
+  var wg sync.WaitGroup
 
-  err := d.db.Delete_Repo(ctx, repo_id)
-  if !errors.Is(err, Error_Invalid) && err != nil {
-    log.Printf("Error while removeing repo: %v\n", err.Error())
-  }
+  var git_err error
+  var db_err error
 
-  return err
+  wg.Go(func() {
+    git_err = git.Delete_Repo(repo_id);
+    if git_err != nil {
+      log.Printf("Error while deleteing repo dir: %v\n", git_err.Error())
+    }
+  })
+  wg.Go(func() {
+    db_err = d.db.Delete_Repo(ctx, repo_id)
+    if !errors.Is(db_err, Error_Invalid) && db_err != nil {
+      log.Printf("Error while removeing repo: %v\n", db_err.Error())
+    }
+  })
+  wg.Wait()
+
+  if git_err != nil { return git_err }
+  return db_err
 }
 
 func (d *Git_db) Get_Repos(

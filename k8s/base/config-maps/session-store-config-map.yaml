@@ -5,3 +5,4 @@ metadata:
 data:
   SESSION_STORE_PORT: "6379"
   SESSION_STORE_HOSTNAME: session-store-service
+  SESSION_STORE_TYPE: redis_cluster

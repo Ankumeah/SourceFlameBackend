@@ -15,10 +15,3 @@ type driver interface {
 type Session_store struct {
   db driver
 }
-
-type Connection_Config struct {
-  Username string
-  Password string
-  Hostname string
-  Port string
-}

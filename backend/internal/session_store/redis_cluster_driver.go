@@ -16,13 +16,19 @@ const timeout = time.Second * 10
 type redis_cluster_driver struct {
   rdb *redis.ClusterClient
 }
+type Redis_Cluster_Config struct {
+  Username string
+  Password string
+  Hostname string
+  Port string
+}
 
 func Get_Redis_Cluster_Driver(
   ctx context.Context,
-  conn_config Connection_Config,
+  conn_config Redis_Cluster_Config,
 ) (*Session_store, error) {
   _addrs := []string {}
-  err := errors.New("")
+  var err error
   for range max_host_lookup_retires {
     _addrs, err = net.LookupHost(conn_config.Hostname)
     if err == nil { break }

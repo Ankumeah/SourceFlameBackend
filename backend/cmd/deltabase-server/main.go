@@ -27,6 +27,7 @@ var env_vars = map[string]string {
   "SESSION_STORE_SESSIONS_PASSWORD": "",
   "SESSION_STORE_HOSTNAME": "",
   "SESSION_STORE_PORT": "",
+  "SESSION_STORE_TYPE": "",
   "DATABASE_USER": "",
   "DATABASE_PASSWORD": "",
   "DATABASE_HOST": "",
@@ -47,19 +48,37 @@ func load_env() {
 }
 
 func connect_session_store() {
-  conn_config := session_store.Connection_Config {
-    Username: env_vars["SESSION_STORE_SESSIONS_USERNAME"],
-    Password: env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
-    Hostname: env_vars["SESSION_STORE_HOSTNAME"],
-    Port: env_vars["SESSION_STORE_PORT"],
+  switch env_vars["SESSION_STORE_TYPE"] {
+    case "redis_standalone":
+      conn_config := session_store.Redis_Config {
+        Username: env_vars["SESSION_STORE_SESSIONS_USERNAME"],
+        Password: env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
+        Hostname: env_vars["SESSION_STORE_HOSTNAME"],
+        Port: env_vars["SESSION_STORE_PORT"],
+      }
+
+      store, err := session_store.Get_Redis_Driver(Ctx, conn_config)
+      if err != nil {
+        log.Fatalf("Error while connecting to session store: %v\n", err.Error())
+      }
+      app.Store = store
+    case "redis_cluster":
+      conn_config := session_store.Redis_Cluster_Config {
+        Username: env_vars["SESSION_STORE_SESSIONS_USERNAME"],
+        Password: env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
+        Hostname: env_vars["SESSION_STORE_HOSTNAME"],
+        Port: env_vars["SESSION_STORE_PORT"],
+      }
+
+      store, err := session_store.Get_Redis_Cluster_Driver(Ctx, conn_config)
+      if err != nil {
+        log.Fatalf("Error while connecting to session store: %v\n", err.Error())
+      }
+      app.Store = store
+    default:
+      log.Fatalf("Unsupported session store type: %v\n", env_vars["SESSION_STORE_TYPE"])
   }
 
-  store, err := session_store.Get_Redis_Cluster_Driver(Ctx, conn_config)
-  if err != nil {
-    log.Fatalf("Error while connecting to session store: %v\n", err.Error())
-  }
-
-  app.Store = store
   log.Println("Connected to session store")
 }
 

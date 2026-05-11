@@ -1,0 +1,45 @@
+services:
+  backend:
+    build: ./backend/
+    env_file:
+      - ./env.d.example/backend
+      - ./env.d.example/session_store
+      - ./env.d.example/database
+    restart: unless-stopped
+    depends_on:
+      - database
+      - session_store
+  database:
+    build: ./database/
+    env_file: ./env.d.example/database
+    restart: unless-stopped
+  session_store:
+    build: ./session_store/
+    env_file: ./env.d.example/session_store
+    restart: unless-stopped
+  reverse_proxy:
+    build: ./reverse_proxy/
+    env_file:
+      - ./env.d.example/reverse_proxy
+      - ./env.d.example/session_store
+      - ./env.d.example/backend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8000:80"
+  session_store_gc:
+    build: ./session_store_gc/
+    env_file: ./env.d.example/session_store
+    restart: unless-stopped
+    depends_on:
+      - session_store
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        trap "exit 0" INT TERM
+        while true; do
+          /opt/gc/gc
+          sleep 300
+        done

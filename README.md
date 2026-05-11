@@ -4,10 +4,12 @@ DeltaBase is a currently **work in progress** git hosting platform, this is the 
 ![compile-check](https://github.com/Ankumeah/DeltaBaseBackend/actions/workflows/compile-check.yaml/badge.svg) ![go-tests](https://github.com/Ankumeah/DeltaBaseBackend/actions/workflows/go-tests.yaml/badge.svg)
 
 ## How to run
-> WARNING: This repo is a Work in progress and has just
+> [!WARNING]
+> This repo is a Work in progress and has just
 recently reached a barely working version, try at your own risk
 
-> NOTE: This repo only contains the code for a backend,
+> [!NOTE]
+> This repo only contains the code for a backend,
 while you can use this on its own if you are willing to interact
 with it through raw urls, you probably want to install a
 frontend for it, the frontend can be found here [Work in progress]()

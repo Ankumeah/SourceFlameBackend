@@ -18,6 +18,9 @@ spec:
       containers:
         - name: backend
           image: deltabasebackend-backend:local
+          volumeMounts:
+            - name: git-storage
+              mountPath: /srv/git
           envFrom:
             - secretRef:
                 name: backend-secrets
@@ -31,3 +34,7 @@ spec:
                 name: database-secrets
             - configMapRef:
                 name: database-config-map
+      volumes:
+        - name: git-storage
+          persistentVolumeClaim:
+            claimName: git-storage

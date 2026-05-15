@@ -19,8 +19,15 @@ spec:
       containers:
         - name: postgres
           image: deltabasebackend-database:local
+          volumeMounts:
+            - name: database-storage
+              mountPath: /var/lib/postgresql
           envFrom:
             - secretRef:
                 name: database-secrets
             - configMapRef:
                 name: database-config-map
+      volumes:
+        - name: database-storage
+          persistentVolumeClaim:
+            claimName: database-storage

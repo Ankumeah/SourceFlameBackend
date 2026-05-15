@@ -5,6 +5,8 @@ services:
       - ./env.d.example/backend
       - ./env.d.example/session_store
       - ./env.d.example/database
+    volumes:
+      - ./data/git/:/srv/git/
     restart: unless-stopped
     depends_on:
       - database
@@ -13,6 +15,8 @@ services:
     build: ./database/
     env_file: ./env.d.example/database
     restart: unless-stopped
+    volumes:
+      - ./data/database/:/var/lib/postgresql/
   session_store:
     build: ./session_store/
     env_file: ./env.d.example/session_store

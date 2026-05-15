@@ -27,6 +27,8 @@ func Verify_Session_Middleware(store *session_store.Session_store) gin.HandlerFu
       c.Abort()
       return
     } else {
+      c.Set("username", username)
+      c.Set("session", session)
       c.Next()
       return
     }

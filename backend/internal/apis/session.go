@@ -29,8 +29,8 @@ func session(r *gin.RouterGroup, app *a.App) {
 
   group.POST("/renew_session", func (c *gin.Context) {
     ctx := c.Request.Context()
-    username := c.GetHeader("username")
-    session := c.GetHeader("session")
+    username := c.GetString("username")
+    session := c.GetString("session")
 
     token, err := app.Store.Add_Session(ctx, username)
     if err == session_store.Error_too_many_tokens {
@@ -50,8 +50,8 @@ func session(r *gin.RouterGroup, app *a.App) {
 
   group.DELETE("", func (c *gin.Context) {
     ctx := c.Request.Context()
-    session := c.GetHeader("session")
-    username := c.GetHeader("username")
+    session := c.GetString("session")
+    username := c.GetString("username")
 
     if err := app.Store.Delete_Session(ctx, username, session); err != nil {
       c.JSON(internal_server_error())

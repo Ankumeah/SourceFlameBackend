@@ -1,0 +1,33 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.head_commit.message, 'release:')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Extract version
+        id: extract_version
+        run: |
+          VERSION=$(echo "${{ github.event.head_commit.message }}" | sed -n 's/^release: \(.*\)$/\1/p')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_version.outputs.version }}
+          release_name: Release ${{ steps.extract_version.outputs.version }}
+          body: |
+            Automated release for version ${{ steps.extract_version.outputs.version }}
+          draft: false
+          prerelease: false
+

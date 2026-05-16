@@ -8,5 +8,4 @@ data:
   BACKEND_HOSTNAME: backend-service
   JWT_LIFESPAN_MINS: "15"
   TOKEN_TIMEOUT_DAYS: "30"
-  TOKEN_NAMESPACE: "refresh:"
   TOKEN_LIMIT: "10"

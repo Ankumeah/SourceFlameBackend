@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+const push_conflict_message = "Push rejected because another client is pushing, please try again in some time"
+
 func repo(r *gin.RouterGroup, app *a.App) {
   group := r.Group("/repo",
     middlewars.Check_Login_Middleware(),
@@ -164,17 +166,11 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    info, err := app.Git_db.Info(ctx, repo_id)
-    if err != nil {
-      c.JSON(internal_server_error())
-      return
-    }
-
-    if info.Private && !authed {
+    if !authed {
       c.Header("WWW-Authenticate", auth_challenge_header)
       c.JSON(unauthorised_request())
       return
-    } else if info.Private && user_id != owner_id {
+    } else if user_id != owner_id {
       c.JSON(bad_request(database.Error_invalid_repo))
       return
     }

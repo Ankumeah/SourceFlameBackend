@@ -12,9 +12,9 @@ import (
 )
 
 const token_length = 64
+const token_namespace = "refresh:"
 
 var token_timeout time.Duration
-var token_namespace string
 var token_limit uint8
 
 func init() {
@@ -31,10 +31,6 @@ func init() {
   val, err = strconv.Atoi(limit)
   if err != nil { log.Fatalf("Error while converting TOKEN_LIMIT to int: %v\n", err.Error()) }
   token_limit = uint8(val)
-
-  namespace, ok := os.LookupEnv("TOKEN_NAMESPACE")
-  if !ok { log.Fatalln("Unset env var: TOKEN_NAMESPACE") }
-  token_namespace = namespace
 }
 
 func (d *Session_store) Add_Session(ctx context.Context, username string) (string, error) {

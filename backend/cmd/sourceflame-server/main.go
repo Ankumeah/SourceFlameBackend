@@ -1,19 +1,19 @@
 package main
 
 import (
-	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
 	"github.com/Ankumeah/SourceFlameBackend/internal/apis"
+	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
 	"github.com/Ankumeah/SourceFlameBackend/internal/database"
 	"github.com/Ankumeah/SourceFlameBackend/internal/middlewares"
-	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 	"github.com/Ankumeah/SourceFlameBackend/internal/pat"
+	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 
 	"github.com/gin-gonic/gin"
 
 	"context"
 	"log"
 	"os"
-  "sync"
+	"sync"
 )
 
 var Ctx = context.Background()
@@ -48,37 +48,28 @@ func load_env() {
 }
 
 func connect_session_store() {
+  sessions_config := session_store.Universal_Redis_Config {
+    Username: env_vars["SESSION_STORE_SESSIONS_USERNAME"],
+    Password: env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
+    Hostname: env_vars["SESSION_STORE_HOSTNAME"],
+    Port: env_vars["SESSION_STORE_PORT"],
+  }
+  var client session_store.Redis_client
+  var err error
+
   switch env_vars["SESSION_STORE_TYPE"] {
     case "redis_standalone":
-      conn_config := session_store.Redis_Config {
-        Username: env_vars["SESSION_STORE_SESSIONS_USERNAME"],
-        Password: env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
-        Hostname: env_vars["SESSION_STORE_HOSTNAME"],
-        Port: env_vars["SESSION_STORE_PORT"],
-      }
-
-      store, err := session_store.Get_Redis_Driver(Ctx, conn_config)
-      if err != nil {
-        log.Fatalf("Error while connecting to session store: %v\n", err.Error())
-      }
-      app.Store = store
+      client, err = session_store.Get_Redis_Client(Ctx, sessions_config)
     case "redis_cluster":
-      conn_config := session_store.Redis_Cluster_Config {
-        Username: env_vars["SESSION_STORE_SESSIONS_USERNAME"],
-        Password: env_vars["SESSION_STORE_SESSIONS_PASSWORD"],
-        Hostname: env_vars["SESSION_STORE_HOSTNAME"],
-        Port: env_vars["SESSION_STORE_PORT"],
-      }
-
-      store, err := session_store.Get_Redis_Cluster_Driver(Ctx, conn_config)
-      if err != nil {
-        log.Fatalf("Error while connecting to session store: %v\n", err.Error())
-      }
-      app.Store = store
+      client, err = session_store.Get_Redis_Cluster_Client(Ctx, sessions_config)
     default:
       log.Fatalf("Unsupported session store type: %v\n", env_vars["SESSION_STORE_TYPE"])
   }
+  if err != nil {
+    log.Panicf("Error while connecting to session store: %v", err.Error())
+  }
 
+  app.Store = session_store.Get_Sessions_Uinversal_Redis_Driver(client)
   log.Println("Connected to session store")
 }
 

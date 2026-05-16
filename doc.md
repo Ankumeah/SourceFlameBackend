@@ -23,7 +23,7 @@
 > requires -H "X-Authorization: JWT"
 - POST("/:repo_name?private=bool") -> null
 - DELETE("/:repo_name") -> null
-- GET("/all") -> { "repos": []string }
+- GET("/all?limit=uin8(delfault 10)&offset=uint64(delfault 0)") -> { "repos": []string }
 
 ## /session
 > requires -H "X-Authorization: refresh_token" -H "X-Username: username"
@@ -33,7 +33,7 @@
 
 ## /user
 - GET("/:username/meta") -> { "creation": uint64 }
-- GET("/:username/repos?limit=uin8&offset=uint64") -> { "repos": []string }
+- GET("/:username/repos?limit=uin8(delfault 10)&offset=uint64(delfault 0)") -> { "repos": []string }
 
 ## Errors
 > Any of the api may return the following if they encounter an error

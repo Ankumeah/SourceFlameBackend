@@ -18,7 +18,7 @@ func (d *PAT_db) Add_PAT(
     return 0, err
   }
 
-  return pat_id, nil
+  return pat_id, err
 }
 
 func (d *PAT_db) Validate_PAT(
@@ -32,7 +32,7 @@ func (d *PAT_db) Validate_PAT(
     return 0, err
   }
 
-  return pat_id, nil
+  return pat_id, err
 }
 
 func (d *PAT_db) Get_Id(

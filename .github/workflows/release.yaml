@@ -26,8 +26,7 @@ jobs:
         with:
           tag_name: ${{ steps.extract_version.outputs.version }}
           release_name: Release ${{ steps.extract_version.outputs.version }}
-          body: |
-            Automated release for version ${{ steps.extract_version.outputs.version }}
+          body: Automated release for version ${{ steps.extract_version.outputs.version }}
           draft: false
           prerelease: false
 

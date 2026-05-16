@@ -13,4 +13,5 @@ func Apis(r *gin.RouterGroup, app *a.App) {
   session(r, app)
   user(r, app)
   pat(r, app)
+  ping(r)
 }

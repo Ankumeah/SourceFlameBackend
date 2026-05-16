@@ -277,6 +277,6 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    c.JSON(http.StatusOK, files)
+    c.JSON(http.StatusOK, gin.H { "files": files })
   })
 }

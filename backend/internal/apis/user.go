@@ -19,6 +19,8 @@ func user(r *gin.RouterGroup, app *a.App) {
         meta(c, app)
       case "/repos":
         get_repos(c, app)
+      default:
+        c.Status(http.StatusNotFound)
     }
   })
 }

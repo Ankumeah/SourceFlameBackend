@@ -1,0 +1,635 @@
+openapi: 3.0.0
+info:
+  title: SourceFlame API
+  version: v0.0.1
+servers:
+  - url: localhost:8000
+
+paths:
+  /login:
+    post:
+      summary: Login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refresh_token:
+                    type: string
+                  JWT:
+                    type: string
+        '*':
+          $ref: '#/components/responses/Error'
+
+  /pat/{pat_name}:
+    post:
+      summary: Create a Personal Access Token
+      tags:
+        - PATs
+      parameters:
+        - name: pat_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: PAT created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  PAT:
+                    type: string
+        '*':
+          $ref: '#/components/responses/Error'
+    get:
+      summary: Get PAT details
+      tags:
+        - PATs
+      parameters:
+        - name: pat_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: PAT details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  creation:
+                    type: integer
+                    format: uint64
+                  last_used:
+                    type: integer
+                    format: uint64
+                    nullable: true
+        '*':
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a Personal Access Token
+      tags:
+        - PATs
+      parameters:
+        - name: pat_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: PAT deleted successfully
+        '*':
+          $ref: '#/components/responses/Error'
+  /pat/all:
+    get:
+      summary: List all PATs
+      tags:
+        - PATs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: List of all PATs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  PATs:
+                    type: array
+                    items:
+                      type: string
+        '*':
+          $ref: '#/components/responses/Error'
+
+  /repo/{repo_owner}/{repo_name}/meta:
+    get:
+      summary: Get repository metadata
+      tags:
+        - Repository
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: repo_owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Repository metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  creation:
+                    type: integer
+                    format: uint64
+                  stars:
+                    type: integer
+                    format: uint64
+                  private:
+                    type: boolean
+                  owner:
+                    type: string
+        '*':
+          $ref: '#/components/responses/Error'
+  /repo/{repo_owner}/{repo_name}/blob/{path}:
+    get:
+      summary: Get blob contents
+      tags:
+        - Repository
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: repo_owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: hash
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File contents
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '*':
+          $ref: '#/components/responses/Error'
+  /repo/{repo_owner}/{repo_name}/list/{path}:
+    get:
+      summary: List directory contents
+      tags:
+        - Repository
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: repo_owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: hash
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Directory listing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        file_name:
+                          type: string
+                        dir:
+                          type: boolean
+        '*':
+          $ref: '#/components/responses/Error'
+
+  /repo/{repo_owner}/{repo_name}/info/refs:
+    get:
+      summary: Git protocol info refs
+      tags:
+        - Git Protocol
+      security:
+        - PATAuth: []
+      parameters:
+        - name: repo_owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: service
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - git-receive-pack
+              - git-upload-pack
+      responses:
+        '200':
+          description: Git refs information
+        '*':
+          $ref: '#/components/responses/Error'
+  /repo/{repo_owner}/{repo_name}/git-upload-pack:
+    post:
+      summary: Git upload pack
+      tags:
+        - Git Protocol
+      security:
+        - PATAuth: []
+      parameters:
+        - name: repo_owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Upload pack response
+        '*':
+          $ref: '#/components/responses/Error'
+  /repo/{repo_owner}/{repo_name}/git-receive-pack:
+    post:
+      summary: Git receive pack
+      tags:
+        - Git Protocol
+      security:
+        - PATAuth: []
+      parameters:
+        - name: repo_owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Receive pack response
+        '*':
+          $ref: '#/components/responses/Error'
+
+  /repos/{repo_name}:
+    post:
+      summary: Create a new repository
+      tags:
+        - Self Repositories
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: private
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Repository created successfully
+        '*':
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a repository
+      tags:
+        - Self Repositories
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: repo_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Repository deleted successfully
+        '*':
+          $ref: '#/components/responses/Error'
+  /repos/all:
+    get:
+      summary: List all Self Repositories
+      tags:
+        - Self Repositories
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: uint8
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: uint64
+            default: 0
+      responses:
+        '200':
+          description: List of all Self Repositories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repos:
+                    type: array
+                    items:
+                      type: string
+        '*':
+          $ref: '#/components/responses/Error'
+
+  /session/renew_jwt:
+    post:
+      summary: Renew JWT
+      tags:
+        - Session
+      security:
+        - RefreshTokenAuth: []
+      parameters:
+        - name: X-Username
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: New JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  JWT:
+                    type: string
+        '*':
+          $ref: '#/components/responses/Error'
+  /session/renew_session:
+    post:
+      summary: Renew refresh token
+      description: "NOTE: Old refresh token is deleted"
+      tags:
+        - Session
+      security:
+        - RefreshTokenAuth: []
+      parameters:
+        - name: X-Username
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: New refresh token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refresh_token:
+                    type: string
+        '*':
+          $ref: '#/components/responses/Error'
+  /session:
+    delete:
+      summary: Delete session
+      tags:
+        - Session
+      security:
+        - RefreshTokenAuth: []
+      parameters:
+        - name: X-Username
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session deleted successfully
+        '*':
+          $ref: '#/components/responses/Error'
+
+  /user/{username}/meta:
+    get:
+      summary: Get user metadata
+      tags:
+        - User
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  creation:
+                    type: integer
+                    format: uint64
+        '*':
+          $ref: '#/components/responses/Error'
+  /user/{username}/repos:
+    get:
+      summary: Get user repositories
+      tags:
+        - User
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: uint8
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: uint64
+            default: 0
+      responses:
+        '200':
+          description: User repositories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repos:
+                    type: array
+                    items:
+                      type: string
+        '*':
+          $ref: '#/components/responses/Error'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      type: apiKey
+      in: header
+      name: X-Authorization
+      description: JWT token for authentication
+    RefreshTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Authorization
+      description: Refresh token for session management
+    PATAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Personal Access Token for git client operations
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+tags:
+  - name: Authentication
+    description: User authentication
+  - name: PATs
+    description: PAT management
+  - name: Repository
+    description: Public repos
+  - name: Git Protocol
+    description: (used by git clients)
+  - name: Self Repositories
+    description: Self repository management
+  - name: Session
+    description: Session management
+  - name: User
+    description: User information

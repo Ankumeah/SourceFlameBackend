@@ -1,7 +1,7 @@
 package middlewars
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/jwt"
+	"github.com/Ankumeah/SourceFlameBackend/internal/jwt"
 
 	"github.com/gin-gonic/gin"
 

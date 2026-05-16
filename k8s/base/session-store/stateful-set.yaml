@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: deltabasebackend-session_store:local
+          image: sourceflamebackend-session_store:local
           envFrom:
             - secretRef:
                 name: session-store-secrets

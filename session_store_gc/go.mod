@@ -1,4 +1,4 @@
-module github.com/Ankumeah/session_store_gc
+module github.com/Ankumeah/SourceFlameBackend/session_store_gc
 
 go 1.25.6
 

@@ -1,7 +1,7 @@
 package session_store_test
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/session_store"
+	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 
 	"context"
 	"testing"

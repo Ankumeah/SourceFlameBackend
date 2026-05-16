@@ -1,7 +1,7 @@
 package jwt_test
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/jwt"
+	"github.com/Ankumeah/SourceFlameBackend/internal/jwt"
 
 	"testing"
 )

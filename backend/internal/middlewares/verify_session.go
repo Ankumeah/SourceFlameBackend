@@ -1,7 +1,7 @@
 package middlewars
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/session_store"
+	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 
 	"github.com/gin-gonic/gin"
 

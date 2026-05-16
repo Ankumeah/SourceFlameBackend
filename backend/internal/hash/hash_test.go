@@ -1,7 +1,7 @@
 package hash_test
 
 import (
-  "github.com/Ankumeah/DeltaBase/internal/hash"
+  "github.com/Ankumeah/SourceFlameBackend/internal/hash"
 
   "testing"
 )

@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/database"
-	"github.com/Ankumeah/DeltaBase/internal/pat"
-	"github.com/Ankumeah/DeltaBase/internal/session_store"
+	"github.com/Ankumeah/SourceFlameBackend/internal/database"
+	"github.com/Ankumeah/SourceFlameBackend/internal/pat"
+	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 )
 
 type App struct {

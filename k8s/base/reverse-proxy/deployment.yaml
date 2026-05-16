@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: deltabasebackend-reverse_proxy:local
+          image: sourceflamebackend-reverse_proxy:local
           envFrom:
             - configMapRef:
                 name: reverse-proxy-config-map

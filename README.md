@@ -1,7 +1,7 @@
-# DeltaBaseBackend
-DeltaBase is a currently **work in progress** git hosting platform, this is the backend for it written in *golang*
+# SourceFlameBackend
+SourceFlame is a currently **work in progress** git hosting platform, this is the backend for it written in *golang*
 
-![compile-check](https://github.com/Ankumeah/DeltaBaseBackend/actions/workflows/compile-check.yaml/badge.svg) ![go-tests](https://github.com/Ankumeah/DeltaBaseBackend/actions/workflows/go-tests.yaml/badge.svg)
+![compile-check](https://github.com/Ankumeah/SourceFlameBackend/actions/workflows/compile-check.yaml/badge.svg) ![go-tests](https://github.com/Ankumeah/SourceFlameBackend/actions/workflows/go-tests.yaml/badge.svg)
 
 ## How to run
 
@@ -20,7 +20,7 @@ frontend for it, the frontend can be found here [Work in progress]()
   > [!NOTE]
   > A new dir called data/ will appear in the project containing the data created by the project
 
-- Clone and cd in the repo: `git clone https://github.com/Ankumeah/DeltaBaseBackend && cd DeltaBaseBackend`
+- Clone and cd in the repo: `git clone https://github.com/Ankumeah/SourceFlameBackend && cd SourceFlameBackend`
 - Change the secrets in `./env.d.example/` to your likeing (**VERY IMPORTANT**)
 - Start docker compose: `docker compose up -d`
 
@@ -32,7 +32,7 @@ frontend for it, the frontend can be found here [Work in progress]()
   responsibility to setup and connect the storage. The app assumes the
   presence of two PVCs by the name of `git-storage` and `database-storage`
 
-- Clone and cd in the repo: `git clone https://github.com/Ankumeah/DeltaBaseBackend && cd DeltaBaseBackend`
+- Clone and cd in the repo: `git clone https://github.com/Ankumeah/SourceFlameBackend && cd SourceFlameBackend`
 - Change the secrets in `./k8s/base/secrets.example/` to your liking (**VERY IMPORTANT**)
 - Move the files to the actual dir: `mv ./k8s/base/secrets.example/ ./k8s/base/secrets/`
 - Add PVCs for your storage with names `git-storage` and `database-storage`

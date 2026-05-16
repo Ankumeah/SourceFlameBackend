@@ -11,7 +11,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: session-store-gc-cron
-              image: deltabasebackend-session_store_gc:local
+              image: sourceflamebackend-session_store_gc:local
               envFrom:
                 - configMapRef:
                     name: session-store-config-map

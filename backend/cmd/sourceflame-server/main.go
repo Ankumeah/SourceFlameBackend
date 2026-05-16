@@ -1,12 +1,12 @@
 package main
 
 import (
-	a "github.com/Ankumeah/DeltaBase/internal/app"
-	"github.com/Ankumeah/DeltaBase/internal/apis"
-	"github.com/Ankumeah/DeltaBase/internal/database"
-	"github.com/Ankumeah/DeltaBase/internal/middlewares"
-	"github.com/Ankumeah/DeltaBase/internal/session_store"
-	"github.com/Ankumeah/DeltaBase/internal/pat"
+	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
+	"github.com/Ankumeah/SourceFlameBackend/internal/apis"
+	"github.com/Ankumeah/SourceFlameBackend/internal/database"
+	"github.com/Ankumeah/SourceFlameBackend/internal/middlewares"
+	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
+	"github.com/Ankumeah/SourceFlameBackend/internal/pat"
 
 	"github.com/gin-gonic/gin"
 

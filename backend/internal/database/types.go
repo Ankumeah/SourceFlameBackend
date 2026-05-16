@@ -1,7 +1,7 @@
 package database
 
 import (
-  "github.com/Ankumeah/DeltaBase/internal/hash"
+  "github.com/Ankumeah/SourceFlameBackend/internal/hash"
 
   "context"
 )

@@ -1,7 +1,7 @@
 package apis
 
 import (
-  "github.com/Ankumeah/DeltaBase/internal/database"
+  "github.com/Ankumeah/SourceFlameBackend/internal/database"
 
 	"github.com/gin-gonic/gin"
 

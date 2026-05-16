@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/hash"
+	"github.com/Ankumeah/SourceFlameBackend/internal/hash"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

@@ -1,4 +1,4 @@
-module github.com/Ankumeah/DeltaBase
+module github.com/Ankumeah/SourceFlameBackend
 
 go 1.25.5
 

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: deltabasebackend-backend:local
+          image: sourceflamebackend-backend:local
           volumeMounts:
             - name: git-storage
               mountPath: /srv/git

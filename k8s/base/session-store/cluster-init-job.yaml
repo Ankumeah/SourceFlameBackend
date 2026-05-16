@@ -8,7 +8,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: session-store-cluster-init
-          image: deltabasebackend-cluster_init:local
+          image: sourceflamebackend-cluster_init:local
           envFrom:
             - configMapRef:
                 name: session-store-config-map

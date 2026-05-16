@@ -1,7 +1,7 @@
 package pat_test
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/pat"
+	"github.com/Ankumeah/SourceFlameBackend/internal/pat"
 
 	"testing"
 )

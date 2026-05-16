@@ -1,10 +1,10 @@
 package apis
 
 import (
-	a "github.com/Ankumeah/DeltaBase/internal/app"
-	"github.com/Ankumeah/DeltaBase/internal/jwt"
-	"github.com/Ankumeah/DeltaBase/internal/middlewares"
-	"github.com/Ankumeah/DeltaBase/internal/session_store"
+	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
+	"github.com/Ankumeah/SourceFlameBackend/internal/jwt"
+	"github.com/Ankumeah/SourceFlameBackend/internal/middlewares"
+	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 
 	"github.com/gin-gonic/gin"
 

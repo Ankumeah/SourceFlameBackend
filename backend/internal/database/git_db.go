@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/Ankumeah/DeltaBase/internal/git"
+	"github.com/Ankumeah/SourceFlameBackend/internal/git"
 
 	"context"
 	"errors"

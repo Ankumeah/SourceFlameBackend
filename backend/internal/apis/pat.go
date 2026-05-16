@@ -114,6 +114,6 @@ func pat(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    c.JSON(http.StatusOK, pats)
+    c.JSON(http.StatusOK, gin.H { "PATs": pats })
   })
 }

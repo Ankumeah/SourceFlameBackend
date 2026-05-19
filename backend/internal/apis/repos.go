@@ -12,7 +12,7 @@ import (
 )
 
 func repos(r *gin.RouterGroup, app *a.App) {
-  group := r.Group("/repos", middlewars.Verify_JWT_Middleware())
+  group := r.Group("/repos", middlewars.Verify_JWT_Middleware(app.JWT_Handler))
 
   group.POST("/:repo_name", func (c *gin.Context) {
     ctx := c.Request.Context()

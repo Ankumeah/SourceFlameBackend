@@ -1,13 +1,12 @@
 package middlewars
 
 import (
-	"log"
-
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
 	"github.com/Ankumeah/SourceFlameBackend/internal/database"
 
 	"github.com/gin-gonic/gin"
 
+	"log"
 	"errors"
 	"net/http"
 	"strings"

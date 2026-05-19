@@ -2,7 +2,6 @@ package apis
 
 import (
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
-	"github.com/Ankumeah/SourceFlameBackend/internal/jwt"
 	"github.com/Ankumeah/SourceFlameBackend/internal/middlewares"
 	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 
@@ -17,7 +16,7 @@ func session(r *gin.RouterGroup, app *a.App) {
   group.POST("/renew_jwt", func (c *gin.Context) {
     username := c.GetString("username")
 
-    token, err := jwt.Issue_jwt(username)
+    token, err := app.JWT_Handler.Issue_jwt(username)
     if err != nil {
       c.JSON(internal_server_error())
       return

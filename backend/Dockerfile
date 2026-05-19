@@ -19,7 +19,6 @@ RUN apk add git --no-cache
 WORKDIR /opt/backend/
 
 ENV GIN_MODE=release
-COPY alpha-01.sql .
 COPY --from=builder /opt/backend/bin/sourceflame-server .
 
 ENTRYPOINT [ "./sourceflame-server" ]

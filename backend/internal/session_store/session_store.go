@@ -4,53 +4,28 @@ import (
   "context"
   "crypto/rand"
   "encoding/base64"
-  "strconv"
-  "time"
   "log"
-  "os"
   "sync"
 )
-
-const token_length = 64
-const token_namespace = "refresh:"
-
-var token_timeout time.Duration
-var token_limit uint8
-
-func init() {
-  _timeout, ok := os.LookupEnv("TOKEN_TIMEOUT")
-  if !ok { log.Fatalln("Unset env var: TOKEN_TIMEOUT") }
-
-  timeout, err := time.ParseDuration(_timeout)
-  if err != nil { log.Fatalf("Error parseing TOKEN_TIMEOUT: %v\n", err.Error()) }
-  token_timeout = timeout
-
-  limit, ok := os.LookupEnv("TOKEN_LIMIT")
-  if !ok { log.Fatalf("Unset env var: TOKEN_LIMIT") }
-
-  val, err := strconv.Atoi(limit)
-  if err != nil { log.Fatalf("Error while converting TOKEN_LIMIT to int: %v\n", err.Error()) }
-  token_limit = uint8(val)
-}
 
 func (d *Session_store) Add_Session(ctx context.Context, username string) (string, error) {
   var wg sync.WaitGroup
 
-  var count uint8
+  var count int
   var count_err error
   var token_err error
   var token string
 
   wg.Go(func() {
-    count, count_err = d.db.Get_Session_Count(ctx, token_namespace + username)
+    count, count_err = d.db.Get_Session_Count(ctx, d.token_namespace + username)
     if count_err != nil {
       log.Printf("Error while getting session count: %v\n", count_err.Error())
-    } else if count >= token_limit {
+    } else if count >= d.token_limit {
       count_err = Error_too_many_tokens
     }
   })
   wg.Go(func() {
-    _token := make([]byte, token_length)
+    _token := make([]byte, d.token_length)
     if _, token_err = rand.Read(_token); token_err != nil {
       log.Printf("Error while genrating token: %v\n", token_err.Error())
       return
@@ -61,7 +36,12 @@ func (d *Session_store) Add_Session(ctx context.Context, username string) (strin
   if count_err != nil { return "", count_err }
   if token_err != nil { return "", token_err }
 
-  if err := d.db.Add_Session(ctx, token_namespace + username, token, token_timeout); err != nil {
+  if err := d.db.Add_Session(
+    ctx,
+    d.token_namespace + username,
+    token,
+    d.token_timeout,
+  ); err != nil {
     log.Printf("Error while adding session: %v\n", err.Error())
     return "", err
   }
@@ -70,7 +50,7 @@ func (d *Session_store) Add_Session(ctx context.Context, username string) (strin
 }
 
 func (d *Session_store) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
-  valid, err := d.db.Validate_Session(ctx, token_namespace + username, token)
+  valid, err := d.db.Validate_Session(ctx, d.token_namespace + username, token)
   if err != nil {
     log.Printf("Error while validateing session: %v\n", err)
     return false, err
@@ -80,7 +60,7 @@ func (d *Session_store) Validate_Session(ctx context.Context, username string, t
 }
 
 func (d *Session_store) Delete_Session(ctx context.Context, username string, token string) error {
-  if err := d.db.Delete_Session(ctx, token_namespace + username, token); err != nil {
+  if err := d.db.Delete_Session(ctx, d.token_namespace + username, token); err != nil {
     log.Printf("Error while deleting session: %v\n", err.Error())
   }
 

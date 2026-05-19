@@ -10,7 +10,11 @@ type fake_driver struct {
 }
 
 func Get_Fake_Driver() (*Session_store) {
-  return &Session_store { &fake_driver{ map[string]string{} } }
+  return &Session_store {
+    &fake_driver{ map[string]string{} },
+    time.Minute,
+    2, 8, "fake:",
+  }
 }
 
 func (d *fake_driver) Add_Session(ctx context.Context, username string, token string, timeout time.Duration) error {
@@ -34,6 +38,6 @@ func (d *fake_driver) Delete_Session(ctx context.Context, username string, token
   return nil
 }
 
-func (d *fake_driver) Get_Session_Count(ctx context.Context, username string) (uint8, error) {
+func (d *fake_driver) Get_Session_Count(ctx context.Context, username string) (int, error) {
   return 1, nil
 }

@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Check_Login_Middleware() gin.HandlerFunc {
+func Check_Login_Middleware(handler *jwt.JWT_Handler) gin.HandlerFunc {
   return func(c *gin.Context) {
     token := c.GetHeader("X-Authorization")
     if token == "" {
@@ -16,7 +16,7 @@ func Check_Login_Middleware() gin.HandlerFunc {
       return
     }
 
-    username, err := jwt.Validate_jwt(token)
+    username, err := handler.Validate_jwt(token)
     if err == jwt.Error_invalid_JWT {
       c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid JWT" })
       c.Abort()

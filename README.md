@@ -20,6 +20,12 @@ frontend for it, the frontend can be found here [Work in progress]()
   > [!NOTE]
   > A new dir called data/ will appear in the project containing the data created by the project
 
+  > [!NOTE]
+  > Currently we sship support for postgres and sqlite3 out of the box,
+  out of these sqlite3 is the default option when running with docker compose,
+  while for any use case involveing docker copmose, sqlite3 is recommended,
+  if you wish to switch to postgres have a look at ./docker-compose.yaml
+
 - Clone and cd in the repo: `git clone https://github.com/Ankumeah/SourceFlameBackend && cd SourceFlameBackend`
 - Change the secrets in `./env.d.example/` to your likeing (**VERY IMPORTANT**)
 - Start docker compose: `docker compose up -d`

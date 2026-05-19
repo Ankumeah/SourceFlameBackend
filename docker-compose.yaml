@@ -1,37 +1,60 @@
 services:
   backend:
-    build: ./backend/
+    build:
+      context: ./backend/
+      args:
+        - "db_type=sqlite3"                    # Currently supported sqlite3 and postgres
     env_file:
       - ./env.d.example/backend
       - ./env.d.example/session_store
-      - ./env.d.example/database
+      - ./env.d.example/database               # Comment if useing postgres
+#      - ./env.d.example/pg_database           # Comment if useing sqlite3
     volumes:
       - ./data/git/:/srv/git/
+      - ./data/database/:/data/                # Comment if not useing sqlite3
     restart: unless-stopped
     depends_on:
-      - database
+      - db_init
       - session_store
-  database:
-    build: ./database/
-    env_file: ./env.d.example/database
-    restart: unless-stopped
+
+  db_init:
+    build:
+      context: ./db_init/
+      args:
+        - "db_type=sqlite3"                    # Currently supported sqlite3 and postgres
+    env_file:
+      - ./env.d.example/backend
+      - ./env.d.example/database               # Comment if useing postgres
+#      - ./env.d.example/pg_database           # Comment if useing sqlite3
+    restart: on-failure
     volumes:
-      - ./data/database/:/var/lib/postgresql/
+      - ./data/database/:/data/
+#    depends_on:                               # Comment if useing sqlite3
+#      - database                              # Comment if useing sqlite3
+
+#  database:                                   # Comment if useing sqlite3
+#    build: ./database/                        # Comment if useing sqlite3
+#    env_file: ./env.d.example/pg_database     # Comment if useing sqlite3
+#    restart: unless-stopped                   # Comment if useing sqlite3
+#    volumes:                                  # Comment if useing sqlite3
+#      - ./data/database/:/var/lib/postgresql/ # Comment if useing sqlite3
+
   session_store:
     build: ./session_store/
     env_file: ./env.d.example/session_store
     restart: unless-stopped
+
   reverse_proxy:
     build: ./reverse_proxy/
     env_file:
       - ./env.d.example/reverse_proxy
-      - ./env.d.example/session_store
       - ./env.d.example/backend
     restart: unless-stopped
     depends_on:
       - backend
     ports:
       - "8000:80"
+
   session_store_gc:
     build: ./session_store_gc/
     env_file: ./env.d.example/session_store

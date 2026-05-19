@@ -1,6 +1,9 @@
 package main
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/Ankumeah/SourceFlameBackend/internal/apis"
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
 	"github.com/Ankumeah/SourceFlameBackend/internal/database"
@@ -28,12 +31,11 @@ var env_vars = map[string]string {
   "SESSION_STORE_HOSTNAME": "",
   "SESSION_STORE_PORT": "",
   "SESSION_STORE_TYPE": "",
-  "DATABASE_USER": "",
-  "DATABASE_PASSWORD": "",
-  "DATABASE_HOST": "",
-  "DATABASE_PORT": "",
-  "DATABASE_DB": "",
-  "DATABASE_CONFIG": "",
+  "DATABASE_URL": "",
+  "DATABASE_MAX_CONNS": "",
+  "DATABASE_MAX_IDLE_CONNS": "",
+  "DATABASE_MAX_LIFETIME": "",
+  "DATABASE_MAX_IDLE_TIME": "",
 }
 
 func load_env() {
@@ -66,7 +68,7 @@ func connect_session_store() {
       log.Fatalf("Unsupported session store type: %v\n", env_vars["SESSION_STORE_TYPE"])
   }
   if err != nil {
-    log.Panicf("Error while connecting to session store: %v", err.Error())
+    log.Panicf("Error while connecting to session store: %v\n", err.Error())
   }
 
   app.Store = session_store.Get_Sessions_Uinversal_Redis_Driver(client)
@@ -74,23 +76,32 @@ func connect_session_store() {
 }
 
 func connect_database() {
-  conn_config := database.Connection_Config {
-    Username: env_vars["DATABASE_USER"],
-    Password: env_vars["DATABASE_PASSWORD"],
-    Hostname: env_vars["DATABASE_HOST"],
-    Port: env_vars["DATABASE_PORT"],
-    Db_name: env_vars["DATABASE_DB"],
-    Db_config: env_vars["DATABASE_CONFIG"],
+  max_conn, err := strconv.Atoi(env_vars["DATABASE_MAX_CONNS"])
+  if err != nil {
+    log.Fatalf("Error while parsing DATABASE_MAX_CONNS: %v\n", err.Error())
   }
+  max_idle, err := strconv.Atoi(env_vars["DATABASE_MAX_IDLE_CONNS"])
+  if err != nil {
+    log.Fatalf("Error while parsing DATABASE_MAX_IDLE_CONNS: %v\n", err.Error())
+  }
+  max_lifetime, err := time.ParseDuration(env_vars["DATABASE_MAX_LIFETIME"])
+  if err != nil {
+    log.Fatalf("Error while parsing DATABASE_MAX_LIFETIME: %v\n", err.Error())
+  }
+  max_idle_time, err := time.ParseDuration(env_vars["DATABASE_MAX_IDLE_TIME"])
+  if err != nil {
+    log.Fatalf("Error while parsing DATABASE_MAX_IDLE_TIME: %v\n", err.Error())
+  }
+  config := database.New_Sql_Config(int(max_conn), int(max_idle), max_lifetime, max_idle_time)
 
-  pool, err := database.Get_Connection_Pool(Ctx, conn_config)
+  db, err := database.Get_DB_Connection(Ctx, env_vars["DATABASE_URL"], config)
   if err != nil {
     log.Fatalf("Error while connecting to database: %v\n", err.Error())
   }
 
-  app.User_db = database.User_Postgres_Driver(pool)
-  app.Git_db = database.Git_Postgres_Driver(pool)
-  app.PAT_db = database.PAT_Postgres_Driver(pool)
+  app.User_db = database.User_Sql_Driver(db)
+  app.Git_db = database.Git_Sql_Driver(db)
+  app.PAT_db = database.PAT_Sql_Driver(db)
 
   log.Println("Connected to database")
 }

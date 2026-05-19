@@ -2,18 +2,24 @@ FROM golang:alpine AS builder
 
 WORKDIR /opt/backend/
 
+RUN apk add gcc musl-dev --no-cache
+
 COPY go.mod go.sum ./
 RUN go mod download
 
+ARG db_type=sqlite3
+
 COPY . .
-#RUN go build -ldflags="-s -w" -o ./bin/sourceflame-server ./cmd/sourceflame-server/
-RUN --mount=type=cache,target=/root/.cache/go-build go build -ldflags="-s -w" -o ./bin/sourceflame-server ./cmd/sourceflame-server/
+RUN --mount=type=cache,target=/root/.cache/go-build go build -ldflags="-s -w" -tags=${db_type} -o ./bin/sourceflame-server ./cmd/sourceflame-server/
 
 FROM alpine
 
 RUN apk add git --no-cache
 
-ENV GIN_MODE=release
-COPY --from=builder /opt/backend/bin/sourceflame-server /opt/backend/sourceflame-server
+WORKDIR /opt/backend/
 
-ENTRYPOINT [ "/opt/backend/sourceflame-server" ]
+ENV GIN_MODE=release
+COPY alpha-01.sql .
+COPY --from=builder /opt/backend/bin/sourceflame-server .
+
+ENTRYPOINT [ "./sourceflame-server" ]

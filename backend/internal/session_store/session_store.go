@@ -18,17 +18,17 @@ var token_timeout time.Duration
 var token_limit uint8
 
 func init() {
-  timeout, ok := os.LookupEnv("TOKEN_TIMEOUT_DAYS")
-  if !ok { log.Fatalln("Unset env var: TOKEN_TIMEOUT_DAYS") }
+  _timeout, ok := os.LookupEnv("TOKEN_TIMEOUT")
+  if !ok { log.Fatalln("Unset env var: TOKEN_TIMEOUT") }
 
-  val, err := strconv.Atoi(timeout)
-  if err != nil { log.Fatalf("Error while converting TOKEN_TIMEOUT_DAYS to int: %v\n", err.Error()) }
-  token_timeout = time.Duration(val) * 24 * time.Hour
+  timeout, err := time.ParseDuration(_timeout)
+  if err != nil { log.Fatalf("Error parseing TOKEN_TIMEOUT: %v\n", err.Error()) }
+  token_timeout = timeout
 
   limit, ok := os.LookupEnv("TOKEN_LIMIT")
   if !ok { log.Fatalf("Unset env var: TOKEN_LIMIT") }
 
-  val, err = strconv.Atoi(limit)
+  val, err := strconv.Atoi(limit)
   if err != nil { log.Fatalf("Error while converting TOKEN_LIMIT to int: %v\n", err.Error()) }
   token_limit = uint8(val)
 }

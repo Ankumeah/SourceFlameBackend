@@ -51,12 +51,3 @@ type PAT_Info struct {
   Creation uint64 `json:"creation"`
   Last_Used *uint64 `json:"last_used"`
 }
-
-type Connection_Config struct {
-  Username string
-  Password string
-  Hostname string
-  Port string
-  Db_name string
-  Db_config string
-}

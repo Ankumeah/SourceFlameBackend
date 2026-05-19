@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
   "log"
-  "strconv"
 )
 
 const jwt_leeway = 10 * time.Second
@@ -19,12 +18,12 @@ func init() {
   if !ok { log.Fatalln("Unset env var: JWT_KEY") }
   jwt_key = []byte(key)
 
-  lifespan, ok := os.LookupEnv("JWT_LIFESPAN_MINS")
-  if !ok { log.Fatalln("Unset env var: JWT_LIFESPAN_MINS") }
+  lifespan, ok := os.LookupEnv("JWT_LIFESPAN")
+  if !ok { log.Fatalln("Unset env var: JWT_LIFESPAN") }
 
-  val, err := strconv.Atoi(lifespan)
-  if err != nil { log.Fatalf("Error converting JWT_LIFESPAN_MINS to int: %v\n", err.Error()) }
-  jwt_lifespan = time.Duration(val) * time.Minute
+  val, err := time.ParseDuration(lifespan)
+  if err != nil { log.Fatalf("Error parseing JWT_LIFESPAN: %v\n", err.Error()) }
+  jwt_lifespan = val
 }
 
 func Issue_jwt(username string) (string, error) {

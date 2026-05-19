@@ -90,8 +90,10 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
     token, token_err = store.Add_Session(ctx, username)
     if token_err == session_store.Error_too_many_tokens {
       c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
+      return
     } else if token_err != nil {
       c.JSON(internal_server_error())
+      return
     }
   })
   wg.Go(func() {

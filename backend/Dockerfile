@@ -7,7 +7,7 @@ RUN apk add gcc musl-dev --no-cache
 COPY go.mod go.sum ./
 RUN go mod download
 
-ARG db_type=sqlite3
+ARG db_type=postgres
 
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build go build -ldflags="-s -w" -tags=${db_type} -o ./bin/sourceflame-server ./cmd/sourceflame-server/

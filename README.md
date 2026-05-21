@@ -24,7 +24,7 @@ frontend for it, the frontend can be found here [Work in progress]()
   > Currently we sship support for postgres and sqlite3 out of the box,
   out of these sqlite3 is the default option when running with docker compose,
   while for any use case involveing docker copmose, sqlite3 is recommended,
-  if you wish to switch to postgres have a look at ./docker-compose.yaml
+  if you wish to switch to postgres have a look at docker-compose.yaml
 
 - Clone and cd in the repo: `git clone https://github.com/Ankumeah/SourceFlameBackend && cd SourceFlameBackend`
 - Change the secrets in `./env.d.example/` to your likeing (**VERY IMPORTANT**)
@@ -32,15 +32,9 @@ frontend for it, the frontend can be found here [Work in progress]()
 
 ### With kustomize
 
-  > [!NOTE]
-  > This dir does not include the yaml files needed to deploy the required
-  storage or the PVC used to connect the storage to the app. It is the user's
-  responsibility to setup and connect the storage. The app assumes the
-  presence of two PVCs by the name of `git-storage` and `database-storage`
+  ![Read here](https://github.com/Ankumeah/SourceFlameBackend/blob/master/k8s/base/README.md)
 
-- Clone and cd in the repo: `git clone https://github.com/Ankumeah/SourceFlameBackend && cd SourceFlameBackend`
-- Change the secrets in `./k8s/base/secrets.example/` to your liking (**VERY IMPORTANT**)
-- Move the files to the actual dir: `mv ./k8s/base/secrets.example/ ./k8s/base/secrets/`
-- Add PVCs for your storage with names `git-storage` and `database-storage`
-- Take a look at the yaml files and patch any values you want (Optional but recommended)
-- Apply the files: `kubectl apply -k ./k8s/base/` (Adjust accordingly if patched)
+## How to use
+
+  ![openapi.yaml](https://github.com/Ankumeah/SourceFlameBackend/blob/master/openapi.yaml)
+  ![Quick cheatsheet](https://github.com/Ankumeah/SourceFlameBackend/blob/master/doc.md)

@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ./secrets/
   - ./config-maps/
+  - ./pv.yaml
   - ./backend/
   - ./database/
   - ./session-store/

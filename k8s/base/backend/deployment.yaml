@@ -32,8 +32,6 @@ spec:
                 name: session-store-config-map
             - secretRef:
                 name: database-secrets
-            - configMapRef:
-                name: database-config-map
       volumes:
         - name: git-storage
           persistentVolumeClaim:

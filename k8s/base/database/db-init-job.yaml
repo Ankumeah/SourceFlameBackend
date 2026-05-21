@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-job
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: db-init
+          image: sourceflamebackend-db_init:local
+          envFrom:
+            - secretRef:
+                name: database-secrets
+            - configMapRef:
+                name: backend-config-map

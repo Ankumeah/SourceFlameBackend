@@ -29,4 +29,4 @@ jobs:
 
       - name: Run tests
         working-directory: backend/
-        run: go test ./... -v
+        run: go test ./... -v -tags="sqlite3"

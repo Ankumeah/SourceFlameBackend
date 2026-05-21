@@ -15,9 +15,19 @@ type Redis_client interface {
   ZCount(ctx context.Context, key string, min string, max string) *redis.IntCmd
 }
 type sessions_uinversal_redis_driver struct { rdb Redis_client }
-func Get_Sessions_Uinversal_Redis_Driver(client Redis_client) *Session_store {
+func Get_Sessions_Uinversal_Redis_Driver(
+  client Redis_client,
+  token_timeout time.Duration,
+  token_limit int,
+  token_length int,
+  token_namespace string,
+) *Session_store {
   return &Session_store {
     &sessions_uinversal_redis_driver { client },
+    token_timeout,
+    token_limit,
+    token_length,
+    token_namespace,
   }
 }
 
@@ -45,12 +55,12 @@ func (r *sessions_uinversal_redis_driver) Delete_Session(ctx context.Context, us
   return r.rdb.ZRem(ctx, username, token).Err()
 }
 
-func (r *sessions_uinversal_redis_driver) Get_Session_Count(ctx context.Context, username string) (uint8, error) {
+func (r *sessions_uinversal_redis_driver) Get_Session_Count(ctx context.Context, username string) (int, error) {
   now := time.Now().Unix()
   count , err := r.rdb.ZCount(ctx, username, strconv.FormatInt(now, 10), "inf").Result()
   if err != nil {
     return 0, err
   } else {
-    return uint8(count), nil
+    return int(count), nil
   }
 }

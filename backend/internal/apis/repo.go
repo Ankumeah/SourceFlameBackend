@@ -14,11 +14,9 @@ import (
 	"strings"
 )
 
-const push_conflict_message = "Push rejected because another client is pushing, please try again in some time"
-
 func repo(r *gin.RouterGroup, app *a.App) {
   group := r.Group("/repo",
-    middlewars.Check_Login_Middleware(),
+    middlewars.Check_Login_Middleware(app.JWT_Handler),
     middlewars.Check_PAT_Middleware(app),
   )
 
@@ -85,7 +83,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
     }
 
     if info.Private && !authed {
-      c.Header("WWW-Authenticate", auth_challenge_header)
+      c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
       c.JSON(unauthorised_request())
       return
     } else if info.Private && user_id != owner_id {
@@ -129,7 +127,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
     }
 
     if info.Private && !authed {
-      c.Header("WWW-Authenticate", auth_challenge_header)
+      c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
       c.JSON(unauthorised_request())
       return
     } else if info.Private && user_id != owner_id {
@@ -167,7 +165,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
     }
 
     if !authed {
-      c.Header("WWW-Authenticate", auth_challenge_header)
+      c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
       c.JSON(unauthorised_request())
       return
     } else if user_id != owner_id {

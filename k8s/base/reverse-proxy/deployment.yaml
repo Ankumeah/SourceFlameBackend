@@ -22,6 +22,4 @@ spec:
             - configMapRef:
                 name: reverse-proxy-config-map
             - configMapRef:
-                name: session-store-config-map
-            - configMapRef:
                 name: backend-config-map

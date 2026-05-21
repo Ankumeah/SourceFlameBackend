@@ -26,4 +26,4 @@ jobs:
 
       - name: Compile
         working-directory: backend/
-        run: go build ./cmd/sourceflame-server/
+        run: go build -tags="sqlite3" ./cmd/sourceflame-server/

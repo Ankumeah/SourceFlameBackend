@@ -8,11 +8,11 @@ import (
 	"net/http"
 )
 
-func Verify_JWT_Middleware() gin.HandlerFunc {
+func Verify_JWT_Middleware(handler *jwt.JWT_Handler) gin.HandlerFunc {
   return func(c *gin.Context) {
     token := c.GetHeader("X-Authorization")
 
-    username, err := jwt.Validate_jwt(token)
+    username, err := handler.Validate_jwt(token)
     if err == jwt.Error_invalid_JWT {
       c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid JWT" })
       c.Abort()

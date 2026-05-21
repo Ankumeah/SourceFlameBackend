@@ -2,5 +2,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./backend-secrets.yaml
-  - ./session-store-secrets.yaml
   - ./database-secrets.yaml
+  - ./session-store-secrets.yaml

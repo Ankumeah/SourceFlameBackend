@@ -4,7 +4,6 @@ import (
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
 	"github.com/Ankumeah/SourceFlameBackend/internal/database"
 	"github.com/Ankumeah/SourceFlameBackend/internal/external_auth"
-	"github.com/Ankumeah/SourceFlameBackend/internal/jwt"
 	"github.com/Ankumeah/SourceFlameBackend/internal/session_store"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +30,7 @@ func login(r *gin.RouterGroup, app *a.App) {
     user_id, err := app.User_db.Get_Id(ctx, request.Username)
     if err == database.Error_invalid_user {
       _, err = app.User_db.Add_User(ctx, request.Username, request.Password)
-      add_session(c, app.Store, request.Username)
+      add_session(c, app, request.Username)
       return
     } else if err != nil {
       c.JSON(internal_server_error())
@@ -46,7 +45,7 @@ func login(r *gin.RouterGroup, app *a.App) {
       c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid password" })
       return
     } else {
-      add_session(c, app.Store, request.Username)
+      add_session(c, app, request.Username)
     }
   })
 
@@ -73,11 +72,11 @@ func login(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    add_session(c, app.Store, username)
+    add_session(c, app, username)
   })
 }
 
-func add_session(c *gin.Context, store *session_store.Session_store, username string) bool {
+func add_session(c *gin.Context, app *a.App, username string) bool {
   ctx := c.Request.Context()
   var wg sync.WaitGroup
 
@@ -87,17 +86,19 @@ func add_session(c *gin.Context, store *session_store.Session_store, username st
   var jwt_err error
 
   wg.Go(func() {
-    token, token_err = store.Add_Session(ctx, username)
+    token, token_err = app.Store.Add_Session(ctx, username)
     if token_err == session_store.Error_too_many_tokens {
       c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
+      return
     } else if token_err != nil {
       c.JSON(internal_server_error())
+      return
     }
   })
   wg.Go(func() {
-    new_jwt, jwt_err = jwt.Issue_jwt(username)
+    new_jwt, jwt_err = app.JWT_Handler.Issue_jwt(username)
     if jwt_err != nil {
-      store.Delete_Session(ctx, username, token)
+      app.Store.Delete_Session(ctx, username, token)
       c.JSON(internal_server_error())
     }
   })

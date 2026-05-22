@@ -29,6 +29,7 @@ type pat_driver interface {
   Delete_PAT(ctx context.Context, pat_id uint64) error
   Get_PATs(ctx context.Context, user_id uint64) ([]string, error)
   Info(ctx context.Context, pat_id uint64) (*PAT_Info, error)
+  Update_Use(ctx context.Context, pat_id uint64) error
 }
 
 type User_db struct { db user_driver }

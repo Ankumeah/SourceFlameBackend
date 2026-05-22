@@ -83,3 +83,16 @@ func (d *PAT_db) Info(
 
   return info, err
 }
+
+
+func (d *PAT_db) Update_Use(
+  ctx context.Context,
+  pat_id uint64,
+) error {
+  err := d.db.Update_Use(ctx, pat_id)
+  if !errors.Is(err, Error_Invalid) && err != nil {
+    log.Printf("Error while updateing pat use: %v\n", err.Error())
+  }
+
+  return err
+}

@@ -66,7 +66,7 @@ func (s *pat_sqlx_driver) Delete_PAT(ctx context.Context, pat_id uint64) error {
     WHERE (id = ?);
   `)
 
-  tag, err := s.db.Exec(query, pat_id)
+  tag, err := s.db.ExecContext(ctx, query, pat_id)
   if err != nil { return err }
 
   effected, err := tag.RowsAffected()
@@ -80,7 +80,7 @@ func (s *pat_sqlx_driver) Get_PATs(ctx context.Context, user_id uint64) ([]strin
     WHERE (owner_id = ?);
   `)
 
-  rows, err := s.db.Query(query, user_id)
+  rows, err := s.db.QueryContext(ctx, query, user_id)
   if err != nil { return nil, err }
   defer rows.Close()
 
@@ -105,4 +105,24 @@ func (s *pat_sqlx_driver) Info(ctx context.Context, pat_id uint64) (*PAT_Info, e
   err := s.db.QueryRowContext(ctx, query, pat_id).Scan(&info.Name, &info.Creation, &info.Last_Used)
 
   return &info, err
+}
+
+func (s *pat_sqlx_driver) Update_Use(ctx context.Context, pat_id uint64) error {
+  query := s.db.Rebind(`
+    UPDATE pats
+    SET last_used = ?
+    WHERE id = ?
+  `)
+  now := time.Now().Unix()
+
+  tag, err := s.db.ExecContext(ctx, query, now, pat_id)
+  if err != nil { return err }
+
+  effected, err := tag.RowsAffected()
+  if err != nil {
+    return err
+  } else if effected <= 0 {
+    return Error_invalid_pat
+  } else { return nil }
+
 }

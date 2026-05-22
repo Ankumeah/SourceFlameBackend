@@ -44,7 +44,7 @@ func (s *user_sqlx_driver) Delete_User(
 ) error {
   query := s.db.Rebind("DELETE FROM users WHERE (id = ?);")
 
-  _, err := s.db.Exec(query, user_id)
+  _, err := s.db.ExecContext(ctx, query, user_id)
   return err
 }
 

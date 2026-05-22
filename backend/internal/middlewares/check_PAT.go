@@ -55,7 +55,7 @@ func Check_PAT_Middleware(app *a.App) gin.HandlerFunc {
       return
     }
 
-    _, err = app.PAT_db.Validate_PAT(ctx, owner_id, pat)
+    pat_id, err := app.PAT_db.Validate_PAT(ctx, owner_id, pat)
     if errors.Is(err, database.Error_Invalid) {
       c.JSON(http.StatusBadRequest, gin.H { "error": err.Error() })
       c.Abort()
@@ -64,6 +64,7 @@ func Check_PAT_Middleware(app *a.App) gin.HandlerFunc {
       c.Abort()
       return
     } else {
+      app.PAT_db.Update_Use(ctx, pat_id)
       c.Set("authed", true)
       c.Set("user_id", owner_id)
       c.Next()

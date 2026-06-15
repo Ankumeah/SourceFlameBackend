@@ -24,7 +24,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
     ctx := c.Request.Context()
     repo_name := c.Param("repo_name")
     repo_owner := c.Param("repo_owner")
-    username := c.GetString("username")
+    user_id := c.GetUint64("user_id")
+    authed := c.GetBool("authed")
 
     owner_id, ok := get_user_id(c, app.User_db, repo_owner)
     if !ok { return }
@@ -44,10 +45,15 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    if info.Private && username != repo_owner {
+    if info.Private && !authed {
+      c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
+      c.JSON(unauthorised_request())
+      return
+    } else if info.Private && user_id != owner_id {
       c.JSON(bad_request(database.Error_invalid_repo))
       return
     }
+
     c.JSON(http.StatusOK, info)
   })
 
@@ -184,7 +190,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
     ctx := c.Request.Context()
     repo_owner := c.Param("repo_owner")
     repo_name := c.Param("repo_name")
-    username := c.GetString("username")
+    user_id := c.GetUint64("user_id")
+    authed := c.GetBool("authed")
     path := strings.Trim(c.Param("path"), "/")
     hash := c.Query("hash")
 
@@ -206,7 +213,11 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    if info.Private && username != repo_owner {
+    if info.Private && !authed {
+      c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
+      c.JSON(unauthorised_request())
+      return
+    } else if info.Private && user_id != owner_id {
       c.JSON(bad_request(database.Error_invalid_repo))
       return
     }
@@ -232,7 +243,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
     ctx := c.Request.Context()
     repo_owner := c.Param("repo_owner")
     repo_name := c.Param("repo_name")
-    username := c.GetString("username")
+    user_id := c.GetUint64("user_id")
+    authed := c.GetBool("authed")
     path := strings.Trim(c.Param("path"), "/")
     hash := c.Query("hash")
 
@@ -254,7 +266,11 @@ func repo(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    if info.Private && username != repo_owner {
+    if info.Private && !authed {
+      c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
+      c.JSON(unauthorised_request())
+      return
+    } else if info.Private && user_id != owner_id {
       c.JSON(bad_request(database.Error_invalid_repo))
       return
     }

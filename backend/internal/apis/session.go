@@ -38,13 +38,15 @@ func session(r *gin.RouterGroup, app *a.App) {
     } else if err != nil {
       c.JSON(internal_server_error())
       return
-    } else {
-      c.JSON(http.StatusOK, gin.H { "refresh_token": token })
     }
 
     if err = app.Store.Delete_Session(ctx, username, session); err != nil {
       c.JSON(internal_server_error())
+      app.Store.Delete_Session(ctx, username, token)
+      return
     }
+
+    c.JSON(http.StatusOK, gin.H { "refresh_token": token })
   })
 
   group.DELETE("", func (c *gin.Context) {

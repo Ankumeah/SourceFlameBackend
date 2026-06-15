@@ -22,7 +22,7 @@ func (d *User_db) Add_User(
   }
 
   user_id, err := d.db.Add_User(ctx, username, password_hash)
-  if err != nil {
+  if !errors.Is(err, Safe_Error) && err != nil {
     log.Printf("Error while adding user: %v\n", err.Error())
   }
 

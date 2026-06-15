@@ -16,33 +16,26 @@ type User struct {
 	Created_At uint64 `bun:"created_at,notnull"`
 	Password_Hash []byte `bun:"password_hash,notnull"`
 	Salt []byte `bun:"salt,notnull"`
-
-	Repos []*Repo `bun:"rel:has-many,join:id=owner_id"`
-	PATs []*PAT `bun:"rel:has-many,join:id=owner_id"`
 }
 type Repo struct {
 	bun.BaseModel `bun:"table:repos"`
 
 	ID uint64 `bun:"id,pk,autoincrement"`
-	Name string `bun:"name,notnull"`
+  Name string `bun:"name,notnull,unique:repo_name"`
 	Private bool `bun:"private,notnull"`
-	OwnerID uint64 `bun:"owner_id,notnull"`
+	OwnerID uint64 `bun:"owner_id,notnull,unique:repo_name"`
 	CreatedAt uint64 `bun:"created_at,notnull"`
 	Stars uint64 `bun:"stars,notnull"`
-
-	Owner *User `bun:"rel:belongs-to,join:owner_id=id"`
 }
 type PAT struct {
 	bun.BaseModel `bun:"table:pats"`
 
 	ID uint64 `bun:"id,pk,autoincrement"`
-	Name string `bun:"name,notnull"`
+  Name string `bun:"name,notnull,unique:pat_name"`
 	Hash []byte `bun:"hash,notnull"`
-	OwnerID uint64 `bun:"owner_id,notnull"`
+	OwnerID uint64 `bun:"owner_id,notnull,unique:pat_name"`
 	CreatedAt uint64 `bun:"created_at,notnull"`
 	LastUsed *int64 `bun:"last_used"`
-
-	Owner *User `bun:"rel:belongs-to,join:owner_id=id"`
 }
 
 type Sql_Config struct {

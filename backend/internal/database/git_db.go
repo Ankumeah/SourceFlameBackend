@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"sync"
 )
 
 func (d *Git_db) Create_Repo(
@@ -16,7 +15,9 @@ func (d *Git_db) Create_Repo(
   private bool,
 ) (uint64, error) {
   repo_id, err := d.db.Create_Repo(ctx, owner_id, repo_name, private)
-  if err != nil {
+  if errors.Is(err, Safe_Error) {
+    return 0, err
+  } else if err != nil {
     log.Printf("Error while adding repo: %v\n", err.Error())
     return 0, err
   }
@@ -49,27 +50,17 @@ func (d *Git_db) Delete_Repo(
   ctx context.Context,
   repo_id uint64,
 ) error {
-  var wg sync.WaitGroup
+  err := d.db.Delete_Repo(ctx, repo_id)
+  if !errors.Is(err, Error_Invalid) && err != nil {
+    log.Printf("Error while removeing repo: %v\n", err.Error())
+  }
 
-  var git_err error
-  var db_err error
+  err = git.Delete_Repo(repo_id);
+  if err != nil {
+    log.Printf("Error while deleteing repo dir: %v\n", err.Error())
+  }
 
-  wg.Go(func() {
-    git_err = git.Delete_Repo(repo_id);
-    if git_err != nil {
-      log.Printf("Error while deleteing repo dir: %v\n", git_err.Error())
-    }
-  })
-  wg.Go(func() {
-    db_err = d.db.Delete_Repo(ctx, repo_id)
-    if !errors.Is(db_err, Error_Invalid) && db_err != nil {
-      log.Printf("Error while removeing repo: %v\n", db_err.Error())
-    }
-  })
-  wg.Wait()
-
-  if git_err != nil { return git_err }
-  return db_err
+  return err
 }
 
 func (d *Git_db) Get_Repos(

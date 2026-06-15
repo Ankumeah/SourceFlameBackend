@@ -29,13 +29,13 @@ func (s *user_sqlx_driver) Add_User(
 
   var user_id uint64
   now := time.Now().Unix()
-  if err := s.db.QueryRowContext(ctx, query,
+  err := s.db.QueryRowContext(ctx, query,
     username, now, password_hash.Hash, password_hash.Salt,
-  ).Scan(&user_id); err != nil {
-    return 0, err
-  }
+  ).Scan(&user_id)
 
-  return user_id, nil
+  if is_unique_violation(err) { err = Error_user_exists }
+
+  return user_id, err
 }
 
 func (s *user_sqlx_driver) Delete_User(

@@ -31,6 +31,8 @@ func (s *git_sqlx_driver) Create_Repo(
   now := time.Now().Unix()
   err := s.db.QueryRowContext(ctx, query, repo_name, owner_id, private, now).Scan(&repo_id)
 
+  if is_unique_violation(err) { err = Error_repo_exists }
+
   return repo_id, err
 }
 

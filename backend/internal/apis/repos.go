@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -28,18 +29,9 @@ func repos(r *gin.RouterGroup, app *a.App) {
     owner_id, ok := get_user_id(c, app.User_db, username)
     if !ok { return }
 
-    _, err = app.Git_db.Get_Id(ctx, owner_id, repo_name)
-    if err != database.Error_invalid_repo && err != nil {
-      c.JSON(internal_server_error())
-      return
-    } else if err != database.Error_invalid_repo {
-      c.JSON(http.StatusConflict, gin.H { "error": "Repo alreday exists" })
-      return
-    }
-
     _, err = app.Git_db.Create_Repo(ctx, owner_id, repo_name, private)
-    if err == database.Error_invalid_user {
-      c.JSON(invalid_user())
+    if errors.Is(err, database.Safe_Error) {
+      c.JSON(bad_request(err))
       return
     } else if err != nil {
       c.JSON(internal_server_error())
@@ -63,9 +55,6 @@ func repos(r *gin.RouterGroup, app *a.App) {
     repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
     if err == database.Error_invalid_user {
       c.JSON(invalid_user())
-      return
-    } else if err == database.Error_invalid_repo {
-      c.JSON(invalid_repo())
       return
     } else if err != nil {
       c.JSON(internal_server_error())

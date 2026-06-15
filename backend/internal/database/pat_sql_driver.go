@@ -27,6 +27,8 @@ func (s *pat_sqlx_driver) Add_PAT(ctx context.Context, owner_id uint64, hash str
   now := time.Now().Unix()
   err := s.db.QueryRowContext(ctx, query, pat_name, hash, owner_id, now).Scan(&pat_id)
 
+  if is_unique_violation(err) { err = Error_pat_exists }
+
   return pat_id, err
 }
 
@@ -104,7 +106,13 @@ func (s *pat_sqlx_driver) Info(ctx context.Context, pat_id uint64) (*PAT_Info, e
   var info PAT_Info
   err := s.db.QueryRowContext(ctx, query, pat_id).Scan(&info.Name, &info.Creation, &info.Last_Used)
 
-  return &info, err
+  if err == sql.ErrNoRows {
+    return nil, Error_invalid_pat
+  } else if err != nil {
+    return nil, err
+  } else {
+    return &info, nil
+  }
 }
 
 func (s *pat_sqlx_driver) Update_Use(ctx context.Context, pat_id uint64) error {

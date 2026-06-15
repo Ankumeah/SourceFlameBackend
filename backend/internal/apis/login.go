@@ -1,6 +1,7 @@
 package apis
 
 import (
+
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
 	"github.com/Ankumeah/SourceFlameBackend/internal/database"
 	"github.com/Ankumeah/SourceFlameBackend/internal/external_auth"
@@ -9,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"net/http"
-	"sync"
+	"errors"
 )
 
 func login(r *gin.RouterGroup, app *a.App) {
@@ -27,26 +28,31 @@ func login(r *gin.RouterGroup, app *a.App) {
       return
     }
 
-    user_id, err := app.User_db.Get_Id(ctx, request.Username)
-    if err == database.Error_invalid_user {
-      _, err = app.User_db.Add_User(ctx, request.Username, request.Password)
-      add_session(c, app, request.Username)
-      return
+    user_id, err := app.User_db.Add_User(ctx, request.Username, request.Password)
+    if errors.Is(err, database.Error_Exists) {
+      user_id, err = app.User_db.Get_Id(ctx, request.Username)
+      if errors.Is(err, database.Error_Invalid) {
+        c.JSON(bad_request(err))
+        return
+      } else if err != nil {
+        c.JSON(internal_server_error())
+        return
+      }
+
+      valid, err := app.User_db.Verify_User(ctx, user_id, request.Password)
+      if err != nil {
+        c.JSON(internal_server_error())
+        return
+      } else if !valid {
+        c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid password" })
+        return
+      }
     } else if err != nil {
       c.JSON(internal_server_error())
       return
     }
 
-    valid, err := app.User_db.Verify_User(ctx, user_id, request.Password)
-    if err != nil {
-      c.JSON(internal_server_error())
-      return
-    } else if !valid {
-      c.JSON(http.StatusUnauthorized, gin.H { "error": "Invalid password" })
-      return
-    } else {
-      add_session(c, app, request.Username)
-    }
+    add_session(c, app, request.Username)
   })
 
   group.POST("/external_login", func (c *gin.Context) {
@@ -78,36 +84,23 @@ func login(r *gin.RouterGroup, app *a.App) {
 
 func add_session(c *gin.Context, app *a.App, username string) bool {
   ctx := c.Request.Context()
-  var wg sync.WaitGroup
 
-  var token string
-  var token_err error
-  var new_jwt string
-  var jwt_err error
-
-  wg.Go(func() {
-    token, token_err = app.Store.Add_Session(ctx, username)
-    if token_err == session_store.Error_too_many_tokens {
-      c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
-      return
-    } else if token_err != nil {
-      c.JSON(internal_server_error())
-      return
-    }
-  })
-  wg.Go(func() {
-    new_jwt, jwt_err = app.JWT_Handler.Issue_jwt(username)
-    if jwt_err != nil {
-      app.Store.Delete_Session(ctx, username, token)
-      c.JSON(internal_server_error())
-    }
-  })
-  wg.Wait()
-
-  if token_err != nil || jwt_err != nil {
+  token, err := app.Store.Add_Session(ctx, username)
+  if err == session_store.Error_too_many_tokens {
+    c.JSON(http.StatusForbidden, gin.H { "error": "Too many refresh tokens" })
     return false
-  } else {
-    c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
-    return true
+  } else if err != nil {
+    c.JSON(internal_server_error())
+    return false
   }
+
+  new_jwt, err := app.JWT_Handler.Issue_jwt(username)
+  if err != nil {
+    app.Store.Delete_Session(ctx, username, token)
+    c.JSON(internal_server_error())
+    return false
+  }
+
+  c.JSON(http.StatusOK, gin.H { "JWT": new_jwt, "refresh_token": token })
+  return true
 }

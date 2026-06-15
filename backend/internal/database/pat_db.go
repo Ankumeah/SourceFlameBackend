@@ -13,7 +13,7 @@ func (d *PAT_db) Add_PAT(
   pat_name string,
 ) (uint64, error) {
   pat_id, err := d.db.Add_PAT(ctx, owner_id, hash, pat_name)
-  if !errors.Is(err, Error_Invalid) && err != nil {
+  if !errors.Is(err, Safe_Error) && err != nil {
     log.Printf("Error while adding PAT: %v\n", err.Error())
     return 0, err
   }

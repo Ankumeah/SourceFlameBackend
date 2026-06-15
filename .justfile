@@ -47,7 +47,7 @@ _load archive:
 
 # Run go tests on ./backend/
 [linux, macos]
-test *options:
+test *options = "-tags='sqlite3'":
   #! /bin/env sh
 
   echo "==> Running tests"

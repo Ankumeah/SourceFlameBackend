@@ -60,9 +60,10 @@ func (d *Session_store) Validate_Session(ctx context.Context, username string, t
 }
 
 func (d *Session_store) Delete_Session(ctx context.Context, username string, token string) error {
-  if err := d.db.Delete_Session(ctx, d.token_namespace + username, token); err != nil {
+  err := d.db.Delete_Session(ctx, d.token_namespace + username, token)
+  if err != nil {
     log.Printf("Error while deleting session: %v\n", err.Error())
   }
 
-  return nil
+  return err
 }

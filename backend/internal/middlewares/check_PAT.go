@@ -42,6 +42,7 @@ func Check_PAT_Middleware(app *a.App) gin.HandlerFunc {
       c.JSON(http.StatusInternalServerError, gin.H { "error": "Internal server error" })
       c.Abort()
       log.Printf("Error while parseing pat: %v\n", err.Error())
+      return
     }
 
     owner_id, err := app.User_db.Get_Id(ctx, username)

@@ -52,6 +52,10 @@ test *options = "-tags='sqlite3'":
 
   echo "==> Running tests"
 
+  echo "==> Loading env"
+  echo '--> export $(cat ./env.d.example/*)'
+  export $(cat ./env.d.example/*)
+
   echo  "-> go test ./... {{ options }}"
   cd ./backend/
   go test ./... {{ options }} | column -t -s $'\t'

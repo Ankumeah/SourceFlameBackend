@@ -4,79 +4,79 @@ import (
 	"github.com/Ankumeah/SourceFlameBackend/internal/hash"
 
 	"context"
+	"errors"
 	"log"
-  "errors"
 )
 
-var hasher = hash.Get_Hasher(2, 16, 64 * 1024, 4, 32)
+var hasher = hash.Get_Hasher(2, 16, 64*1024, 4, 32)
 
 func (d *User_db) Add_User(
-  ctx context.Context,
-  username string,
-  password string,
+	ctx context.Context,
+	username string,
+	password string,
 ) (uint64, error) {
-  password_hash, err := hasher.Generate_Hash([]byte(password), []byte(""))
-  if err != nil {
-    log.Printf("Error while hashing password: %v\n", err.Error())
-    return 0, err
-  }
+	password_hash, err := hasher.Generate_Hash([]byte(password), []byte(""))
+	if err != nil {
+		log.Printf("Error while hashing password: %v\n", err.Error())
+		return 0, err
+	}
 
-  user_id, err := d.db.Add_User(ctx, username, password_hash)
-  if !errors.Is(err, Safe_Error) && err != nil {
-    log.Printf("Error while adding user: %v\n", err.Error())
-  }
+	user_id, err := d.db.Add_User(ctx, username, password_hash)
+	if !errors.Is(err, Safe_Error) && err != nil {
+		log.Printf("Error while adding user: %v\n", err.Error())
+	}
 
-  return user_id, err
+	return user_id, err
 }
 
 func (d *User_db) Delete_User(ctx context.Context, user_id uint64) error {
-  err := d.db.Delete_User(ctx, user_id)
-  if !errors.Is(err, Error_Invalid) && err != nil {
-    log.Printf("Error while deleting user: %v\n", err.Error())
-  }
+	err := d.db.Delete_User(ctx, user_id)
+	if !errors.Is(err, Error_Invalid) && err != nil {
+		log.Printf("Error while deleting user: %v\n", err.Error())
+	}
 
-  return err
+	return err
 }
 
 func (d *User_db) Verify_User(
-  ctx context.Context,
-  user_id uint64,
-  password string,
+	ctx context.Context,
+	user_id uint64,
+	password string,
 ) (bool, error) {
-  hash, err := d.db.Get_Hash(ctx, user_id)
-  if !errors.Is(err, Error_Invalid) && err != nil {
-    log.Printf("Error while getting hash: %v\n", err.Error())
-    return false, err
-  }
+	hash, err := d.db.Get_Hash(ctx, user_id)
+	if !errors.Is(err, Error_Invalid) && err != nil {
+		log.Printf("Error while getting hash: %v\n", err.Error())
+		return false, err
+	}
 
-  valid, err := hasher.Compare_Hash(hash, password)
-  if err != nil {
-    log.Printf("Error while compairing hash: %v\n", err.Error())
-  }
+	valid, err := hasher.Compare_Hash(hash, password)
+	if err != nil {
+		log.Printf("Error while compairing hash: %v\n", err.Error())
+	}
 
-  return valid, err
+	return valid, err
 }
 
 func (d *User_db) Get_Id(
-  ctx context.Context,
-  username string,
+	ctx context.Context,
+	username string,
 ) (uint64, error) {
-  id, err := d.db.Get_Id(ctx, username)
-  if !errors.Is(err, Error_Invalid) && err != nil {
-    log.Printf("Error while getting user id: %v\n", err.Error())
-  }
+	id, err := d.db.Get_Id(ctx, username)
+	if !errors.Is(err, Error_Invalid) && err != nil {
+		log.Printf("Error while getting user id: %v\n", err.Error())
+	}
 
-  return id, err
+	return id, err
 }
 
 func (d *User_db) Info(
-  ctx context.Context,
-  user_id uint64,
+	ctx context.Context,
+	user_id uint64,
 ) (*User_Info, error) {
-  info, err := d.db.Info(ctx, user_id)
-  if !errors.Is(err, Error_Invalid) && err != nil {
-    log.Printf("Error while getting user creation time: %v\n", err.Error())
-  }
+	info, err := d.db.Info(ctx, user_id)
+	if !errors.Is(err, Error_Invalid) && err != nil {
+		log.Printf("Error while getting user creation time: %v\n", err.Error())
+	}
 
-  return info, err
+	return info, err
 }

@@ -19,7 +19,7 @@ func repos(r *gin.RouterGroup, app *a.App) {
 		repo_name := c.Param("repo_name")
 		user_id := c.GetUint64("user_id")
 
-    _, err := app.Git_db.Create_Repo(ctx, user_id, repo_name)
+		_, err := app.Git_db.Create_Repo(ctx, user_id, repo_name)
 		if errors.Is(err, database.Safe_Error) {
 			c.JSON(bad_request(err))
 			return

@@ -12,9 +12,8 @@ func (d *Git_db) Create_Repo(
 	ctx context.Context,
 	owner_id uint64,
 	repo_name string,
-	private bool,
 ) (uint64, error) {
-	repo_id, err := d.db.Create_Repo(ctx, owner_id, repo_name, private)
+	repo_id, err := d.db.Create_Repo(ctx, owner_id, repo_name)
 	if errors.Is(err, Safe_Error) {
 		return 0, err
 	} else if err != nil {
@@ -68,7 +67,6 @@ func (d *Git_db) Delete_Repo(
 func (d *Git_db) Get_Repos(
 	ctx context.Context,
 	user_id uint64,
-	all bool,
 	limit uint8,
 	offset uint64,
 ) ([]string, error) {
@@ -77,7 +75,7 @@ func (d *Git_db) Get_Repos(
 		return nil, Error_limit_too_big
 	}
 
-	repos, err := d.db.Get_Repos(ctx, user_id, all, limit, offset)
+	repos, err := d.db.Get_Repos(ctx, user_id, limit, offset)
 	if !errors.Is(err, Error_Invalid) && err != nil {
 		log.Printf("Error while getting repos: %v\n", err.Error())
 	}

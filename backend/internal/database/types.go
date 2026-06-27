@@ -15,10 +15,10 @@ type user_driver interface {
 }
 
 type git_driver interface {
-	Create_Repo(ctx context.Context, owner_id uint64, repo_name string, private bool) (uint64, error)
+	Create_Repo(ctx context.Context, owner_id uint64, repo_name string) (uint64, error)
 	Get_Id(ctx context.Context, owner_id uint64, repo_name string) (uint64, error)
 	Delete_Repo(ctx context.Context, repo_id uint64) error
-	Get_Repos(ctx context.Context, user_id uint64, all bool, limit uint8, offset uint64) ([]string, error)
+	Get_Repos(ctx context.Context, user_id uint64, limit uint8, offset uint64) ([]string, error)
 	Info(ctx context.Context, repo_id uint64) (*Repo_Info, error)
 }
 
@@ -43,7 +43,6 @@ type User_Info struct {
 type Repo_Info struct {
 	Creation uint64 `json:"creation"`
 	Stars    uint64 `json:"stars"`
-	Private  bool   `json:"private"`
 	Owner    string `json:"owner"`
 }
 

@@ -20,7 +20,6 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 	group.GET("/:repo_owner/:repo_name/meta", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		role := c.GetInt("role")
 		repo_id := c.GetUint64("repo_id")
 
 		info, err := app.Git_db.Info(ctx, repo_id)
@@ -32,11 +31,6 @@ func repo(r *gin.RouterGroup, app *a.App) {
 			return
 		}
 
-		if info.Private && role < roles.Member {
-			c.JSON(http.StatusBadRequest, gin.H{"error": database.Error_invalid_repo.Error()})
-			return
-		}
-
 		c.JSON(http.StatusOK, info)
 	})
 
@@ -44,16 +38,9 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		ctx := c.Request.Context()
 		service := c.Query("service")
 		repo_id := c.GetUint64("repo_id")
-		role := c.GetInt("role")
-		private := c.GetBool("private")
 
 		if service != "git-receive-pack" && service != "git-upload-pack" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Unsupported Service"})
-			return
-		}
-
-		if private && role < roles.Member {
-			c.JSON(bad_request(database.Error_invalid_repo))
 			return
 		}
 
@@ -70,13 +57,6 @@ func repo(r *gin.RouterGroup, app *a.App) {
 	group.POST("/:repo_owner/:repo_name/git-upload-pack", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		repo_id := c.GetUint64("repo_id")
-		role := c.GetInt("role")
-		private := c.GetBool("private")
-
-		if private && role < roles.Member {
-			c.JSON(bad_request(database.Error_invalid_repo))
-			return
-		}
 
 		c.Header("Content-Type", "application/x-git-upload-pack-result")
 		c.Header("Cache-Control", "no-cache")
@@ -92,12 +72,6 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		ctx := c.Request.Context()
 		repo_id := c.GetUint64("repo_id")
 		role := c.GetInt("role")
-		private := c.GetBool("private")
-
-		if private && role < roles.Member {
-			c.JSON(bad_request(database.Error_invalid_repo))
-			return
-		}
 
 		if role < roles.Owner {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Only owner can push"})
@@ -116,15 +90,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 	group.GET("/:repo_owner/:repo_name/blob/*path", func(c *gin.Context) {
 		repo_id := c.GetUint64("repo_id")
-		role := c.GetInt("role")
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
-		private := c.GetBool("private")
-
-		if private && role < roles.Member {
-			c.JSON(bad_request(database.Error_invalid_repo))
-			return
-		}
 
 		blob, err := git.Get_Glob(repo_id, hash, path)
 		if errors.Is(err, git.Error_Not_Found) {
@@ -145,15 +112,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 	group.GET("/:repo_owner/:repo_name/list/*path", func(c *gin.Context) {
 		repo_id := c.GetUint64("repo_id")
-		role := c.GetInt("role")
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
-		private := c.GetBool("private")
-
-		if private && role < roles.Member {
-			c.JSON(bad_request(database.Error_invalid_repo))
-			return
-		}
 
 		files, err := git.List_Dir(repo_id, hash, path)
 		if errors.Is(err, git.Error_Not_Found) {

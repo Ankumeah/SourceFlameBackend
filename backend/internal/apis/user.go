@@ -68,7 +68,7 @@ func get_repos(c *gin.Context, app *a.App) {
 		return
 	}
 
-	repos, err := app.Git_db.Get_Repos(ctx, user_id, false, limit, offset)
+	repos, err := app.Git_db.Get_Repos(ctx, user_id, limit, offset)
 	if err == database.Error_limit_too_big {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit too big"})
 		return

@@ -22,7 +22,6 @@ type Repo struct {
 
 	ID uint64 `bun:"id,pk,autoincrement"`
   Name string `bun:"name,notnull,unique:repo_name"`
-	Private bool `bun:"private,notnull"`
 	OwnerID uint64 `bun:"owner_id,notnull,unique:repo_name"`
 	CreatedAt uint64 `bun:"created_at,notnull"`
 	Stars uint64 `bun:"stars,notnull"`

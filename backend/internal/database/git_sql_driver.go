@@ -20,17 +20,16 @@ func (s *git_sqlx_driver) Create_Repo(
 	ctx context.Context,
 	owner_id uint64,
 	repo_name string,
-	private bool,
 ) (uint64, error) {
 	query := s.db.Rebind(`
-    INSERT INTO repos (name, owner_id, private, created_at, stars)
-    VALUES (?, ?, ?, ?, 0)
+    INSERT INTO repos (name, owner_id, created_at, stars)
+    VALUES (?, ?, ?, 0)
     RETURNING id;
   `)
 
 	var repo_id uint64
 	now := time.Now().Unix()
-	err := s.db.QueryRowContext(ctx, query, repo_name, owner_id, private, now).Scan(&repo_id)
+	err := s.db.QueryRowContext(ctx, query, repo_name, owner_id, now).Scan(&repo_id)
 
 	if is_unique_violation(err) {
 		err = Error_repo_exists
@@ -83,24 +82,14 @@ func (s *git_sqlx_driver) Delete_Repo(
 func (s *git_sqlx_driver) Get_Repos(
 	ctx context.Context,
 	user_id uint64,
-	all bool,
 	limit uint8,
 	offset uint64,
 ) ([]string, error) {
-	query_all := `
+	query := s.db.Rebind(`
     SELECT name FROM repos
     WHERE (owner_id = ?)
-    LIMIT ? OFFSET ?;
-  `
-	_query := `
-    SELECT name FROM repos
-    WHERE (NOT private AND owner_id = ?)
     LIMIT ? OFFSET ?
-  `
-	if all {
-		_query = query_all
-	}
-	query := s.db.Rebind(_query)
+  `)
 
 	rows, err := s.db.QueryContext(ctx, query, user_id, limit, offset)
 	if err != nil {
@@ -129,7 +118,7 @@ func (s *git_sqlx_driver) Info(
 	repo_id uint64,
 ) (*Repo_Info, error) {
 	query := s.db.Rebind(`
-    SELECT repos.created_at, repos.stars, repos.private, users.username
+    SELECT repos.created_at, repos.stars, users.username
     FROM repos
     INNER JOIN users ON repos.owner_id = users.id
     WHERE repos.id = ?;
@@ -137,7 +126,7 @@ func (s *git_sqlx_driver) Info(
 
 	var info Repo_Info
 	err := s.db.QueryRowContext(ctx, query, repo_id).Scan(
-		&info.Creation, &info.Stars, &info.Private, &info.Owner,
+		&info.Creation, &info.Stars, &info.Owner,
 	)
 	if err == sql.ErrNoRows {
 		return nil, Error_invalid_repo

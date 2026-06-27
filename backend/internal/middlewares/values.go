@@ -5,7 +5,6 @@ const Username_feild = "username"
 const Role_feild = "role"
 const Session_feild = "session"
 const Repo_id_feild = "repo_id"
-const Private_feild = "private"
 
 const self_auth_type = "Basic"
 const jwt_auth_type = "Bearer"

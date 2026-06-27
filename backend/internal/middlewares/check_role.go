@@ -74,19 +74,10 @@ func Check_Role_Middleware(app *a.App) gin.HandlerFunc {
 			return
 		}
 
-		info, err := app.Git_db.Info(ctx, repo_id)
-		if err != nil {
-			c.AbortWithStatusJSON(internal_server_error())
-			return
-		}
-
 		route_end := filepath.Base(c.Request.URL.Path)
-		if (route_end == "git-receive-pack" || info.Private) && user_id == 0 {
+		if route_end == "git-receive-pack" && user_id == 0 {
 			c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
 			c.AbortWithStatusJSON(unauthorised_request())
-			return
-		} else if info.Private && user_id != owner_id {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": database.Error_invalid_repo.Error()})
 			return
 		}
 
@@ -99,7 +90,6 @@ func Check_Role_Middleware(app *a.App) gin.HandlerFunc {
 		app.PAT_db.Update_Use(ctx, pat_id)
 		c.Set(User_id_feild, user_id)
 		c.Set(Repo_id_feild, repo_id)
-		c.Set(Private_feild, info.Private)
 		c.Next()
 	}
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func Log_Middleware() gin.HandlerFunc {
-  return func(c *gin.Context) {
-    c.Next()
-  }
+	return func(c *gin.Context) {
+		c.Next()
+	}
 }

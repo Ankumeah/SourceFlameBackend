@@ -1,7 +1,6 @@
 # SourceFlameBackend
 SourceFlame is a currently **work in progress** git hosting platform, this is the backend for it written in *golang*
-
-![compile-check](https://github.com/Ankumeah/SourceFlameBackend/actions/workflows/compile-check.yaml/badge.svg) ![go-tests](https://github.com/Ankumeah/SourceFlameBackend/actions/workflows/go-tests.yaml/badge.svg)
+![go-tests](https://github.com/Ankumeah/SourceFlameBackend/actions/workflows/go-tests.yaml/badge.svg)
 
 ## How to run
 
@@ -21,7 +20,7 @@ frontend for it, the frontend can be found here [Work in progress]()
   > A new dir called data/ will appear in the project containing the data created by the project
 
   > [!NOTE]
-  > Currently we sship support for postgres and sqlite3 out of the box,
+  > Currently we ship support for postgres and sqlite3 out of the box,
   out of these sqlite3 is the default option when running with docker compose,
   while for any use case involveing docker copmose, sqlite3 is recommended,
   if you wish to switch to postgres have a look at docker-compose.yaml
@@ -37,4 +36,5 @@ frontend for it, the frontend can be found here [Work in progress]()
 ## How to use
 
   ![openapi.yaml](https://github.com/Ankumeah/SourceFlameBackend/blob/master/openapi.yaml)
+
   ![Quick cheatsheet](https://github.com/Ankumeah/SourceFlameBackend/blob/master/doc.md)

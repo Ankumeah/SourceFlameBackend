@@ -2,29 +2,18 @@ openapi: 3.0.0
 info:
   title: SourceFlame API
   version: v0.0.1
+  description: "NOTE: This openapi.yaml was Ai genrated (boooo ik), so please cautious. If you want a non Ai genrated doc, have a look at doc.md at the root of the git repo"
 servers:
-  - url: localhost:8000
+  - url: http://localhost:8000
 
 paths:
   /login:
     post:
-      summary: Login
+      summary: Login with credentials
       tags:
-        - Authentication
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
+        - Login
+      security:
+        - SelfAuth: []
       responses:
         '200':
           description: Successful login
@@ -37,7 +26,7 @@ paths:
                     type: string
                   JWT:
                     type: string
-        '*':
+        default:
           $ref: '#/components/responses/Error'
 
   /pat/{pat_name}:
@@ -45,26 +34,14 @@ paths:
       summary: Create a Personal Access Token
       tags:
         - PATs
+      security:
+        - SelfAuth: []
       parameters:
         - name: pat_name
           in: path
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
       responses:
         '200':
           description: PAT created successfully
@@ -75,32 +52,20 @@ paths:
                 properties:
                   PAT:
                     type: string
-        '*':
+        default:
           $ref: '#/components/responses/Error'
     get:
       summary: Get PAT details
       tags:
         - PATs
+      security:
+        - SelfAuth: []
       parameters:
         - name: pat_name
           in: path
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
       responses:
         '200':
           description: PAT details
@@ -118,56 +83,33 @@ paths:
                     type: integer
                     format: uint64
                     nullable: true
-        '*':
+        default:
           $ref: '#/components/responses/Error'
     delete:
       summary: Delete a Personal Access Token
       tags:
         - PATs
+      security:
+        - SelfAuth: []
       parameters:
         - name: pat_name
           in: path
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
       responses:
         '200':
           description: PAT deleted successfully
-        '*':
+        default:
           $ref: '#/components/responses/Error'
+
   /pat/all:
     get:
-      summary: List all PATs
+      summary: List all Personal Access Tokens
       tags:
         - PATs
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
+      security:
+        - SelfAuth: []
       responses:
         '200':
           description: List of all PATs
@@ -180,16 +122,14 @@ paths:
                     type: array
                     items:
                       type: string
-        '*':
+        default:
           $ref: '#/components/responses/Error'
 
   /repo/{repo_owner}/{repo_name}/meta:
     get:
       summary: Get repository metadata
       tags:
-        - Repository
-      security:
-        - JWTAuth: []
+        - Repo
       parameters:
         - name: repo_owner
           in: path
@@ -203,7 +143,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Repository metadata
+          description: Repo metadata
           content:
             application/json:
               schema:
@@ -215,19 +155,16 @@ paths:
                   stars:
                     type: integer
                     format: uint64
-                  private:
-                    type: boolean
                   owner:
                     type: string
-        '*':
+        default:
           $ref: '#/components/responses/Error'
+
   /repo/{repo_owner}/{repo_name}/blob/{path}:
     get:
-      summary: Get blob contents
+      summary: Get blob/file contents
       tags:
-        - Repository
-      security:
-        - JWTAuth: []
+        - Repo
       parameters:
         - name: repo_owner
           in: path
@@ -252,20 +189,23 @@ paths:
       responses:
         '200':
           description: File contents
+          headers:
+            Content-Type:
+              schema:
+                type: string
           content:
             application/octet-stream:
               schema:
                 type: string
                 format: binary
-        '*':
+        default:
           $ref: '#/components/responses/Error'
+
   /repo/{repo_owner}/{repo_name}/list/{path}:
     get:
       summary: List directory contents
       tags:
-        - Repository
-      security:
-        - JWTAuth: []
+        - Repo
       parameters:
         - name: repo_owner
           in: path
@@ -304,16 +244,14 @@ paths:
                           type: string
                         dir:
                           type: boolean
-        '*':
+        default:
           $ref: '#/components/responses/Error'
 
   /repo/{repo_owner}/{repo_name}/info/refs:
     get:
       summary: Git protocol info refs
       tags:
-        - Git Protocol
-      security:
-        - PATAuth: []
+        - Repo
       parameters:
         - name: repo_owner
           in: path
@@ -336,15 +274,14 @@ paths:
       responses:
         '200':
           description: Git refs information
-        '*':
+        default:
           $ref: '#/components/responses/Error'
+
   /repo/{repo_owner}/{repo_name}/git-upload-pack:
     post:
       summary: Git upload pack
       tags:
-        - Git Protocol
-      security:
-        - PATAuth: []
+        - Repo
       parameters:
         - name: repo_owner
           in: path
@@ -359,15 +296,16 @@ paths:
       responses:
         '200':
           description: Upload pack response
-        '*':
+        default:
           $ref: '#/components/responses/Error'
+
   /repo/{repo_owner}/{repo_name}/git-receive-pack:
     post:
       summary: Git receive pack
       tags:
-        - Git Protocol
+        - Repo
       security:
-        - PATAuth: []
+        - PatAuth: []
       parameters:
         - name: repo_owner
           in: path
@@ -382,7 +320,7 @@ paths:
       responses:
         '200':
           description: Receive pack response
-        '*':
+        default:
           $ref: '#/components/responses/Error'
 
   /repos/{repo_name}:
@@ -398,14 +336,10 @@ paths:
           required: true
           schema:
             type: string
-        - name: private
-          in: query
-          schema:
-            type: boolean
       responses:
         '200':
-          description: Repository created successfully
-        '*':
+          description: Repo created successfully
+        default:
           $ref: '#/components/responses/Error'
     delete:
       summary: Delete a repository
@@ -421,112 +355,8 @@ paths:
             type: string
       responses:
         '200':
-          description: Repository deleted successfully
-        '*':
-          $ref: '#/components/responses/Error'
-  /repos/all:
-    get:
-      summary: List all Self Repositories
-      tags:
-        - Self Repositories
-      security:
-        - JWTAuth: []
-      parameters:
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            format: uint8
-            default: 10
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            format: uint64
-            default: 0
-      responses:
-        '200':
-          description: List of all Self Repositories
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  repos:
-                    type: array
-                    items:
-                      type: string
-        '*':
-          $ref: '#/components/responses/Error'
-
-  /session/renew_jwt:
-    post:
-      summary: Renew JWT
-      tags:
-        - Session
-      security:
-        - RefreshTokenAuth: []
-      parameters:
-        - name: X-Username
-          in: header
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: New JWT
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  JWT:
-                    type: string
-        '*':
-          $ref: '#/components/responses/Error'
-  /session/renew_session:
-    post:
-      summary: Renew refresh token
-      description: "NOTE: Old refresh token is deleted"
-      tags:
-        - Session
-      security:
-        - RefreshTokenAuth: []
-      parameters:
-        - name: X-Username
-          in: header
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: New refresh token
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  refresh_token:
-                    type: string
-        '*':
-          $ref: '#/components/responses/Error'
-  /session:
-    delete:
-      summary: Delete session
-      tags:
-        - Session
-      security:
-        - RefreshTokenAuth: []
-      parameters:
-        - name: X-Username
-          in: header
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Session deleted successfully
-        '*':
+          description: Repo deleted successfully
+        default:
           $ref: '#/components/responses/Error'
 
   /user/{username}/meta:
@@ -551,8 +381,9 @@ paths:
                   creation:
                     type: integer
                     format: uint64
-        '*':
+        default:
           $ref: '#/components/responses/Error'
+
   /user/{username}/repos:
     get:
       summary: Get user repositories
@@ -578,7 +409,7 @@ paths:
             default: 0
       responses:
         '200':
-          description: User repositories
+          description: List of user repositories
           content:
             application/json:
               schema:
@@ -588,29 +419,104 @@ paths:
                     type: array
                     items:
                       type: string
-        '*':
+        default:
+          $ref: '#/components/responses/Error'
+
+  /session/renew_jwt:
+    post:
+      summary: Renew JWT token
+      tags:
+        - Session
+      security:
+        - RefreshTokenAuth: []
+      parameters:
+        - name: X-Username
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: New JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  JWT:
+                    type: string
+        default:
+          $ref: '#/components/responses/Error'
+
+  /session/renew_session:
+    post:
+      summary: Renew refresh token
+      description: "NOTE: Old refresh token is deleted"
+      tags:
+        - Session
+      security:
+        - RefreshTokenAuth: []
+      parameters:
+        - name: X-Username
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: New refresh token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refresh_token:
+                    type: string
+        default:
+          $ref: '#/components/responses/Error'
+
+  /session:
+    delete:
+      summary: Delete session
+      tags:
+        - Session
+      security:
+        - RefreshTokenAuth: []
+      parameters:
+        - name: X-Username
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session deleted successfully
+        default:
           $ref: '#/components/responses/Error'
 
 components:
   securitySchemes:
+    SelfAuth:
+      type: apiKey
+      in: header
+      name: X-Authorization
+      description: Base64 encoded username:password
+    PatAuth:
+      type: http
+      scheme: basic
+      description: PAT
     JWTAuth:
-      type: apiKey
-      in: header
-      name: X-Authorization
-      description: JWT token for authentication
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token
     RefreshTokenAuth:
-      type: apiKey
-      in: header
-      name: X-Authorization
-      description: Refresh token for session management
-    PATAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: Personal Access Token for git client operations
+      type: http
+      scheme: bearer
+      description: Refresh token
   responses:
     Error:
-      description: Error
+      description: Error response
       content:
         application/json:
           schema:
@@ -618,18 +524,3 @@ components:
             properties:
               error:
                 type: string
-tags:
-  - name: Authentication
-    description: User authentication
-  - name: PATs
-    description: PAT management
-  - name: Repository
-    description: Public repos
-  - name: Git Protocol
-    description: (used by git clients)
-  - name: Self Repositories
-    description: Self repository management
-  - name: Session
-    description: Session management
-  - name: User
-    description: User information

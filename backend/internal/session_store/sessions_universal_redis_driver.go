@@ -4,63 +4,64 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"context"
+	"strconv"
 	"time"
-  "strconv"
 )
 
 type Redis_client interface {
-  ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd
-  ZScore(ctx context.Context, key string, member string) *redis.FloatCmd
-  ZRem(ctx context.Context, key string, members ...interface{}) *redis.IntCmd
-  ZCount(ctx context.Context, key string, min string, max string) *redis.IntCmd
+	ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd
+	ZScore(ctx context.Context, key string, member string) *redis.FloatCmd
+	ZRem(ctx context.Context, key string, members ...interface{}) *redis.IntCmd
+	ZCount(ctx context.Context, key string, min string, max string) *redis.IntCmd
 }
-type sessions_uinversal_redis_driver struct { rdb Redis_client }
+type sessions_uinversal_redis_driver struct{ rdb Redis_client }
+
 func Get_Sessions_Uinversal_Redis_Driver(
-  client Redis_client,
-  token_timeout time.Duration,
-  token_limit int,
-  token_length int,
-  token_namespace string,
+	client Redis_client,
+	token_timeout time.Duration,
+	token_limit int,
+	token_length int,
+	token_namespace string,
 ) *Session_store {
-  return &Session_store {
-    &sessions_uinversal_redis_driver { client },
-    token_timeout,
-    token_limit,
-    token_length,
-    token_namespace,
-  }
+	return &Session_store{
+		&sessions_uinversal_redis_driver{client},
+		token_timeout,
+		token_limit,
+		token_length,
+		token_namespace,
+	}
 }
 
 func (r *sessions_uinversal_redis_driver) Add_Session(ctx context.Context, username string, token string, timeout time.Duration) error {
-  now := time.Now().Add(timeout).Unix()
-  return r.rdb.ZAdd(ctx, username, redis.Z { Member: token, Score: float64(now) }).Err()
+	now := time.Now().Add(timeout).Unix()
+	return r.rdb.ZAdd(ctx, username, redis.Z{Member: token, Score: float64(now)}).Err()
 }
 
 func (r *sessions_uinversal_redis_driver) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
-  now := float64(time.Now().Unix())
-  exp, err := r.rdb.ZScore(ctx, username, token).Result()
+	now := float64(time.Now().Unix())
+	exp, err := r.rdb.ZScore(ctx, username, token).Result()
 
-  if err == redis.Nil {
-    return false, nil
-  } else if err != nil {
-    return false, err
-  } else if exp <= now {
-    return false, nil
-  } else {
-    return true, nil
-  }
+	if err == redis.Nil {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	} else if exp <= now {
+		return false, nil
+	} else {
+		return true, nil
+	}
 }
 
 func (r *sessions_uinversal_redis_driver) Delete_Session(ctx context.Context, username string, token string) error {
-  return r.rdb.ZRem(ctx, username, token).Err()
+	return r.rdb.ZRem(ctx, username, token).Err()
 }
 
 func (r *sessions_uinversal_redis_driver) Get_Session_Count(ctx context.Context, username string) (int, error) {
-  now := time.Now().Unix()
-  count , err := r.rdb.ZCount(ctx, username, strconv.FormatInt(now, 10), "inf").Result()
-  if err != nil {
-    return 0, err
-  } else {
-    return int(count), nil
-  }
+	now := time.Now().Unix()
+	count, err := r.rdb.ZCount(ctx, username, strconv.FormatInt(now, 10), "inf").Result()
+	if err != nil {
+		return 0, err
+	} else {
+		return int(count), nil
+	}
 }

@@ -1,10 +1,15 @@
 //go:build sqlite3
+
 package database
 
-import (
-  _ "github.com/mattn/go-sqlite3"
-  "github.com/uptrace/bun/dialect/sqlitedialect"
-)
+import "github.com/mattn/go-sqlite3"
 
 const driver_name = "sqlite3"
-var dia = sqlitedialect.New()
+
+func is_unique_violation(err error) bool {
+	sqlite_err, ok := err.(sqlite3.Error)
+	if !ok {
+		return false
+	}
+	return sqlite_err.ExtendedCode == sqlite3.ErrConstraintUnique
+}

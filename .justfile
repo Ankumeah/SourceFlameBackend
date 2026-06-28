@@ -47,10 +47,14 @@ _load archive:
 
 # Run go tests on ./backend/
 [linux, macos]
-test *options:
+test *options = "-tags='sqlite3'":
   #! /bin/env sh
 
   echo "==> Running tests"
+
+  echo "==> Loading env"
+  echo '--> export $(cat ./env.d.example/*)'
+  export $(cat ./env.d.example/*)
 
   echo  "-> go test ./... {{ options }}"
   cd ./backend/

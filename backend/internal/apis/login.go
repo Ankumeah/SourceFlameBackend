@@ -15,7 +15,7 @@ func login(r *gin.RouterGroup, app *a.App) {
 
 	group.POST("", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		username := c.GetString("username")
+		username := c.GetString(middlewars.Username_feild)
 
 		token, err := app.Store.Add_Session(ctx, username)
 		if err == session_store.Error_too_many_tokens {

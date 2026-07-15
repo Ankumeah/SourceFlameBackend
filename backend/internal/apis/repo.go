@@ -20,7 +20,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 	group.GET("/:repo_owner/:repo_name/meta", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_id := c.GetUint64("repo_id")
+		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 
 		info, err := app.Git_db.Info(ctx, repo_id)
 		if errors.Is(err, database.Error_Invalid) {
@@ -37,7 +37,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 	group.GET("/:repo_owner/:repo_name/info/refs", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		service := c.Query("service")
-		repo_id := c.GetUint64("repo_id")
+		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 
 		if service != "git-receive-pack" && service != "git-upload-pack" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Unsupported Service"})
@@ -56,7 +56,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 	group.POST("/:repo_owner/:repo_name/git-upload-pack", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_id := c.GetUint64("repo_id")
+		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 
 		c.Header("Content-Type", "application/x-git-upload-pack-result")
 		c.Header("Cache-Control", "no-cache")
@@ -70,8 +70,8 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 	group.POST("/:repo_owner/:repo_name/git-receive-pack", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_id := c.GetUint64("repo_id")
-		role := c.GetInt("role")
+		repo_id := c.GetUint64(middlewars.Repo_id_feild)
+		role := c.GetInt(middlewars.Role_feild)
 
 		if role < roles.Owner {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Only owner can push"})
@@ -89,7 +89,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 	})
 
 	group.GET("/:repo_owner/:repo_name/blob/*path", func(c *gin.Context) {
-		repo_id := c.GetUint64("repo_id")
+		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
 
@@ -111,7 +111,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 	})
 
 	group.GET("/:repo_owner/:repo_name/list/*path", func(c *gin.Context) {
-		repo_id := c.GetUint64("repo_id")
+		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
 

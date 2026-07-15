@@ -1,3 +1,5 @@
+default: vet test fmt
+
 # Build and export dockerfiles
 [linux, macos]
 build *dirs:
@@ -45,22 +47,50 @@ _load archive:
   @echo "-> docker image load -i {{ archive }}"
   @docker image load -i {{ archive }} 1>/dev/null
 
-# Run go tests on ./backend/
+# Run go test
 [linux, macos]
 test *options = "-tags='sqlite3'":
   #! /bin/env sh
 
-  echo "==> Running tests"
-
-  echo "==> Loading env"
-  echo '--> export $(cat ./env.d.example/*)'
   export $(cat ./env.d.example/*)
 
-  echo  "-> go test ./... {{ options }}"
   cd ./backend/
-  go test ./... {{ options }} | column -t -s $'\t'
+  echo  "==> backend: go test {{ options }} ./..."
+  go test {{ options }} ./... | column -t -s $'\t'
 
-  echo
+  cd ../db_init/
+  echo  "==> db_init: go test {{ options }} ./..."
+  go test {{ options }} ./... | column -t -s $'\t'
+
+# Run go vet
+[linux, macos]
+vet *options = "-tags='sqlite3'":
+  #! /bin/env sh
+
+  export $(cat ./env.d.example/*)
+
+  cd ./backend/
+  echo "==> backend: go vet {{ options }} ./..."
+  go vet {{ options }} ./...
+
+  cd ../db_init/
+  echo "==> db_init: go vet {{ options }} ./..."
+  go vet {{ options }} ./...
+
+# Run go fmt
+[linux, macos]
+fmt *options = "":
+  #! /bin/env sh
+
+  export $(cat ./env.d.example/*)
+
+  cd ./backend/
+  echo "==> backend: go fmt {{ options }} ./..."
+  go fmt {{ options }} ./...
+
+  cd ../db_init/
+  echo "==> db_init: go fmt {{ options }} ./..."
+  go fmt {{ options }} ./...
 
 [linux, macos]
 _sanitize string:

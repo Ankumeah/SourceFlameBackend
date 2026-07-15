@@ -14,7 +14,7 @@ func session(r *gin.RouterGroup, app *a.App) {
 	group := r.Group("/session", middlewars.Refresh_Auth_Middleware(app))
 
 	group.POST("/renew_jwt", func(c *gin.Context) {
-		username := c.GetString("username")
+		username := c.GetString(middlewars.Username_feild)
 
 		token, err := app.JWT_Handler.Issue_jwt(username)
 		if err != nil {
@@ -28,8 +28,8 @@ func session(r *gin.RouterGroup, app *a.App) {
 
 	group.POST("/renew_session", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		username := c.GetString("username")
-		session := c.GetString("session")
+		username := c.GetString(middlewars.Username_feild)
+		session := c.GetString(middlewars.Session_feild)
 
 		token, err := app.Store.Add_Session(ctx, username)
 		if err == session_store.Error_too_many_tokens {
@@ -51,8 +51,8 @@ func session(r *gin.RouterGroup, app *a.App) {
 
 	group.DELETE("", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		session := c.GetString("session")
-		username := c.GetString("username")
+		session := c.GetString(middlewars.Session_feild)
+		username := c.GetString(middlewars.Username_feild)
 
 		if err := app.Store.Delete_Session(ctx, username, session); err != nil {
 			c.JSON(internal_server_error())

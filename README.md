@@ -35,6 +35,12 @@ frontend for it, the frontend can be found here [Work in progress]()
 
 ## How to use
 
+> [!WARNING]
+> The openapi spec may be out of date as it is harder to maintain
+due to me to useing a auto genrater
+but I try my best to make sure the quick cheatsheet is always up to date
+so funnily enought the rought cheatsheet is more reliable then the formal spec
+
   ![openapi.yaml](https://github.com/Ankumeah/SourceFlameBackend/blob/master/openapi.yaml)
 
   ![Quick cheatsheet](https://github.com/Ankumeah/SourceFlameBackend/blob/master/doc.md)

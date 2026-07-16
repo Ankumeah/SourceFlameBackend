@@ -16,9 +16,10 @@ import (
 )
 
 func repo(r *gin.RouterGroup, app *a.App) {
-	group := r.Group("/repo", middlewars.Check_Role_Middleware(app))
+	g := r.Group("/repo", middlewars.Check_Role_Middleware(app))
+	group := g.Group("/:repo_owner/:repo_name")
 
-	group.GET("/:repo_owner/:repo_name/meta", func(c *gin.Context) {
+	group.GET("/meta", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 
@@ -34,7 +35,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		c.JSON(http.StatusOK, info)
 	})
 
-	group.GET("/:repo_owner/:repo_name/info/refs", func(c *gin.Context) {
+	group.GET("/info/refs", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		service := c.Query("service")
 		repo_id := c.GetUint64(middlewars.Repo_id_feild)
@@ -54,7 +55,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		}
 	})
 
-	group.POST("/:repo_owner/:repo_name/git-upload-pack", func(c *gin.Context) {
+	group.POST("/git-upload-pack", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 
@@ -68,7 +69,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		}
 	})
 
-	group.POST("/:repo_owner/:repo_name/git-receive-pack", func(c *gin.Context) {
+	group.POST("/git-receive-pack", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 		role := c.GetInt(middlewars.Role_feild)
@@ -88,7 +89,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		}
 	})
 
-	group.GET("/:repo_owner/:repo_name/blob/*path", func(c *gin.Context) {
+	group.GET("/blob/*path", func(c *gin.Context) {
 		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
@@ -110,7 +111,7 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		c.String(http.StatusOK, blob)
 	})
 
-	group.GET("/:repo_owner/:repo_name/list/*path", func(c *gin.Context) {
+	group.GET("/list/*path", func(c *gin.Context) {
 		repo_id := c.GetUint64(middlewars.Repo_id_feild)
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
@@ -128,5 +129,21 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"files": files})
+	})
+
+	group.GET("/commits/:branch", func(c *gin.Context) {
+		repo_id := c.GetUint64(middlewars.Repo_id_feild)
+		branch := c.Param("branch")
+
+		commits, err := git.Get_Commits(repo_id, branch)
+		if errors.Is(err, git.Error_Not_Found) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else if err != nil {
+			c.JSON(internal_server_error())
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"commits": commits})
 	})
 }

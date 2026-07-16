@@ -21,3 +21,14 @@ type File struct {
 	File_name string `json:"file_name" binding:"required"`
 	Dir       bool   `json:"dir" binding:"required"`
 }
+
+type author struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email" binding:"required"`
+}
+type Commit struct {
+	Author    author `json:"author" binding:"required"`
+	Message   string `json:"message" binding:"required"`
+	Hash      string `json:"hash" binding:"required"`
+	Timestamp uint64 `json:"timestamp" binding:"required"`
+}

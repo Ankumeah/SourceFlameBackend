@@ -13,6 +13,7 @@
 - GET("/:repo_owner/:repo_name/meta") -> { "creation": uint64, "stars": uint64, "private": bool, "owner": string }
 - GET("/:repo_owner/:repo_name/blob/*path?hash=hash") -> -H "Content-Type: type" file_contents
 - GET("/:repo_owner/:repo_name/list/*path?hash=hash") -> { "files": []{ "file_name": string, "dir": bool } }
+- GET("/:repo_owner/:repo_name/commits/:branch") -> { "commits": []{ "author" { "name": string, "email": string }, "message": string, "hash": string, "timestamp": uint64 } }
 > Git client use
   - GET("/:repo_owner/:repo_name/info/refs?service=(git-receive-pack|git-upload-pack)")
   - POST("/:repo_owner/:repo_name/git-upload-pack")

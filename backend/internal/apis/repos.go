@@ -17,7 +17,7 @@ func repos(r *gin.RouterGroup, app *a.App) {
 	group.POST("/:repo_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		repo_name := c.Param("repo_name")
-		user_id := c.GetUint64("user_id")
+		user_id := c.GetUint64(middlewars.User_id_feild)
 
 		_, err := app.Git_db.Create_Repo(ctx, user_id, repo_name)
 		if errors.Is(err, database.Safe_Error) {
@@ -33,7 +33,7 @@ func repos(r *gin.RouterGroup, app *a.App) {
 
 	group.DELETE("/:repo_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64("user_id")
+		user_id := c.GetUint64(middlewars.User_id_feild)
 		repo_name := c.Param("repo_name")
 
 		repo_id, err := app.Git_db.Get_Id(ctx, user_id, repo_name)

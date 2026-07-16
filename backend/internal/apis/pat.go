@@ -17,7 +17,7 @@ func pat(r *gin.RouterGroup, app *a.App) {
 	group.POST("/:pat_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		pat_name := c.Param("pat_name")
-		user_id := c.GetUint64("user_id")
+		user_id := c.GetUint64(middlewars.User_id_feild)
 
 		pat, err := app.PAT_Handler.Genrate_PAT()
 		if err != nil {
@@ -39,7 +39,7 @@ func pat(r *gin.RouterGroup, app *a.App) {
 
 	group.DELETE("/:pat_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64("user_id")
+		user_id := c.GetUint64(middlewars.User_id_feild)
 		pat_name := c.Param("pat_name")
 
 		pat_id, err := app.PAT_db.Get_Id(ctx, user_id, pat_name)
@@ -61,7 +61,7 @@ func pat(r *gin.RouterGroup, app *a.App) {
 
 	group.GET("/:pat_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64("user_id")
+		user_id := c.GetUint64(middlewars.User_id_feild)
 		pat_name := c.Param("pat_name")
 
 		pat_id, err := app.PAT_db.Get_Id(ctx, user_id, pat_name)
@@ -84,7 +84,7 @@ func pat(r *gin.RouterGroup, app *a.App) {
 
 	group.GET("/all", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64("user_id")
+		user_id := c.GetUint64(middlewars.User_id_feild)
 
 		pats, err := app.PAT_db.Get_PATs(ctx, user_id)
 		if err == database.Error_Invalid {

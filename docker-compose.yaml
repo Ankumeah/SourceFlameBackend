@@ -3,15 +3,15 @@ services:
     build:
       context: ./backend/
       args:
-        - "db_type=sqlite3"                    # Currently supported sqlite3 and postgres
+        - "db_type=sqlite3"                  # Currently supported sqlite3 and postgres
     env_file:
       - ./env.d.example/backend
       - ./env.d.example/session_store
-      - ./env.d.example/database               # Comment if useing postgres
+      - ./env.d.example/database              # Comment if useing postgres
 #      - ./env.d.example/pg_database           # Comment if useing sqlite3
     volumes:
       - ./data/git/:/srv/git/
-      - ./data/database/:/data/                # Comment if not useing sqlite3
+      - ./data/database/:/data/               # Comment if not useing sqlite3
     restart: unless-stopped
     depends_on:
       - db_init
@@ -21,14 +21,14 @@ services:
     build:
       context: ./db_init/
       args:
-        - "db_type=sqlite3"                    # Currently supported sqlite3 and postgres
+        - "db_type=sqlite3"                  # Currently supported sqlite3 and postgres
     env_file:
       - ./env.d.example/backend
-      - ./env.d.example/database               # Comment if useing postgres
+      - ./env.d.example/database              # Comment if useing postgres
 #      - ./env.d.example/pg_database           # Comment if useing sqlite3
     restart: on-failure
-    volumes:
-      - ./data/database/:/data/
+    volumes:                                  # Comment if useing postgres
+      - ./data/database/:/data/               # Comment if useing postgres
 #    depends_on:                               # Comment if useing sqlite3
 #      - database                              # Comment if useing sqlite3
 

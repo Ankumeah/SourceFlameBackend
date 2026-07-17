@@ -1,4 +1,4 @@
-ï# SourceFlameBackend
+# SourceFlameBackend
 SourceFlame is a currently **work in progress** git hosting platform, this is the backend for it written in *golang*
 ![go-tests](https://github.com/Ankumeah/SourceFlameBackend/actions/workflows/go-tests.yaml/badge.svg)
 

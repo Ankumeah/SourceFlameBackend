@@ -1,4 +1,4 @@
-# SourceFlameBackend
+ï# SourceFlameBackend
 SourceFlame is a currently **work in progress** git hosting platform, this is the backend for it written in *golang*
 ![go-tests](https://github.com/Ankumeah/SourceFlameBackend/actions/workflows/go-tests.yaml/badge.svg)
 
@@ -37,7 +37,7 @@ frontend for it, the frontend can be found here [Work in progress]()
 
 > [!WARNING]
 > The openapi spec may be out of date as it is harder to maintain
-due to me to useing a auto genrater
+due to me not useing a auto genrater
 but I try my best to make sure the quick cheatsheet is always up to date
 so funnily enought the rought cheatsheet is more reliable then the formal spec
 

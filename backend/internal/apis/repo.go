@@ -146,4 +146,16 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 		c.JSON(http.StatusOK, gin.H{"commits": commits})
 	})
+
+  group.GET("/branches", func(c *gin.Context) {
+    repo_id := c.GetUint64(middlewars.Repo_id_feild)
+
+    branches, err := git.Get_Branches(repo_id)
+    if err != nil {
+      c.JSON(internal_server_error())
+      return
+    }
+
+    c.JSON(http.StatusOK, gin.H { "branches": branches })
+  })
 }

@@ -1,4 +1,4 @@
-package middlewars
+package middlewares
 
 import (
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
@@ -7,11 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"errors"
 	"net/http"
 	"strings"
 )
 
-func JWT_Auth_Middleware(app *a.App, enforce bool) gin.HandlerFunc {
+func JWTAuthMiddleware(app *a.App, enforce bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -31,13 +32,13 @@ func JWT_Auth_Middleware(app *a.App, enforce bool) gin.HandlerFunc {
 			return
 		}
 
-		if segments[0] != jwt_auth_type {
+		if segments[0] != jwtAuthType {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect auth type"})
 			return
 		}
 
-		username, err := app.JWT_Handler.Validate_jwt(segments[1])
-		if err == jwt.Error_invalid_JWT {
+		username, err := app.JWTHandler.ValidateJwt(segments[1])
+		if errors.Is(err, jwt.ErrInvalidJWT) {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid JWT"})
 			return
 		} else if err != nil {
@@ -45,8 +46,8 @@ func JWT_Auth_Middleware(app *a.App, enforce bool) gin.HandlerFunc {
 			return
 		}
 
-		user_id, err := app.User_db.Get_Id(ctx, username)
-		if err == database.Error_invalid_user {
+		userId, err := app.UserDb.GetId(ctx, username)
+		if errors.Is(err, database.ErrInvalidUser) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid user"})
 			return
 		} else if err != nil {
@@ -54,7 +55,7 @@ func JWT_Auth_Middleware(app *a.App, enforce bool) gin.HandlerFunc {
 			return
 		}
 
-		c.Set(User_id_feild, user_id)
+		c.Set(UserIdField, userId)
 		c.Next()
 	}
 }

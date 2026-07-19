@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func Test_Genrate_PAT(t *testing.T) {
-	handler := pat.Get_PAT_Handler("test_", 32)
+func TestGeneratePAT(t *testing.T) {
+	handler := pat.GetPATHandler("test_", 32)
 
-	pat, err := handler.Genrate_PAT()
+	pat, err := handler.GeneratePAT()
 	if err != nil {
 		t.Errorf("Error: %v\n", err.Error())
 	}

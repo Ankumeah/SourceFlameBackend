@@ -1,4 +1,4 @@
-package middlewars
+package middlewares
 
 import (
 	"encoding/base64"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func parse_basic_auth(s string) (string, string, error) {
+func parseBasicAuth(s string) (string, string, error) {
 	_decoded, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		return "", "", err
@@ -29,12 +29,12 @@ func parse_basic_auth(s string) (string, string, error) {
 	return username, password, nil
 }
 
-func internal_server_error() (int, map[string]any) {
+func internalServerError() (int, map[string]any) {
 	return http.StatusInternalServerError, map[string]any{"error": "Internal server error"}
 }
-func bad_http_request(err error) (int, map[string]any) {
+func badHttpRequest(err error) (int, map[string]any) {
 	return http.StatusBadRequest, map[string]any{"error": err.Error()}
 }
-func unauthorised_request() (int, map[string]any) {
+func unauthorisedRequest() (int, map[string]any) {
 	return http.StatusUnauthorized, map[string]any{"error": "Unauthorised"}
 }

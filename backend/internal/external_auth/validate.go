@@ -1,10 +1,10 @@
 package external_auth
 
-func Validate(JWT_type string, JWT string) (string, error) {
-	validatation_func, ok := supported_JWT_types[JWT_type]
+func Validate(JWTType string, JWT string) (string, error) {
+	validationFunc, ok := supportedJWTTypes[JWTType]
 	if !ok {
-		return "", Error_unsupported_JWT_type
+		return "", ErrUnsupportedJWTType
 	}
 
-	return validatation_func(JWT)
+	return validationFunc(JWT)
 }

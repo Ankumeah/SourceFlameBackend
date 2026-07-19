@@ -1,4 +1,4 @@
-package middlewars
+package middlewares
 
 import (
 	"github.com/Ankumeah/SourceFlameBackend/internal/database"
@@ -10,59 +10,59 @@ import (
 	"strings"
 )
 
-func Self_Auth_Middleware(user_db database.User_db, create bool) gin.HandlerFunc {
+func SelfAuthMiddleware(userDb database.UserDb, create bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		parts := strings.Split(c.GetHeader("X-Authorization"), " ")
 		if len(parts) != 2 {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect segments in auth header"})
 			return
-		} else if parts[0] != self_auth_type {
+		} else if parts[0] != selfAuthType {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect auth type, expected Basic"})
 			return
 		}
 
-		username, password, err := parse_basic_auth(parts[1])
+		username, password, err := parseBasicAuth(parts[1])
 		if err != nil {
-			c.AbortWithStatusJSON(bad_http_request(err))
+			c.AbortWithStatusJSON(badHttpRequest(err))
 			return
 		}
 
 		if create {
-			user_id, err := user_db.Add_User(ctx, username, password)
+			userId, err := userDb.AddUser(ctx, username, password)
 			if err == nil {
-				c.Set(User_id_feild, user_id)
-				c.Set(Username_feild, username)
+				c.Set(UserIdField, userId)
+				c.Set(UsernameField, username)
 				c.Next()
 				return
-			} else if !errors.Is(err, database.Error_Exists) {
-				c.AbortWithStatusJSON(internal_server_error())
+			} else if !errors.Is(err, database.ErrExists) {
+				c.AbortWithStatusJSON(internalServerError())
 				return
 			}
 		}
 
-		user_id, err := user_db.Get_Id(ctx, username)
-		if err == database.Error_invalid_user {
-			c.AbortWithStatusJSON(bad_http_request(err))
+		userId, err := userDb.GetId(ctx, username)
+		if errors.Is(err, database.ErrInvalidUser) {
+			c.AbortWithStatusJSON(badHttpRequest(err))
 			return
 		} else if err != nil {
-			c.AbortWithStatusJSON(internal_server_error())
+			c.AbortWithStatusJSON(internalServerError())
 			return
 		}
 
-		valid, err := user_db.Verify_User(ctx, user_id, password)
-		if errors.Is(err, database.Error_Invalid) {
-			c.AbortWithStatusJSON(bad_http_request(err))
+		valid, err := userDb.VerifyUser(ctx, userId, password)
+		if errors.Is(err, database.ErrInvalid) {
+			c.AbortWithStatusJSON(badHttpRequest(err))
 			return
 		} else if err != nil {
-			c.AbortWithStatusJSON(internal_server_error())
+			c.AbortWithStatusJSON(internalServerError())
 			return
 		} else if !valid {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
 			return
 		} else {
-			c.Set(User_id_feild, user_id)
-			c.Set(Username_feild, username)
+			c.Set(UserIdField, userId)
+			c.Set(UsernameField, username)
 			c.Next()
 			return
 		}

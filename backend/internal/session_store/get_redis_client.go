@@ -6,14 +6,14 @@ import (
 	"context"
 )
 
-func Get_Redis_Client(
+func GetRedisClient(
 	ctx context.Context,
-	conn_config Universal_Redis_Config,
+	connConfig UniversalRedisConfig,
 ) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:         conn_config.Hostname + ":" + conn_config.Port,
-		Username:     conn_config.Username,
-		Password:     conn_config.Password,
+		Addr:         connConfig.Hostname + ":" + connConfig.Port,
+		Username:     connConfig.Username,
+		Password:     connConfig.Password,
 		DialTimeout:  timeout,
 		ReadTimeout:  timeout,
 		WriteTimeout: timeout,

@@ -7,6 +7,6 @@ import (
 	"github.com/uptrace/bun/dialect/pgdialect"
 )
 
-const driver_name = "pgx"
+const driverName = "pgx"
 
 var dia = pgdialect.New()

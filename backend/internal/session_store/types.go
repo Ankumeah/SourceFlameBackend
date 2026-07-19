@@ -5,17 +5,17 @@ import (
 	"time"
 )
 
-type sessions_driver interface {
-	Add_Session(ctx context.Context, username string, token string, timeout time.Duration) error
-	Validate_Session(ctx context.Context, username string, token string) (bool, error)
-	Delete_Session(ctx context.Context, username string, token string) error
-	Get_Session_Count(ctx context.Context, username string) (int, error)
+type sessionsDriver interface {
+	AddSession(ctx context.Context, username string, token string, timeout time.Duration) error
+	ValidateSession(ctx context.Context, username string, token string) (bool, error)
+	DeleteSession(ctx context.Context, username string, token string) error
+	GetSessionCount(ctx context.Context, username string) (int, error)
 }
 
-type Session_store struct {
-	db              sessions_driver
-	token_timeout   time.Duration
-	token_limit     int
-	token_length    int
-	token_namespace string
+type SessionStore struct {
+	db             sessionsDriver
+	tokenTimeout   time.Duration
+	tokenLimit     int
+	tokenLength    int
+	tokenNamespace string
 }

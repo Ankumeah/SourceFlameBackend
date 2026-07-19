@@ -7,11 +7,11 @@ services:
     env_file:
       - ./env.d.example/backend
       - ./env.d.example/session_store
-      - ./env.d.example/database              # Comment if useing postgres
-#      - ./env.d.example/pg_database           # Comment if useing sqlite3
+      - ./env.d.example/database              # Comment if using postgres
+#      - ./env.d.example/pg_database           # Comment if using sqlite3
     volumes:
       - ./data/git/:/srv/git/
-      - ./data/database/:/data/               # Comment if not useing sqlite3
+      - ./data/database/:/data/               # Comment if not using sqlite3
     restart: unless-stopped
     depends_on:
       - db_init
@@ -24,20 +24,20 @@ services:
         - "db_type=sqlite3"                  # Currently supported sqlite3 and postgres
     env_file:
       - ./env.d.example/backend
-      - ./env.d.example/database              # Comment if useing postgres
-#      - ./env.d.example/pg_database           # Comment if useing sqlite3
+      - ./env.d.example/database              # Comment if using postgres
+#      - ./env.d.example/pg_database           # Comment if using sqlite3
     restart: on-failure
-    volumes:                                  # Comment if useing postgres
-      - ./data/database/:/data/               # Comment if useing postgres
-#    depends_on:                               # Comment if useing sqlite3
-#      - database                              # Comment if useing sqlite3
+    volumes:                                  # Comment if not using sqlite3
+      - ./data/database/:/data/               # Comment if not using sqlite3
+#    depends_on:                               # Comment if using sqlite3
+#      - database                              # Comment if using sqlite3
 
-#  database:                                   # Comment if useing sqlite3
-#    build: ./database/                        # Comment if useing sqlite3
-#    env_file: ./env.d.example/pg_database     # Comment if useing sqlite3
-#    restart: unless-stopped                   # Comment if useing sqlite3
-#    volumes:                                  # Comment if useing sqlite3
-#      - ./data/database/:/var/lib/postgresql/ # Comment if useing sqlite3
+#  database:                                   # Comment if using sqlite3
+#    build: ./database/                        # Comment if using sqlite3
+#    env_file: ./env.d.example/pg_database     # Comment if using sqlite3
+#    restart: unless-stopped                   # Comment if using sqlite3
+#    volumes:                                  # Comment if using sqlite3
+#      - ./data/database/:/var/lib/postgresql/ # Comment if using sqlite3
 
   session_store:
     build: ./session_store/

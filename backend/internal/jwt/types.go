@@ -2,18 +2,18 @@ package jwt
 
 import "time"
 
-type JWT_Handler struct {
+type JWTHandler struct {
 	leeway   time.Duration
 	lifespan time.Duration
 	key      []byte
 }
 
-func Get_JWT_Handler(
+func GetJWTHandler(
 	leeway time.Duration,
 	lifespan time.Duration,
 	key []byte,
-) *JWT_Handler {
-	return &JWT_Handler{
+) *JWTHandler {
+	return &JWTHandler{
 		leeway:   leeway,
 		lifespan: lifespan,
 		key:      key,

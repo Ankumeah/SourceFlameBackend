@@ -16,28 +16,29 @@ import (
 )
 
 func repo(r *gin.RouterGroup, app *a.App) {
-	group := r.Group("/repo", middlewars.Check_Role_Middleware(app))
+	g := r.Group("/repo", middlewares.CheckRoleMiddleware(app))
+	group := g.Group("/:repo_owner/:repo_name")
 
-	group.GET("/:repo_owner/:repo_name/meta", func(c *gin.Context) {
+	group.GET("/meta", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_id := c.GetUint64(middlewars.Repo_id_feild)
+		repoId := c.GetUint64(middlewares.RepoIdField)
 
-		info, err := app.Git_db.Info(ctx, repo_id)
-		if errors.Is(err, database.Error_Invalid) {
-			c.JSON(bad_request(err))
+		info, err := app.GitDb.Info(ctx, repoId)
+		if errors.Is(err, database.ErrInvalid) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
 		c.JSON(http.StatusOK, info)
 	})
 
-	group.GET("/:repo_owner/:repo_name/info/refs", func(c *gin.Context) {
+	group.GET("/info/refs", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		service := c.Query("service")
-		repo_id := c.GetUint64(middlewars.Repo_id_feild)
+		repoId := c.GetUint64(middlewares.RepoIdField)
 
 		if service != "git-receive-pack" && service != "git-upload-pack" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Unsupported Service"})
@@ -47,86 +48,134 @@ func repo(r *gin.RouterGroup, app *a.App) {
 		c.Header("Content-Type", fmt.Sprintf("application/x-%s-advertisement", service))
 		c.Header("Cache-Control", "no-cache")
 
-		err := git.Info_Refs(ctx, repo_id, service, c.Writer)
+		err := git.InfoRefs(ctx, repoId, service, c.Writer)
 		if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 	})
 
-	group.POST("/:repo_owner/:repo_name/git-upload-pack", func(c *gin.Context) {
+	group.POST("/git-upload-pack", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_id := c.GetUint64(middlewars.Repo_id_feild)
+		repoId := c.GetUint64(middlewares.RepoIdField)
 
 		c.Header("Content-Type", "application/x-git-upload-pack-result")
 		c.Header("Cache-Control", "no-cache")
 
-		err := git.Upload_Pack(ctx, repo_id, c.Request.Body, c.Writer)
+		err := git.UploadPack(ctx, repoId, c.Request.Body, c.Writer)
 		if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 	})
 
-	group.POST("/:repo_owner/:repo_name/git-receive-pack", func(c *gin.Context) {
+	group.POST("/git-receive-pack", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_id := c.GetUint64(middlewars.Repo_id_feild)
-		role := c.GetInt(middlewars.Role_feild)
+		repoId := c.GetUint64(middlewares.RepoIdField)
+		role := c.GetInt(middlewares.RoleField)
 
 		if role < roles.Owner {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Only owner can push"})
 			return
 		}
 
-		err := git.Receive_Pack(ctx, repo_id, c.Request.Body, c.Writer)
-		if errors.Is(err, database.Error_Invalid) {
-			c.JSON(bad_request(err))
+		err := git.ReceivePack(ctx, repoId, c.Request.Body, c.Writer)
+		if errors.Is(err, database.ErrInvalid) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 	})
 
-	group.GET("/:repo_owner/:repo_name/blob/*path", func(c *gin.Context) {
-		repo_id := c.GetUint64(middlewars.Repo_id_feild)
+	group.GET("/blob/*path", func(c *gin.Context) {
+		repoId := c.GetUint64(middlewares.RepoIdField)
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
 
-		blob, err := git.Get_Glob(repo_id, hash, path)
-		if errors.Is(err, git.Error_Not_Found) {
+		blob, err := git.GetBlob(repoId, hash, path)
+		if errors.Is(err, git.ErrNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
-		} else if err == git.Error_Blob_Too_Large {
+		} else if errors.Is(err, git.ErrBlobTooLarge) {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": err.Error()})
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
-		blob_type := http.DetectContentType([]byte(blob))
-		c.Header("Content-Type", blob_type)
+		blobType := http.DetectContentType([]byte(blob))
+		c.Header("Content-Type", blobType)
 		c.String(http.StatusOK, blob)
 	})
 
-	group.GET("/:repo_owner/:repo_name/list/*path", func(c *gin.Context) {
-		repo_id := c.GetUint64(middlewars.Repo_id_feild)
+	group.GET("/list/*path", func(c *gin.Context) {
+		repoId := c.GetUint64(middlewares.RepoIdField)
 		path := strings.Trim(c.Param("path"), "/")
 		hash := c.Query("hash")
 
-		files, err := git.List_Dir(repo_id, hash, path)
-		if errors.Is(err, git.Error_Not_Found) {
+		files, err := git.ListDir(repoId, hash, path)
+		if errors.Is(err, git.ErrNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
-		} else if err == git.Error_Path_Too_Deep {
+		} else if errors.Is(err, git.ErrPathTooDeep) {
 			c.JSON(http.StatusRequestURITooLong, gin.H{"error": err.Error()})
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{"files": files})
+	})
+
+	group.GET("/commits/:branch", func(c *gin.Context) {
+		repoId := c.GetUint64(middlewares.RepoIdField)
+		branch := c.Param("branch")
+
+		commits, err := git.GetCommits(repoId, branch)
+		if errors.Is(err, git.ErrNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else if err != nil {
+			c.JSON(internalServerError())
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"commits": commits})
+	})
+
+	group.GET("/branches", func(c *gin.Context) {
+		repoId := c.GetUint64(middlewares.RepoIdField)
+
+		branches, err := git.GetBranches(repoId)
+		if err != nil {
+			c.JSON(internalServerError())
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"branches": branches})
+	})
+
+	group.GET("/blame/*path", func(c *gin.Context) {
+		repoId := c.GetUint64(middlewares.RepoIdField)
+		path := strings.Trim(c.Param("path"), "/")
+		hash := c.Query("hash")
+
+		blame, err := git.GetBlame(repoId, hash, path)
+		if errors.Is(err, git.ErrInvalidCommitHash) {
+			c.JSON(badRequest(err))
+			return
+		} else if errors.Is(err, git.ErrBlobNotFound) {
+			c.JSON(badRequest(err))
+			return
+		} else if err != nil {
+			c.JSON(internalServerError())
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"blame": blame})
 	})
 }

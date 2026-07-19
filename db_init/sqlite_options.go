@@ -7,6 +7,6 @@ import (
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 )
 
-const driver_name = "sqlite3"
+const driverName = "sqlite3"
 
 var dia = sqlitedialect.New()

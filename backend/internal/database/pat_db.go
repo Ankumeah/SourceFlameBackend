@@ -6,91 +6,91 @@ import (
 	"log"
 )
 
-func (d *PAT_db) Add_PAT(
+func (d *PATDb) AddPAT(
 	ctx context.Context,
-	owner_id uint64,
+	ownerId uint64,
 	hash string,
-	pat_name string,
+	patName string,
 ) (uint64, error) {
-	pat_id, err := d.db.Add_PAT(ctx, owner_id, hash, pat_name)
-	if !errors.Is(err, Safe_Error) && err != nil {
+	patId, err := d.db.AddPAT(ctx, ownerId, hash, patName)
+	if !errors.Is(err, ErrSafe) && err != nil {
 		log.Printf("Error while adding PAT: %v\n", err.Error())
 		return 0, err
 	}
 
-	return pat_id, err
+	return patId, err
 }
 
-func (d *PAT_db) Validate_PAT(
+func (d *PATDb) ValidatePAT(
 	ctx context.Context,
-	owner_id uint64,
+	ownerId uint64,
 	hash string,
 ) (uint64, error) {
-	pat_id, err := d.db.Validate_PAT(ctx, owner_id, hash)
-	if !errors.Is(err, Error_Invalid) && err != nil {
+	patId, err := d.db.ValidatePAT(ctx, ownerId, hash)
+	if !errors.Is(err, ErrInvalid) && err != nil {
 		log.Printf("Error while adding PAT: %v\n", err.Error())
 		return 0, err
 	}
 
-	return pat_id, err
+	return patId, err
 }
 
-func (d *PAT_db) Get_Id(
+func (d *PATDb) GetId(
 	ctx context.Context,
-	owner_id uint64,
-	pat_name string,
+	ownerId uint64,
+	patName string,
 ) (uint64, error) {
-	pat_id, err := d.db.Get_Id(ctx, owner_id, pat_name)
-	if !errors.Is(err, Error_Invalid) && err != nil {
+	patId, err := d.db.GetId(ctx, ownerId, patName)
+	if !errors.Is(err, ErrInvalid) && err != nil {
 		log.Printf("Error while getting pat id: %v\n", err.Error())
 	}
 
-	return pat_id, err
+	return patId, err
 }
 
-func (d *PAT_db) Delete_PAT(
+func (d *PATDb) DeletePAT(
 	ctx context.Context,
-	pat_id uint64,
+	patId uint64,
 ) error {
-	err := d.db.Delete_PAT(ctx, pat_id)
-	if !errors.Is(err, Error_Invalid) && err != nil {
-		log.Printf("Error while deleteing pat: %v\n", err.Error())
+	err := d.db.DeletePAT(ctx, patId)
+	if !errors.Is(err, ErrInvalid) && err != nil {
+		log.Printf("Error while deleting pat: %v\n", err.Error())
 	}
 
 	return err
 }
 
-func (d *PAT_db) Get_PATs(
+func (d *PATDb) GetPATs(
 	ctx context.Context,
-	user_id uint64,
+	userId uint64,
 ) ([]string, error) {
-	pats, err := d.db.Get_PATs(ctx, user_id)
-	if !errors.Is(err, Error_Invalid) && err != nil {
-		log.Printf("Error while deleteing pat: %v\n", err.Error())
+	pats, err := d.db.GetPATs(ctx, userId)
+	if !errors.Is(err, ErrInvalid) && err != nil {
+		log.Printf("Error while deleting pat: %v\n", err.Error())
 	}
 
 	return pats, err
 }
 
-func (d *PAT_db) Info(
+func (d *PATDb) Info(
 	ctx context.Context,
-	pat_id uint64,
-) (*PAT_Info, error) {
-	info, err := d.db.Info(ctx, pat_id)
-	if !errors.Is(err, Error_Invalid) && err != nil {
+	patId uint64,
+) (*PATInfo, error) {
+	info, err := d.db.Info(ctx, patId)
+	if !errors.Is(err, ErrInvalid) && err != nil {
 		log.Printf("Error while getting pat info: %v\n", err.Error())
 	}
 
 	return info, err
 }
 
-func (d *PAT_db) Update_Use(
+func (d *PATDb) UpdateUse(
 	ctx context.Context,
-	pat_id uint64,
+	patId uint64,
 ) error {
-	err := d.db.Update_Use(ctx, pat_id)
-	if !errors.Is(err, Error_Invalid) && err != nil {
-		log.Printf("Error while updateing pat use: %v\n", err.Error())
+	err := d.db.UpdateUse(ctx, patId)
+	if !errors.Is(err, ErrInvalid) && err != nil {
+		log.Printf("Error while updating pat use: %v\n", err.Error())
 	}
 
 	return err

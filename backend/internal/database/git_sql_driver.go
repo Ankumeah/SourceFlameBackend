@@ -5,21 +5,22 @@ import (
 
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
-type git_sqlx_driver struct{ db *sqlx.DB }
+type gitSqlxDriver struct{ db *sqlx.DB }
 
-func Git_Sql_Driver(db *sqlx.DB) *Git_db {
-	return &Git_db{
-		&git_sqlx_driver{db},
+func GitSqlDriver(db *sqlx.DB) *GitDb {
+	return &GitDb{
+		&gitSqlxDriver{db},
 	}
 }
 
-func (s *git_sqlx_driver) Create_Repo(
+func (s *gitSqlxDriver) CreateRepo(
 	ctx context.Context,
-	owner_id uint64,
-	repo_name string,
+	ownerId uint64,
+	repoName string,
 ) (uint64, error) {
 	query := s.db.Rebind(`
     INSERT INTO repos (name, owner_id, created_at, stars)
@@ -27,61 +28,61 @@ func (s *git_sqlx_driver) Create_Repo(
     RETURNING id;
   `)
 
-	var repo_id uint64
+	var repoId uint64
 	now := time.Now().Unix()
-	err := s.db.QueryRowContext(ctx, query, repo_name, owner_id, now).Scan(&repo_id)
+	err := s.db.QueryRowContext(ctx, query, repoName, ownerId, now).Scan(&repoId)
 
-	if is_unique_violation(err) {
-		err = Error_repo_exists
+	if isUniqueViolation(err) {
+		err = ErrRepoExists
 	}
 
-	return repo_id, err
+	return repoId, err
 }
 
-func (s *git_sqlx_driver) Get_Id(
+func (s *gitSqlxDriver) GetId(
 	ctx context.Context,
-	owner_id uint64,
-	repo_name string,
+	ownerId uint64,
+	repoName string,
 ) (uint64, error) {
 	query := s.db.Rebind(`
     SELECT id FROM repos
     WHERE (owner_id = ? AND name = ?);
   `)
 
-	var repo_id uint64
-	err := s.db.QueryRowContext(ctx, query, owner_id, repo_name).Scan(&repo_id)
-	if err == sql.ErrNoRows {
-		return 0, Error_invalid_repo
+	var repoId uint64
+	err := s.db.QueryRowContext(ctx, query, ownerId, repoName).Scan(&repoId)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, ErrInvalidRepo
 	}
 
-	return repo_id, err
+	return repoId, err
 }
 
-func (s *git_sqlx_driver) Delete_Repo(
+func (s *gitSqlxDriver) DeleteRepo(
 	ctx context.Context,
-	repo_id uint64,
+	repoId uint64,
 ) error {
 	query := s.db.Rebind(`
     DELETE FROM repos
     WHERE (id = ?);
   `)
 
-	tag, err := s.db.ExecContext(ctx, query, repo_id)
+	tag, err := s.db.ExecContext(ctx, query, repoId)
 	if err != nil {
 		return err
 	}
 
-	effected, err := tag.RowsAffected()
-	if effected == 0 {
-		return Error_invalid_repo
+	affected, err := tag.RowsAffected()
+	if affected == 0 {
+		return ErrInvalidRepo
 	}
 
 	return err
 }
 
-func (s *git_sqlx_driver) Get_Repos(
+func (s *gitSqlxDriver) GetRepos(
 	ctx context.Context,
-	user_id uint64,
+	userId uint64,
 	limit uint8,
 	offset uint64,
 ) ([]string, error) {
@@ -91,7 +92,7 @@ func (s *git_sqlx_driver) Get_Repos(
     LIMIT ? OFFSET ?
   `)
 
-	rows, err := s.db.QueryContext(ctx, query, user_id, limit, offset)
+	rows, err := s.db.QueryContext(ctx, query, userId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -113,10 +114,10 @@ func (s *git_sqlx_driver) Get_Repos(
 	return repos, nil
 }
 
-func (s *git_sqlx_driver) Info(
+func (s *gitSqlxDriver) Info(
 	ctx context.Context,
-	repo_id uint64,
-) (*Repo_Info, error) {
+	repoId uint64,
+) (*RepoInfo, error) {
 	query := s.db.Rebind(`
     SELECT repos.created_at, repos.stars, users.username
     FROM repos
@@ -124,12 +125,12 @@ func (s *git_sqlx_driver) Info(
     WHERE repos.id = ?;
   `)
 
-	var info Repo_Info
-	err := s.db.QueryRowContext(ctx, query, repo_id).Scan(
+	var info RepoInfo
+	err := s.db.QueryRowContext(ctx, query, repoId).Scan(
 		&info.Creation, &info.Stars, &info.Owner,
 	)
-	if err == sql.ErrNoRows {
-		return nil, Error_invalid_repo
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrInvalidRepo
 	}
 
 	return &info, err

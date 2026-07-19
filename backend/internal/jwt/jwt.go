@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (h *JWT_Handler) Issue_jwt(username string) (string, error) {
+func (h *JWTHandler) IssueJwt(username string) (string, error) {
 	now := time.Now()
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256,
@@ -18,18 +18,18 @@ func (h *JWT_Handler) Issue_jwt(username string) (string, error) {
 		},
 	)
 
-	signed_jwt, err := t.SignedString(h.key)
+	signedJwt, err := t.SignedString(h.key)
 	if err != nil {
 		log.Println(err.Error())
 		return "", err
 	}
 
-	return signed_jwt, nil
+	return signedJwt, nil
 }
 
-func (h *JWT_Handler) Validate_jwt(target_jwt string) (string, error) {
+func (h *JWTHandler) ValidateJwt(targetJwt string) (string, error) {
 	claims := &jwt.RegisteredClaims{}
-	token, err := jwt.ParseWithClaims(target_jwt, claims,
+	token, err := jwt.ParseWithClaims(targetJwt, claims,
 		func(t *jwt.Token) (any, error) { return h.key, nil },
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 		jwt.WithJSONNumber(),
@@ -39,7 +39,7 @@ func (h *JWT_Handler) Validate_jwt(target_jwt string) (string, error) {
 	if err != nil {
 		return "", err
 	} else if !token.Valid {
-		return "", Error_invalid_JWT
+		return "", ErrInvalidJWT
 	}
 
 	return claims.Subject, nil

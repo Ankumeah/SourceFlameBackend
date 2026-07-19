@@ -40,14 +40,14 @@ func (client *redis_driver) get_keys(ctx context.Context) []string {
 
   _keys, cur, err := client.store.Scan(ctx, 0, namespace, 100).Result()
   if err != nil {
-    log.Fatalf("Error while scaning: %v\n", err.Error())
+    log.Fatalf("Error while scanning: %v\n", err.Error())
   }
   keys = append(keys, _keys...)
 
   for cur != 0 {
     _keys, cur, err = client.store.Scan(ctx, cur, namespace, 100).Result()
     if err != nil {
-      log.Fatalf("Error while scaning: %v\n", err.Error())
+      log.Fatalf("Error while scanning: %v\n", err.Error())
     }
     keys = append(keys, _keys...)
   }

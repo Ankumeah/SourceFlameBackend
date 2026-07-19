@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: SourceFlame API
   version: v0.0.1
-  description: "NOTE: This openapi.yaml was Ai genrated (boooo ik), so please cautious. If you want a non Ai genrated doc, have a look at doc.md at the root of the git repo"
+  description: "NOTE: This openapi.yaml was Ai generated (boooo ik), so please be cautious. If you want a non Ai generated doc, have a look at doc.md at the root of the git repo"
 servers:
   - url: http://localhost:8000
 

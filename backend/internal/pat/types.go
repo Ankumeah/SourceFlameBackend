@@ -1,6 +1,6 @@
 package pat
 
-type PAT_Handler struct {
+type PATHandler struct {
 	prefix string
 	length uint8
 }

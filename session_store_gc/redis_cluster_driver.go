@@ -23,7 +23,7 @@ func get_redis_cluster_driver(
 ) (*store, error) {
   _addrs := []string {}
   var err error
-  for range max_host_lookup_retires {
+  for range max_host_lookup_retries {
     _addrs, err = net.LookupHost(hostname)
     if err == nil { break }
     time.Sleep(timeout)
@@ -71,7 +71,7 @@ func (client *redis_cluster_driver) get_keys(ctx context.Context) []string {
 
     return nil
   }); err != nil {
-    log.Fatalf("Error while scaning: %v\n", err.Error())
+    log.Fatalf("Error while scanning: %v\n", err.Error())
   }
 
   log.Println("Got keys")

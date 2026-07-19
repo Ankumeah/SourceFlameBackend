@@ -9,10 +9,10 @@ import (
 
 var Ctx = context.Background()
 
-func Test_Add_Session(t *testing.T) {
-	driver := session_store.Get_Fake_Driver()
+func TestAddSession(t *testing.T) {
+	driver := session_store.GetFakeDriver()
 
-	token, err := driver.Add_Session(Ctx, "test")
+	token, err := driver.AddSession(Ctx, "test")
 	if err != nil {
 		t.Errorf("Error: %v\n", err.Error())
 	}
@@ -20,15 +20,15 @@ func Test_Add_Session(t *testing.T) {
 	t.Logf("Resulting token: %v\n", token)
 }
 
-func Test_Validate_Session(t *testing.T) {
-	driver := session_store.Get_Fake_Driver()
+func TestValidateSession(t *testing.T) {
+	driver := session_store.GetFakeDriver()
 
-	token, err := driver.Add_Session(Ctx, "test")
+	token, err := driver.AddSession(Ctx, "test")
 	if err != nil {
 		t.Errorf("Error: %v\n", err.Error())
 	}
 
-	valid, err := driver.Validate_Session(Ctx, "test", token)
+	valid, err := driver.ValidateSession(Ctx, "test", token)
 	if err != nil {
 		t.Errorf("Error: %v\n", err.Error())
 	} else if !valid {
@@ -38,15 +38,15 @@ func Test_Validate_Session(t *testing.T) {
 	t.Logf("Resulting token: %v\n", token)
 }
 
-func Test_Delete_Session(t *testing.T) {
-	driver := session_store.Get_Fake_Driver()
+func TestDeleteSession(t *testing.T) {
+	driver := session_store.GetFakeDriver()
 
-	token, err := driver.Add_Session(Ctx, "test")
+	token, err := driver.AddSession(Ctx, "test")
 	if err != nil {
 		t.Errorf("Error: %v\n", err.Error())
 	}
 
-	err = driver.Delete_Session(Ctx, "test", token)
+	err = driver.DeleteSession(Ctx, "test", token)
 	if err != nil {
 		t.Errorf("Error: %v\n", err.Error())
 	}

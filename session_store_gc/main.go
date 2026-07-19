@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const max_host_lookup_retires = 10
+const max_host_lookup_retries = 10
 const timeout = 10 * time.Second
 const namespace = "refresh:"
 

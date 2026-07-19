@@ -7,32 +7,33 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"errors"
 	"net/http"
 )
 
 func login(r *gin.RouterGroup, app *a.App) {
-	group := r.Group("/login", middlewars.Self_Auth_Middleware(*app.User_db, true))
+	group := r.Group("/login", middlewares.SelfAuthMiddleware(*app.UserDb, true))
 
 	group.POST("", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		username := c.GetString(middlewars.Username_feild)
+		username := c.GetString(middlewares.UsernameField)
 
-		token, err := app.Store.Add_Session(ctx, username)
-		if err == session_store.Error_too_many_tokens {
+		token, err := app.Store.AddSession(ctx, username)
+		if errors.Is(err, session_store.ErrTooManyTokens) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Too many refresh tokens"})
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
-		new_jwt, err := app.JWT_Handler.Issue_jwt(username)
+		newJwt, err := app.JWTHandler.IssueJwt(username)
 		if err != nil {
-			app.Store.Delete_Session(ctx, username, token)
-			c.JSON(internal_server_error())
+			app.Store.DeleteSession(ctx, username, token)
+			c.JSON(internalServerError())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"JWT": new_jwt, "refresh_token": token})
+		c.JSON(http.StatusOK, gin.H{"JWT": newJwt, "refresh_token": token})
 	})
 }

@@ -9,17 +9,17 @@ import (
 	"time"
 )
 
-const max_host_lookup_retires = 10
+const maxHostLookupRetries = 10
 const timeout = time.Second * 10
 
-func Get_Redis_Cluster_Client(
+func GetRedisClusterClient(
 	ctx context.Context,
-	conn_config Universal_Redis_Config,
+	connConfig UniversalRedisConfig,
 ) (*redis.ClusterClient, error) {
 	_addrs := []string{}
 	var err error
-	for range max_host_lookup_retires {
-		_addrs, err = net.LookupHost(conn_config.Hostname)
+	for range maxHostLookupRetries {
+		_addrs, err = net.LookupHost(connConfig.Hostname)
 		if err == nil {
 			break
 		}
@@ -32,13 +32,13 @@ func Get_Redis_Cluster_Client(
 
 	addrs := make([]string, len(_addrs))
 	for i, addr := range _addrs {
-		addrs[i] = addr + ":" + conn_config.Port
+		addrs[i] = addr + ":" + connConfig.Port
 	}
 
 	client := redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:        addrs,
-		Username:     conn_config.Username,
-		Password:     conn_config.Password,
+		Username:     connConfig.Username,
+		Password:     connConfig.Password,
 		DialTimeout:  timeout,
 		ReadTimeout:  timeout,
 		WriteTimeout: timeout,

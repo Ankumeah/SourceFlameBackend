@@ -1,8 +1,8 @@
 package database
 
 import (
-  "errors"
-  "fmt"
+	"errors"
+	"fmt"
 )
 
 var ErrLimitTooLarge = errors.New("Limit too big")

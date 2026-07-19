@@ -5,8 +5,8 @@ import (
 	"github.com/go-git/go-git/v6/plumbing"
 	"github.com/go-git/go-git/v6/plumbing/object"
 
+	"errors"
 	"log"
-  "errors"
 )
 
 func GetBlob(repoId uint64, commitHash string, path string) (string, error) {
@@ -16,9 +16,9 @@ func GetBlob(repoId uint64, commitHash string, path string) (string, error) {
 	}
 
 	objId, ok := plumbing.FromHex(commitHash)
-  if !ok {
-    return "", ErrInvalidCommitHash
-  }
+	if !ok {
+		return "", ErrInvalidCommitHash
+	}
 	commit, err := repo.CommitObject(objId)
 	if errors.Is(err, plumbing.ErrObjectNotFound) {
 		return "", ErrInvalidCommitHash

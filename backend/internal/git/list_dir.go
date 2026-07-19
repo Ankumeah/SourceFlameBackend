@@ -6,8 +6,8 @@ import (
 	"github.com/go-git/go-git/v6/plumbing/filemode"
 	"github.com/go-git/go-git/v6/plumbing/object"
 
+	"errors"
 	"log"
-  "errors"
 )
 
 func ListDir(repoId uint64, commitHash string, path string) ([]File, error) {
@@ -17,9 +17,9 @@ func ListDir(repoId uint64, commitHash string, path string) ([]File, error) {
 	}
 
 	objId, ok := plumbing.FromHex(commitHash)
-  if !ok {
-    return nil, ErrInvalidCommitHash
-  }
+	if !ok {
+		return nil, ErrInvalidCommitHash
+	}
 	commit, err := repo.CommitObject(objId)
 	if errors.Is(err, plumbing.ErrObjectNotFound) {
 		return nil, ErrInvalidCommitHash

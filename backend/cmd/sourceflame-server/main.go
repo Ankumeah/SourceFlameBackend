@@ -42,8 +42,8 @@ func main() {
 	log.Println("Running backend on port: " + app.Settings.BACKEND_PORT)
 	log.Println("API_VERSION: " + app.Settings.API_VERSION)
 
-  err := r.Run(":" + app.Settings.BACKEND_PORT)
-  if err != nil {
-    log.Fatalf("Error while running server: %v\n", err.Error())
-  }
+	err := r.Run(":" + app.Settings.BACKEND_PORT)
+	if err != nil {
+		log.Fatalf("Error while running server: %v\n", err.Error())
+	}
 }

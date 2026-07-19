@@ -3,9 +3,9 @@ package jwt_test
 import (
 	"github.com/Ankumeah/SourceFlameBackend/internal/jwt"
 
+	"errors"
 	"testing"
 	"time"
-  "errors"
 )
 
 func TestIssueJwt(t *testing.T) {

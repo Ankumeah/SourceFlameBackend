@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"errors"
 	"net/http"
-  "errors"
 )
 
 func login(r *gin.RouterGroup, app *a.App) {

@@ -5,8 +5,8 @@ import (
 	"github.com/go-git/go-git/v6/plumbing"
 	"github.com/go-git/go-git/v6/plumbing/object"
 
+	"errors"
 	"log"
-  "errors"
 )
 
 func GetBlame(repoId uint64, commitHash string, path string) ([]BlameLine, error) {
@@ -16,9 +16,9 @@ func GetBlame(repoId uint64, commitHash string, path string) ([]BlameLine, error
 	}
 
 	objId, ok := plumbing.FromHex(commitHash)
-  if !ok {
-    return nil, ErrInvalidCommitHash
-  }
+	if !ok {
+		return nil, ErrInvalidCommitHash
+	}
 	commit, err := repo.CommitObject(objId)
 	if errors.Is(err, plumbing.ErrObjectNotFound) {
 		return nil, ErrInvalidCommitHash
@@ -27,22 +27,22 @@ func GetBlame(repoId uint64, commitHash string, path string) ([]BlameLine, error
 		return nil, err
 	}
 
-  blameRes, err := git.Blame(commit, path)
-  if errors.Is(err, object.ErrFileNotFound) {
-    return nil, ErrBlobNotFound
-  }
+	blameRes, err := git.Blame(commit, path)
+	if errors.Is(err, object.ErrFileNotFound) {
+		return nil, ErrBlobNotFound
+	}
 
-  blame := []BlameLine{}
-  for _, line := range blameRes.Lines {
-    blame = append(blame, BlameLine{
-      Author: author{
-        Name: line.AuthorName,
-        Email: line.Author,
-      },
-      Text: line.Text,
-      Timestamp: uint64(line.Date.Unix()),
-      Hash: line.Hash.String(),
-    })
-  }
-  return blame, nil
+	blame := []BlameLine{}
+	for _, line := range blameRes.Lines {
+		blame = append(blame, BlameLine{
+			Author: author{
+				Name:  line.AuthorName,
+				Email: line.Author,
+			},
+			Text:      line.Text,
+			Timestamp: uint64(line.Date.Unix()),
+			Hash:      line.Hash.String(),
+		})
+	}
+	return blame, nil
 }

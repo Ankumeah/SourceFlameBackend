@@ -27,15 +27,15 @@ type author struct {
 	Email string `json:"email" binding:"required"`
 }
 type Commit struct {
-	Author author    `json:"author" binding:"required"`
+	Author    author `json:"author" binding:"required"`
 	Message   string `json:"message" binding:"required"`
 	Hash      string `json:"hash" binding:"required"`
 	Timestamp uint64 `json:"timestamp" binding:"required"`
 }
 
 type BlameLine struct {
-  Author author `json:"author" binding:"required"`
-  Text string `json:"text" binding:"required"`
-  Timestamp uint64 `json:"timestamp" binding:"required"`
-  Hash string `json:"hash" binding:"required"`
+	Author    author `json:"author" binding:"required"`
+	Text      string `json:"text" binding:"required"`
+	Timestamp uint64 `json:"timestamp" binding:"required"`
+	Hash      string `json:"hash" binding:"required"`
 }

@@ -20,6 +20,7 @@
 - GET("/:repo_owner/:repo_name/list/*path?hash=hash") -> { "files": []{ "file_name": string, "dir": bool } }
 - GET("/:repo_owner/:repo_name/commits/:branch") -> { "commits": []{ "author" { "name": string, "email": string }, "message": string, "hash": string, "timestamp": uint64 } }
 - GET("/:repo_owner/:repo_name/branches") -> { "branches": []string }
+- GET("/:repo_owner/:repo_name/blame/*path?hash=hash") -> { "blame": []{ "author" { "name": string, "email": string }, "text": string, "timestamp": uint64, "hash": string } }
 > Git client use
   - GET("/:repo_owner/:repo_name/info/refs?service=(git-receive-pack|git-upload-pack)")
   - POST("/:repo_owner/:repo_name/git-upload-pack")

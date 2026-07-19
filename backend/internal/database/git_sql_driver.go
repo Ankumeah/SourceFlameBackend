@@ -5,8 +5,8 @@ import (
 
 	"context"
 	"database/sql"
+	"errors"
 	"time"
-  "errors"
 )
 
 type gitSqlxDriver struct{ db *sqlx.DB }

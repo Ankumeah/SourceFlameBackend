@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"errors"
 	"net/http"
-  "errors"
 )
 
 func internalServerError() (int, map[string]any) {

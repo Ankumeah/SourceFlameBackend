@@ -15,8 +15,11 @@ func GetBlob(repoId uint64, commitHash string, path string) (string, error) {
 		return "", err
 	}
 
-	hash := plumbing.NewHash(commitHash)
-	commit, err := repo.CommitObject(hash)
+	objId, ok := plumbing.FromHex(commitHash)
+  if !ok {
+    return "", ErrInvalidCommitHash
+  }
+	commit, err := repo.CommitObject(objId)
 	if errors.Is(err, plumbing.ErrObjectNotFound) {
 		return "", ErrInvalidCommitHash
 	} else if err != nil {

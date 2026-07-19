@@ -158,4 +158,24 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 		c.JSON(http.StatusOK, gin.H{"branches": branches})
 	})
+
+  group.GET("/blame/*path", func(c *gin.Context) {
+    repoId := c.GetUint64(middlewares.RepoIdField)
+		path := strings.Trim(c.Param("path"), "/")
+		hash := c.Query("hash")
+
+    blame, err := git.GetBlame(repoId, hash, path)
+    if errors.Is(err, git.ErrInvalidCommitHash)  {
+      c.JSON(badRequest(err))
+      return
+    } else if errors.Is(err, git.ErrBlobNotFound) {
+      c.JSON(badRequest(err))
+      return
+    } else if err != nil {
+      c.JSON(internalServerError())
+      return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"blame": blame})
+  })
 }

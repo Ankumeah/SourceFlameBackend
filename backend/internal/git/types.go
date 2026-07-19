@@ -32,3 +32,10 @@ type Commit struct {
 	Hash      string `json:"hash" binding:"required"`
 	Timestamp uint64 `json:"timestamp" binding:"required"`
 }
+
+type BlameLine struct {
+  Author author `json:"author" binding:"required"`
+  Text string `json:"text" binding:"required"`
+  Timestamp uint64 `json:"timestamp" binding:"required"`
+  Hash string `json:"hash" binding:"required"`
+}

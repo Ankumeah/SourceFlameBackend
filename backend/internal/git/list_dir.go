@@ -16,8 +16,11 @@ func ListDir(repoId uint64, commitHash string, path string) ([]File, error) {
 		return nil, err
 	}
 
-	hash := plumbing.NewHash(commitHash)
-	commit, err := repo.CommitObject(hash)
+	objId, ok := plumbing.FromHex(commitHash)
+  if !ok {
+    return nil, ErrInvalidCommitHash
+  }
+	commit, err := repo.CommitObject(objId)
 	if errors.Is(err, plumbing.ErrObjectNotFound) {
 		return nil, ErrInvalidCommitHash
 	} else if err != nil {

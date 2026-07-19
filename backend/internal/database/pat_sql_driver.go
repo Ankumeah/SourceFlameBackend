@@ -9,87 +9,87 @@ import (
 	"time"
 )
 
-type pat_sqlx_driver struct{ db *sqlx.DB }
+type patSqlxDriver struct{ db *sqlx.DB }
 
-func PAT_Sql_Driver(pool *sqlx.DB) *PAT_db {
-	return &PAT_db{
-		&pat_sqlx_driver{pool},
+func PATSqlDriver(pool *sqlx.DB) *PATDb {
+	return &PATDb{
+		&patSqlxDriver{pool},
 	}
 }
 
-func (s *pat_sqlx_driver) Add_PAT(ctx context.Context, owner_id uint64, hash string, pat_name string) (uint64, error) {
+func (s *patSqlxDriver) AddPAT(ctx context.Context, ownerId uint64, hash string, patName string) (uint64, error) {
 	query := s.db.Rebind(`
     INSERT INTO pats (name, hash, owner_id, created_at)
     VALUES (?, ?, ?, ?)
     RETURNING id;
   `)
 
-	var pat_id uint64
+	var patId uint64
 	now := time.Now().Unix()
-	err := s.db.QueryRowContext(ctx, query, pat_name, hash, owner_id, now).Scan(&pat_id)
+	err := s.db.QueryRowContext(ctx, query, patName, hash, ownerId, now).Scan(&patId)
 
-	if is_unique_violation(err) {
-		err = Error_pat_exists
+	if isUniqueViolation(err) {
+		err = ErrPatExists
 	}
 
-	return pat_id, err
+	return patId, err
 }
 
-func (s *pat_sqlx_driver) Validate_PAT(ctx context.Context, owner_id uint64, hash string) (uint64, error) {
+func (s *patSqlxDriver) ValidatePAT(ctx context.Context, ownerId uint64, hash string) (uint64, error) {
 	query := s.db.Rebind(`
     SELECT id FROM pats
     WHERE (owner_id = ? AND hash = ?)
   `)
 
-	var pat_id uint64
-	err := s.db.QueryRowContext(ctx, query, owner_id, hash).Scan(&pat_id)
+	var patId uint64
+	err := s.db.QueryRowContext(ctx, query, ownerId, hash).Scan(&patId)
 	if errors.Is(err, sql.ErrNoRows) {
-		err = Error_invalid_pat
+		err = ErrInvalidPat
 	}
 
-	return pat_id, err
+	return patId, err
 }
 
-func (s *pat_sqlx_driver) Get_Id(ctx context.Context, owner_id uint64, pat_name string) (uint64, error) {
+func (s *patSqlxDriver) GetId(ctx context.Context, ownerId uint64, patName string) (uint64, error) {
 	query := s.db.Rebind(`
     SELECT id FROM pats
     WHERE (owner_id = ? AND name = ?);
   `)
 
-	var pat_id uint64
-	err := s.db.QueryRowContext(ctx, query, owner_id, pat_name).Scan(&pat_id)
+	var patId uint64
+	err := s.db.QueryRowContext(ctx, query, ownerId, patName).Scan(&patId)
 	if errors.Is(err, sql.ErrNoRows) {
-		err = Error_invalid_pat
+		err = ErrInvalidPat
 	}
 
-	return pat_id, err
+	return patId, err
 }
 
-func (s *pat_sqlx_driver) Delete_PAT(ctx context.Context, pat_id uint64) error {
+func (s *patSqlxDriver) DeletePAT(ctx context.Context, patId uint64) error {
 	query := s.db.Rebind(`
     DELETE FROM pats
     WHERE (id = ?);
   `)
 
-	tag, err := s.db.ExecContext(ctx, query, pat_id)
+	tag, err := s.db.ExecContext(ctx, query, patId)
 	if err != nil {
 		return err
 	}
 
-	effected, err := tag.RowsAffected()
-	if effected == 0 {
-		return Error_invalid_pat
+	affected, err := tag.RowsAffected()
+	if affected == 0 {
+		return ErrInvalidPat
 	}
 
 	return err
 }
-func (s *pat_sqlx_driver) Get_PATs(ctx context.Context, user_id uint64) ([]string, error) {
+func (s *patSqlxDriver) GetPATs(ctx context.Context, userId uint64) ([]string, error) {
 	query := s.db.Rebind(`
     SELECT name FROM pats
     WHERE (owner_id = ?);
   `)
 
-	rows, err := s.db.QueryContext(ctx, query, user_id)
+	rows, err := s.db.QueryContext(ctx, query, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -110,17 +110,17 @@ func (s *pat_sqlx_driver) Get_PATs(ctx context.Context, user_id uint64) ([]strin
 
 	return pats, nil
 }
-func (s *pat_sqlx_driver) Info(ctx context.Context, pat_id uint64) (*PAT_Info, error) {
+func (s *patSqlxDriver) Info(ctx context.Context, patId uint64) (*PATInfo, error) {
 	query := s.db.Rebind(`
     SELECT name, created_at, last_used FROM pats
     WHERE (id = ?);
   `)
 
-	var info PAT_Info
-	err := s.db.QueryRowContext(ctx, query, pat_id).Scan(&info.Name, &info.Creation, &info.Last_Used)
+	var info PATInfo
+	err := s.db.QueryRowContext(ctx, query, patId).Scan(&info.Name, &info.Creation, &info.LastUsed)
 
-	if err == sql.ErrNoRows {
-		return nil, Error_invalid_pat
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrInvalidPat
 	} else if err != nil {
 		return nil, err
 	} else {
@@ -128,7 +128,7 @@ func (s *pat_sqlx_driver) Info(ctx context.Context, pat_id uint64) (*PAT_Info, e
 	}
 }
 
-func (s *pat_sqlx_driver) Update_Use(ctx context.Context, pat_id uint64) error {
+func (s *patSqlxDriver) UpdateUse(ctx context.Context, patId uint64) error {
 	query := s.db.Rebind(`
     UPDATE pats
     SET last_used = ?
@@ -136,16 +136,16 @@ func (s *pat_sqlx_driver) Update_Use(ctx context.Context, pat_id uint64) error {
   `)
 	now := time.Now().Unix()
 
-	tag, err := s.db.ExecContext(ctx, query, now, pat_id)
+	tag, err := s.db.ExecContext(ctx, query, now, patId)
 	if err != nil {
 		return err
 	}
 
-	effected, err := tag.RowsAffected()
+	affected, err := tag.RowsAffected()
 	if err != nil {
 		return err
-	} else if effected <= 0 {
-		return Error_invalid_pat
+	} else if affected <= 0 {
+		return ErrInvalidPat
 	} else {
 		return nil
 	}

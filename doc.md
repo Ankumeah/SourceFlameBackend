@@ -1,3 +1,8 @@
+# Base URL: /api/(version number, default v1)/
+
+## /ping
+- GET("") -> "PONG"
+
 ## /login
 > requires -H X-Authorization: Basic base64(username:password)
 - POST("") -> { "refresh_token": refresh_token,"JWT": JWT }
@@ -34,8 +39,8 @@
 
 ## /user
 - GET("/:username/meta") -> { "creation": uint64 }
-- GET("/:username/repos?limit=uin8(delfault 10)&offset=uint64(delfault 0)") -> { "repos": []string }
+- GET("/:username/repos?limit=uint8(default 10)&offset=uint64(default 0)") -> { "repos": []string }
 
 ## Errors
-> Any of the api may return the following if they encounter an error
+> Any of the APIs may return the following if they encounter an error
 - { "error": string }

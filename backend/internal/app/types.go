@@ -10,13 +10,13 @@ import (
 )
 
 type App struct {
-	User_db     *database.User_db
-	Git_db      *database.Git_db
-	PAT_db      *database.PAT_db
-	Store       *session_store.Session_store
-	PAT_Handler *pat.PAT_Handler
-	JWT_Handler *jwt.JWT_Handler
-	Settings    *Settings
+	UserDb     *database.UserDb
+	GitDb      *database.GitDb
+	PATDb      *database.PATDb
+	Store      *session_store.SessionStore
+	PATHandler *pat.PATHandler
+	JWTHandler *jwt.JWTHandler
+	Settings   *Settings
 }
 
 type Settings struct {

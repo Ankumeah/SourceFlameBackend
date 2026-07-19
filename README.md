@@ -22,11 +22,11 @@ frontend for it, the frontend can be found here [Work in progress]()
   > [!NOTE]
   > Currently we ship support for postgres and sqlite3 out of the box,
   out of these sqlite3 is the default option when running with docker compose,
-  while for any use case involveing docker copmose, sqlite3 is recommended,
+  while for any use case involving docker compose, sqlite3 is recommended,
   if you wish to switch to postgres have a look at docker-compose.yaml
 
 - Clone and cd in the repo: `git clone https://github.com/Ankumeah/SourceFlameBackend && cd SourceFlameBackend`
-- Change the secrets in `./env.d.example/` to your likeing (**VERY IMPORTANT**)
+- Change the secrets in `./env.d.example/` to your liking (**VERY IMPORTANT**)
 - Start docker compose: `docker compose up -d`
 
 ### With kustomize
@@ -37,9 +37,9 @@ frontend for it, the frontend can be found here [Work in progress]()
 
 > [!WARNING]
 > The openapi spec may be out of date as it is harder to maintain
-due to me not useing a auto genrater
+due to me not using an auto generator
 but I try my best to make sure the quick cheatsheet is always up to date
-so funnily enought the rought cheatsheet is more reliable then the formal spec
+so funnily enough the rough cheatsheet is more reliable than the formal spec
 
   ![openapi.yaml](https://github.com/Ankumeah/SourceFlameBackend/blob/master/openapi.yaml)
 

@@ -5,6 +5,6 @@ import (
 	"path"
 )
 
-func real_path(repo_id uint64) string {
-	return path.Join(base_path, fmt.Sprintf("%v", repo_id))
+func realPath(repoId uint64) string {
+	return path.Join(basePath, fmt.Sprintf("%v", repoId))
 }

@@ -17,7 +17,7 @@ var Ctx = context.Background()
 var app = &a.App{Settings: &a.Settings{}}
 
 func main() {
-	load_env(app.Settings)
+	loadEnv(app.Settings)
 	app.Settings.PAT_PREFIX = "sf_"
 	app.Settings.PAT_LENGTH = 32
 	app.Settings.AUTH_CHALLENGE_HEADER = `Basic realm="SourceFlame"`
@@ -26,21 +26,24 @@ func main() {
 	app.Settings.TOKEN_NAMESPACE = "refresh:"
 
 	var wg sync.WaitGroup
-	wg.Go(func() { connect_session_store(app) })
-	wg.Go(func() { connect_database(app) })
-	wg.Go(func() { get_handlers(app) })
+	wg.Go(func() { connectSessionStore(app) })
+	wg.Go(func() { connectDatabase(app) })
+	wg.Go(func() { getHandlers(app) })
 	wg.Wait()
 
 	log.Println("Starting http server")
 	r := gin.Default()
 	apiGroup := r.Group(
 		"/api/"+app.Settings.API_VERSION+"/",
-		middlewars.Log_Middleware(),
+		middlewares.LogMiddleware(),
 	)
 	apis.Apis(apiGroup, app)
 
 	log.Println("Running backend on port: " + app.Settings.BACKEND_PORT)
 	log.Println("API_VERSION: " + app.Settings.API_VERSION)
 
-	r.Run(":" + app.Settings.BACKEND_PORT)
+  err := r.Run(":" + app.Settings.BACKEND_PORT)
+  if err != nil {
+    log.Fatalf("Error while running server: %v\n", err.Error())
+  }
 }

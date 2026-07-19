@@ -6,50 +6,50 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-func Get_Hasher(time uint32, salt_len uint32, memory uint32, threads uint8, key_len uint32) *Hasher {
+func GetHasher(time uint32, saltLen uint32, memory uint32, threads uint8, keyLen uint32) *Hasher {
 	return &Hasher{
-		time:     time,
-		salt_len: salt_len,
-		memory:   memory,
-		threads:  threads,
-		key_len:  key_len,
+		time:    time,
+		saltLen: saltLen,
+		memory:  memory,
+		threads: threads,
+		keyLen:  keyLen,
 	}
 }
 
-func (h *Hasher) Generate_Hash(password []byte, salt []byte) (*Hash, error) {
+func (h *Hasher) GenerateHash(password []byte, salt []byte) (*Hash, error) {
 	var err error
 	if len(salt) == 0 {
-		salt, err = random_salt(h.salt_len)
+		salt, err = randomSalt(h.saltLen)
 
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	_hash := argon2.IDKey(password, salt, h.time, h.memory, h.threads, h.key_len)
+	_hash := argon2.IDKey(password, salt, h.time, h.memory, h.threads, h.keyLen)
 
 	hash := &Hash{Hash: _hash, Salt: salt}
 
 	return hash, nil
 }
 
-func (h *Hasher) Compare_Hash(hash *Hash, password string) (bool, error) {
-	_password_hash, err := h.Generate_Hash([]byte(password), hash.Salt)
+func (h *Hasher) CompareHash(hash *Hash, password string) (bool, error) {
+	_passwordHash, err := h.GenerateHash([]byte(password), hash.Salt)
 	if err != nil {
 		return false, err
 	}
 
-	password_hash := append(_password_hash.Hash, _password_hash.Salt...)
-	target_hash := append(hash.Hash, hash.Salt...)
+	passwordHash := append(_passwordHash.Hash, _passwordHash.Salt...)
+	targetHash := append(hash.Hash, hash.Salt...)
 
-	if subtle.ConstantTimeCompare(target_hash, password_hash) != 1 {
+	if subtle.ConstantTimeCompare(targetHash, passwordHash) != 1 {
 		return false, nil
 	} else {
 		return true, nil
 	}
 }
 
-func random_salt(length uint32) ([]byte, error) {
+func randomSalt(length uint32) ([]byte, error) {
 	secret := make([]byte, length)
 
 	_, err := rand.Read(secret)

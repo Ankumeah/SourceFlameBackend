@@ -6,12 +6,12 @@ import (
 	"github.com/Ankumeah/SourceFlameBackend/internal/pat"
 )
 
-func get_handlers(app *a.App) {
-	app.PAT_Handler = pat.Get_PAT_Handler(
+func getHandlers(app *a.App) {
+	app.PATHandler = pat.GetPATHandler(
 		app.Settings.PAT_PREFIX,
 		app.Settings.PAT_LENGTH,
 	)
-	app.JWT_Handler = jwt.Get_JWT_Handler(
+	app.JWTHandler = jwt.GetJWTHandler(
 		app.Settings.JWT_LEEWAY,
 		app.Settings.JWT_LIFESPAN,
 		app.Settings.JWT_KEY,

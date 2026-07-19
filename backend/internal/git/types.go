@@ -2,9 +2,9 @@ package git
 
 import "path"
 
-const max_blob_size = 2097152
+const maxBlobSize = 2097152
 
-var base_path string
+var basePath string
 
 func init() {
 	// This breaks on windows,
@@ -14,12 +14,12 @@ func init() {
 	// The fact that you are reading this means you
 	// can probably change this on your own.
 	// Good luck and apologies from my side
-	base_path = path.Join("/srv", "git")
+	basePath = path.Join("/srv", "git")
 }
 
 type File struct {
-	File_name string `json:"file_name" binding:"required"`
-	Dir       bool   `json:"dir" binding:"required"`
+	FileName string `json:"file_name" binding:"required"`
+	Dir      bool   `json:"dir" binding:"required"`
 }
 
 type author struct {
@@ -27,7 +27,7 @@ type author struct {
 	Email string `json:"email" binding:"required"`
 }
 type Commit struct {
-	Author    author `json:"author" binding:"required"`
+	Author author    `json:"author" binding:"required"`
 	Message   string `json:"message" binding:"required"`
 	Hash      string `json:"hash" binding:"required"`
 	Timestamp uint64 `json:"timestamp" binding:"required"`

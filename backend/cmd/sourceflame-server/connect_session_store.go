@@ -7,23 +7,23 @@ import (
 	"log"
 )
 
-func connect_session_store(app *a.App) {
+func connectSessionStore(app *a.App) {
 	log.Println("Connecting to session store")
 
-	sessions_config := session_store.Universal_Redis_Config{
+	sessionsConfig := session_store.UniversalRedisConfig{
 		Username: app.Settings.SESSION_STORE_SESSIONS_USERNAME,
 		Password: app.Settings.SESSION_STORE_SESSIONS_PASSWORD,
 		Hostname: app.Settings.SESSION_STORE_HOSTNAME,
 		Port:     app.Settings.SESSION_STORE_PORT,
 	}
-	var client session_store.Redis_client
+	var client session_store.RedisClient
 	var err error
 
 	switch app.Settings.SESSION_STORE_TYPE {
 	case "redis_standalone":
-		client, err = session_store.Get_Redis_Client(Ctx, sessions_config)
+		client, err = session_store.GetRedisClient(Ctx, sessionsConfig)
 	case "redis_cluster":
-		client, err = session_store.Get_Redis_Cluster_Client(Ctx, sessions_config)
+		client, err = session_store.GetRedisClusterClient(Ctx, sessionsConfig)
 	default:
 		log.Fatalf("Unsupported session store type: %v\n", app.Settings.SESSION_STORE_TYPE)
 	}
@@ -31,7 +31,7 @@ func connect_session_store(app *a.App) {
 		log.Panicf("Error while connecting to session store: %v\n", err.Error())
 	}
 
-	app.Store = session_store.Get_Sessions_Uinversal_Redis_Driver(
+	app.Store = session_store.GetSessionsUniversalRedisDriver(
 		client,
 		app.Settings.TOKEN_TIMEOUT,
 		app.Settings.TOKEN_LIMIT,

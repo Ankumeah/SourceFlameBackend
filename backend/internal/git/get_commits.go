@@ -9,17 +9,17 @@ import (
 	"log"
 )
 
-func Get_Commits(repo_id uint64, branch string) ([]Commit, error) {
-	repo, err := git.PlainOpen(real_path(repo_id))
+func GetCommits(repoId uint64, branch string) ([]Commit, error) {
+	repo, err := git.PlainOpen(realPath(repoId))
 	if err != nil {
 		return nil, err
 	}
 
 	hash, err := repo.ResolveRevision(plumbing.Revision(branch))
 	if errors.Is(err, plumbing.ErrReferenceNotFound) {
-		return nil, Error_Branch_Not_Found
+		return nil, ErrBranchNotFound
 	} else if err != nil {
-		log.Printf("Error while resolveing repo branch: %v\n", err.Error())
+		log.Printf("Error while resolving repo branch: %v\n", err.Error())
 		return nil, err
 	}
 

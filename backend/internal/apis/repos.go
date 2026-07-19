@@ -12,19 +12,19 @@ import (
 )
 
 func repos(r *gin.RouterGroup, app *a.App) {
-	group := r.Group("/repos", middlewars.JWT_Auth_Middleware(app, true))
+	group := r.Group("/repos", middlewares.JWTAuthMiddleware(app, true))
 
 	group.POST("/:repo_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_name := c.Param("repo_name")
-		user_id := c.GetUint64(middlewars.User_id_feild)
+		repoName := c.Param("repo_name")
+		userId := c.GetUint64(middlewares.UserIdField)
 
-		_, err := app.Git_db.Create_Repo(ctx, user_id, repo_name)
-		if errors.Is(err, database.Safe_Error) {
-			c.JSON(bad_request(err))
+		_, err := app.GitDb.CreateRepo(ctx, userId, repoName)
+		if errors.Is(err, database.ErrSafe) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
@@ -33,24 +33,24 @@ func repos(r *gin.RouterGroup, app *a.App) {
 
 	group.DELETE("/:repo_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64(middlewars.User_id_feild)
-		repo_name := c.Param("repo_name")
+		userId := c.GetUint64(middlewares.UserIdField)
+		repoName := c.Param("repo_name")
 
-		repo_id, err := app.Git_db.Get_Id(ctx, user_id, repo_name)
-		if errors.Is(err, database.Error_Invalid) {
-			c.JSON(invalid_user())
+		repoId, err := app.GitDb.GetId(ctx, userId, repoName)
+		if errors.Is(err, database.ErrInvalid) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
-		err = app.Git_db.Delete_Repo(ctx, repo_id)
-		if errors.Is(err, database.Error_Invalid) {
-			c.JSON(bad_request(err))
+		err = app.GitDb.DeleteRepo(ctx, repoId)
+		if errors.Is(err, database.ErrInvalid) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 

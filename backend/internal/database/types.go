@@ -6,48 +6,48 @@ import (
 	"context"
 )
 
-type user_driver interface {
-	Add_User(ctx context.Context, username string, password_hash *hash.Hash) (uint64, error)
-	Get_Id(ctx context.Context, username string) (uint64, error)
-	Delete_User(ctx context.Context, user_id uint64) error
-	Get_Hash(ctx context.Context, user_id uint64) (*hash.Hash, error)
-	Info(ctx context.Context, user_id uint64) (*User_Info, error)
+type userDriver interface {
+	AddUser(ctx context.Context, username string, passwordHash *hash.Hash) (uint64, error)
+	GetId(ctx context.Context, username string) (uint64, error)
+	DeleteUser(ctx context.Context, userId uint64) error
+	GetHash(ctx context.Context, userId uint64) (*hash.Hash, error)
+	Info(ctx context.Context, userId uint64) (*UserInfo, error)
 }
 
-type git_driver interface {
-	Create_Repo(ctx context.Context, owner_id uint64, repo_name string) (uint64, error)
-	Get_Id(ctx context.Context, owner_id uint64, repo_name string) (uint64, error)
-	Delete_Repo(ctx context.Context, repo_id uint64) error
-	Get_Repos(ctx context.Context, user_id uint64, limit uint8, offset uint64) ([]string, error)
-	Info(ctx context.Context, repo_id uint64) (*Repo_Info, error)
+type gitDriver interface {
+	CreateRepo(ctx context.Context, ownerId uint64, repoName string) (uint64, error)
+	GetId(ctx context.Context, ownerId uint64, repoName string) (uint64, error)
+	DeleteRepo(ctx context.Context, repoId uint64) error
+	GetRepos(ctx context.Context, userId uint64, limit uint8, offset uint64) ([]string, error)
+	Info(ctx context.Context, repoId uint64) (*RepoInfo, error)
 }
 
-type pat_driver interface {
-	Add_PAT(ctx context.Context, owner_id uint64, hash string, pat_name string) (uint64, error)
-	Validate_PAT(ctx context.Context, owner_id uint64, hash string) (uint64, error)
-	Get_Id(ctx context.Context, owner_id uint64, pat_name string) (uint64, error)
-	Delete_PAT(ctx context.Context, pat_id uint64) error
-	Get_PATs(ctx context.Context, user_id uint64) ([]string, error)
-	Info(ctx context.Context, pat_id uint64) (*PAT_Info, error)
-	Update_Use(ctx context.Context, pat_id uint64) error
+type patDriver interface {
+	AddPAT(ctx context.Context, ownerId uint64, hash string, patName string) (uint64, error)
+	ValidatePAT(ctx context.Context, ownerId uint64, hash string) (uint64, error)
+	GetId(ctx context.Context, ownerId uint64, patName string) (uint64, error)
+	DeletePAT(ctx context.Context, patId uint64) error
+	GetPATs(ctx context.Context, userId uint64) ([]string, error)
+	Info(ctx context.Context, patId uint64) (*PATInfo, error)
+	UpdateUse(ctx context.Context, patId uint64) error
 }
 
-type User_db struct{ db user_driver }
-type Git_db struct{ db git_driver }
-type PAT_db struct{ db pat_driver }
+type UserDb struct{ db userDriver }
+type GitDb struct{ db gitDriver }
+type PATDb struct{ db patDriver }
 
-type User_Info struct {
+type UserInfo struct {
 	Creation uint64 `json:"creation"`
 }
 
-type Repo_Info struct {
+type RepoInfo struct {
 	Creation uint64 `json:"creation"`
 	Stars    uint64 `json:"stars"`
 	Owner    string `json:"owner"`
 }
 
-type PAT_Info struct {
-	Name      string  `json:"name"`
-	Creation  uint64  `json:"creation"`
-	Last_Used *uint64 `json:"last_used"`
+type PATInfo struct {
+	Name     string  `json:"name"`
+	Creation uint64  `json:"creation"`
+	LastUsed *uint64 `json:"last_used"`
 }

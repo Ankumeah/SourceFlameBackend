@@ -1,10 +1,10 @@
-package middlewars
+package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
-func Log_Middleware() gin.HandlerFunc {
+func LogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 	}

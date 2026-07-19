@@ -6,19 +6,27 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"net/http"
+  "errors"
 )
 
-func get_user_id(c *gin.Context, user_db *database.User_db, username string) (uint64, bool) {
+func internalServerError() (int, map[string]any) {
+	return http.StatusInternalServerError, map[string]any{"error": "Internal server error"}
+}
+func badRequest(err error) (int, map[string]any) {
+	return http.StatusBadRequest, map[string]any{"error": err.Error()}
+}
+
+func getUserId(c *gin.Context, userDb *database.UserDb, username string) (uint64, bool) {
 	ctx := c.Request.Context()
 
-	user_id, err := user_db.Get_Id(ctx, username)
-	if err == database.Error_invalid_user {
+	userId, err := userDb.GetId(ctx, username)
+	if errors.Is(err, database.ErrInvalidUser) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user"})
 		return 0, false
 	} else if err != nil {
-		c.JSON(internal_server_error())
+		c.JSON(internalServerError())
 		return 0, false
 	} else {
-		return user_id, true
+		return userId, true
 	}
 }

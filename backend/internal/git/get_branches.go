@@ -7,24 +7,24 @@ import (
 	"log"
 )
 
-func Get_Branches(repo_id uint64) ([]string, error) {
-	repo, err := git.PlainOpen(real_path(repo_id))
+func GetBranches(repoId uint64) ([]string, error) {
+	repo, err := git.PlainOpen(realPath(repoId))
 	if err != nil {
 		return nil, err
 	}
 
-  branchesIter, err := repo.Branches()
-  if err != nil {
-    log.Printf("Error while getting repo branches: %v\n", err.Error())
-    return nil, err
-  }
-  defer branchesIter.Close()
+	branchesIter, err := repo.Branches()
+	if err != nil {
+		log.Printf("Error while getting repo branches: %v\n", err.Error())
+		return nil, err
+	}
+	defer branchesIter.Close()
 
-  branches := []string{}
-  branchesIter.ForEach(func(r *plumbing.Reference) error {
-    branches = append(branches, r.Name().Short())
-    return nil
-  })
+	branches := []string{}
+	branchesIter.ForEach(func(r *plumbing.Reference) error {
+		branches = append(branches, r.Name().Short())
+		return nil
+	})
 
-  return branches, nil
+	return branches, nil
 }

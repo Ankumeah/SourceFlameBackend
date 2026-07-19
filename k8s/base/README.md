@@ -1,10 +1,10 @@
-# Deplyment with kustomize
+# Deployment with kustomize
 
 > [!NOTE]
 > This project uses k8s hostPath storage by default (/k8s/base/pv.yaml)
-want it is recommended to change this to an actual storage provider
+while it is recommended to change this to an actual storage provider
 of your choice, the yaml resources to do so are not provided in this repo
-and are assumed as the users responsibility. This app assumes the presence
+and are assumed as the user's responsibility. This app assumes the presence
 of two PVCs by the names `git-storage` and `database-storage`
 
 - Clone and cd in the repo: `git clone https://github.com/Ankumeah/SourceFlameBackend && cd SourceFlameBackend`

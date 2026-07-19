@@ -6,17 +6,17 @@ import (
 	"testing"
 )
 
-func Test_Hash(t *testing.T) {
+func TestHash(t *testing.T) {
 	tests := []struct {
 		password []byte
 		salt     []byte
 	}{
 		{[]byte("beta"), []byte("")},
 	}
-	var hasher = hash.Get_Hasher(2, 16, 64*1024, 4, 32)
+	var hasher = hash.GetHasher(2, 16, 64*1024, 4, 32)
 
 	for _, test := range tests {
-		hash, err := hasher.Generate_Hash(test.password, test.salt)
+		hash, err := hasher.GenerateHash(test.password, test.salt)
 		if err != nil {
 			t.Errorf("Error: %v\n", err.Error())
 		} else if len(hash.Hash) <= 0 {
@@ -27,7 +27,7 @@ func Test_Hash(t *testing.T) {
 
 		t.Logf("Resulting hash: %v, salt: %v\n", string(hash.Hash), string(hash.Salt))
 
-		valid, err := hasher.Compare_Hash(hash, string(test.password))
+		valid, err := hasher.CompareHash(hash, string(test.password))
 		if err != nil {
 			t.Errorf("Error: %v\n", err.Error())
 		} else if !valid {

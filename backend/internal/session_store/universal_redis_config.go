@@ -1,6 +1,6 @@
 package session_store
 
-type Universal_Redis_Config struct {
+type UniversalRedisConfig struct {
 	Username string
 	Password string
 	Hostname string

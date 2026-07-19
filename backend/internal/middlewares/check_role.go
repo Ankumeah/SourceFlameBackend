@@ -1,4 +1,4 @@
-package middlewars
+package middlewares
 
 import (
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
@@ -13,83 +13,83 @@ import (
 	"strings"
 )
 
-func Check_Role_Middleware(app *a.App) gin.HandlerFunc {
+func CheckRoleMiddleware(app *a.App) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		repo_name := c.Param("repo_name")
-		repo_owner := c.Param("repo_owner")
+		repoName := c.Param("repo_name")
+		repoOwner := c.Param("repo_owner")
 
 		header := c.GetHeader("Authorization")
 		if header == "" {
 			c.Set("role", roles.Viewer)
 		}
 
-		var user_id uint64
-		var pat_id uint64
+		var userId uint64
+		var patId uint64
 
 		parts := strings.Split(header, " ")
 		if len(parts) != 2 && header != "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrct amount segments in Authorization header"})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect amount of segments in Authorization header"})
 			return
-		} else if parts[0] != pat_auth_type && header != "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Wrong auth type, wanted: " + pat_auth_type})
+		} else if parts[0] != patAuthType && header != "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Wrong auth type, wanted: " + patAuthType})
 			return
 		} else if header != "" {
-			username, pat, err := parse_basic_auth(parts[1])
+			username, pat, err := parseBasicAuth(parts[1])
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
 
-			user_id, err = app.User_db.Get_Id(ctx, username)
-			if err == database.Error_invalid_user {
-				c.AbortWithStatusJSON(bad_http_request(err))
+			userId, err = app.UserDb.GetId(ctx, username)
+			if errors.Is(err, database.ErrInvalidUser) {
+				c.AbortWithStatusJSON(badHttpRequest(err))
 				return
 			} else if err != nil {
-				c.AbortWithStatusJSON(internal_server_error())
+				c.AbortWithStatusJSON(internalServerError())
 				return
 			}
 
-			pat_id, err = app.PAT_db.Validate_PAT(ctx, user_id, pat)
-			if errors.Is(err, database.Error_Invalid) {
-				c.AbortWithStatusJSON(bad_http_request(err))
+			patId, err = app.PATDb.ValidatePAT(ctx, userId, pat)
+			if errors.Is(err, database.ErrInvalid) {
+				c.AbortWithStatusJSON(badHttpRequest(err))
 			} else if err != nil {
-				c.AbortWithStatusJSON(internal_server_error())
+				c.AbortWithStatusJSON(internalServerError())
 				return
 			}
 		}
 
-		owner_id, err := app.User_db.Get_Id(ctx, repo_owner)
-		if err == database.Error_Invalid {
-			c.AbortWithStatusJSON(bad_http_request(err))
+		ownerId, err := app.UserDb.GetId(ctx, repoOwner)
+		if errors.Is(err, database.ErrInvalid) {
+			c.AbortWithStatusJSON(badHttpRequest(err))
 			return
 		}
 
-		repo_id, err := app.Git_db.Get_Id(ctx, owner_id, repo_name)
-		if err == database.Error_invalid_repo {
-			c.AbortWithStatusJSON(bad_http_request(err))
+		repoId, err := app.GitDb.GetId(ctx, ownerId, repoName)
+		if errors.Is(err, database.ErrInvalidRepo) {
+			c.AbortWithStatusJSON(badHttpRequest(err))
 			return
 		} else if err != nil {
-			c.AbortWithStatusJSON(internal_server_error())
+			c.AbortWithStatusJSON(internalServerError())
 			return
 		}
 
-		route_end := filepath.Base(c.Request.URL.Path)
-		if route_end == "git-receive-pack" && user_id == 0 {
+		routeEnd := filepath.Base(c.Request.URL.Path)
+		if routeEnd == "git-receive-pack" && userId == 0 {
 			c.Header("WWW-Authenticate", app.Settings.AUTH_CHALLENGE_HEADER)
-			c.AbortWithStatusJSON(unauthorised_request())
+			c.AbortWithStatusJSON(unauthorisedRequest())
 			return
 		}
 
-		if user_id == owner_id {
-			c.Set(Role_feild, roles.Owner)
+		if userId == ownerId {
+			c.Set(RoleField, roles.Owner)
 		} else {
-			c.Set(Role_feild, roles.Viewer)
+			c.Set(RoleField, roles.Viewer)
 		}
 
-		app.PAT_db.Update_Use(ctx, pat_id)
-		c.Set(User_id_feild, user_id)
-		c.Set(Repo_id_feild, repo_id)
+		app.PATDb.UpdateUse(ctx, patId)
+		c.Set(UserIdField, userId)
+		c.Set(RepoIdField, repoId)
 		c.Next()
 	}
 }

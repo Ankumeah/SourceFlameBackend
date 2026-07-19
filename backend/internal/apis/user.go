@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -18,7 +19,7 @@ func user(r *gin.RouterGroup, app *a.App) {
 		case "/meta":
 			meta(c, app)
 		case "/repos":
-			get_repos(c, app)
+			getRepos(c, app)
 		default:
 			c.Status(http.StatusNotFound)
 		}
@@ -29,21 +30,21 @@ func meta(c *gin.Context, app *a.App) {
 	ctx := c.Request.Context()
 	username := c.Param("username")
 
-	user_id, ok := get_user_id(c, app.User_db, username)
+	userId, ok := getUserId(c, app.UserDb, username)
 	if !ok {
 		return
 	}
 
-	info, err := app.User_db.Info(ctx, user_id)
+	info, err := app.UserDb.Info(ctx, userId)
 	if err != nil {
-		c.JSON(internal_server_error())
+		c.JSON(internalServerError())
 		return
 	}
 
 	c.JSON(http.StatusOK, info)
 }
 
-func get_repos(c *gin.Context, app *a.App) {
+func getRepos(c *gin.Context, app *a.App) {
 	ctx := c.Request.Context()
 	username := c.Param("username")
 
@@ -53,27 +54,27 @@ func get_repos(c *gin.Context, app *a.App) {
 		limit = 10
 	}
 	if err != nil {
-		c.JSON(bad_request(err))
+		c.JSON(badRequest(err))
 		return
 	}
 
 	offset, err := strconv.ParseUint(c.Query("offset"), 10, 64)
 	if err != nil {
-		c.JSON(bad_request(err))
+		c.JSON(badRequest(err))
 		return
 	}
 
-	user_id, ok := get_user_id(c, app.User_db, username)
+	userId, ok := getUserId(c, app.UserDb, username)
 	if !ok {
 		return
 	}
 
-	repos, err := app.Git_db.Get_Repos(ctx, user_id, limit, offset)
-	if err == database.Error_limit_too_big {
+	repos, err := app.GitDb.GetRepos(ctx, userId, limit, offset)
+	if errors.Is(err, database.ErrLimitTooLarge) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit too big"})
 		return
 	} else if err != nil {
-		c.JSON(internal_server_error())
+		c.JSON(internalServerError())
 		return
 	}
 

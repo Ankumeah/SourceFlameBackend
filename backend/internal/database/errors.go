@@ -1,17 +1,20 @@
 package database
 
-import "errors"
+import (
+  "errors"
+  "fmt"
+)
 
-var Error_limit_too_big = errors.New("Limit too big")
+var ErrLimitTooLarge = errors.New("Limit too big")
 
-var Safe_Error = errors.New("Error")
+var ErrSafe = errors.New("Error")
 
-var Error_Invalid = errors.Join(errors.New("Invalid"), Safe_Error)
-var Error_invalid_user = errors.Join(errors.New("Invalid user"), Error_Invalid)
-var Error_invalid_repo = errors.Join(errors.New("Invalid repo"), Error_Invalid)
-var Error_invalid_pat = errors.Join(errors.New("Invalid pat"), Error_Invalid)
+var ErrInvalid = fmt.Errorf("%w: Invalid", ErrSafe)
+var ErrInvalidUser = fmt.Errorf("%w: Invalid user", ErrInvalid)
+var ErrInvalidRepo = fmt.Errorf("%w: Invalid repo", ErrInvalid)
+var ErrInvalidPat = fmt.Errorf("%w: Invalid pat", ErrInvalid)
 
-var Error_Exists = errors.Join(errors.New("Exists"), Safe_Error)
-var Error_user_exists = errors.Join(errors.New("User exists"), Error_Exists)
-var Error_repo_exists = errors.Join(errors.New("Repo exists"), Error_Exists)
-var Error_pat_exists = errors.Join(errors.New("PAT exists"), Error_Exists)
+var ErrExists = fmt.Errorf("%w: Exists", ErrSafe)
+var ErrUserExists = fmt.Errorf("%w: User exists", ErrExists)
+var ErrRepoExists = fmt.Errorf("%w: Repo exists", ErrExists)
+var ErrPatExists = fmt.Errorf("%w: PAT exists", ErrExists)

@@ -5,7 +5,7 @@ import (
 )
 
 func google(JWT string) (string, error) {
-	// TODO("Implement JWT varification")
+	// TODO("Implement JWT verification")
 
 	return "", errors.New("Not implemented")
 }

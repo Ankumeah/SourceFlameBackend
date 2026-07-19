@@ -12,25 +12,25 @@ import (
 )
 
 func pat(r *gin.RouterGroup, app *a.App) {
-	group := r.Group("/pat", middlewars.Self_Auth_Middleware(*app.User_db, false))
+	group := r.Group("/pat", middlewares.SelfAuthMiddleware(*app.UserDb, false))
 
 	group.POST("/:pat_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		pat_name := c.Param("pat_name")
-		user_id := c.GetUint64(middlewars.User_id_feild)
+		patName := c.Param("pat_name")
+		userId := c.GetUint64(middlewares.UserIdField)
 
-		pat, err := app.PAT_Handler.Genrate_PAT()
+		pat, err := app.PATHandler.GeneratePAT()
 		if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
-		_, err = app.PAT_db.Add_PAT(ctx, user_id, pat, pat_name)
-		if errors.Is(err, database.Safe_Error) {
-			c.JSON(bad_request(err))
+		_, err = app.PATDb.AddPAT(ctx, userId, pat, patName)
+		if errors.Is(err, database.ErrSafe) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
@@ -39,20 +39,20 @@ func pat(r *gin.RouterGroup, app *a.App) {
 
 	group.DELETE("/:pat_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64(middlewars.User_id_feild)
-		pat_name := c.Param("pat_name")
+		userId := c.GetUint64(middlewares.UserIdField)
+		patName := c.Param("pat_name")
 
-		pat_id, err := app.PAT_db.Get_Id(ctx, user_id, pat_name)
-		if err == database.Error_invalid_pat {
-			c.JSON(bad_request(err))
+		patId, err := app.PATDb.GetId(ctx, userId, patName)
+		if errors.Is(err, database.ErrInvalidPat) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
-		if err = app.PAT_db.Delete_PAT(ctx, pat_id); err != nil {
-			c.JSON(internal_server_error())
+		if err = app.PATDb.DeletePAT(ctx, patId); err != nil {
+			c.JSON(internalServerError())
 			return
 		}
 
@@ -61,37 +61,37 @@ func pat(r *gin.RouterGroup, app *a.App) {
 
 	group.GET("/:pat_name", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64(middlewars.User_id_feild)
-		pat_name := c.Param("pat_name")
+		userId := c.GetUint64(middlewares.UserIdField)
+		patName := c.Param("pat_name")
 
-		pat_id, err := app.PAT_db.Get_Id(ctx, user_id, pat_name)
-		if err == database.Error_invalid_pat {
-			c.JSON(bad_request(err))
+		patId, err := app.PATDb.GetId(ctx, userId, patName)
+		if errors.Is(err, database.ErrInvalidPat) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
-		pat_info, err := app.PAT_db.Info(ctx, pat_id)
+		patInfo, err := app.PATDb.Info(ctx, patId)
 		if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 
-		c.JSON(http.StatusOK, pat_info)
+		c.JSON(http.StatusOK, patInfo)
 	})
 
 	group.GET("/all", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		user_id := c.GetUint64(middlewars.User_id_feild)
+		userId := c.GetUint64(middlewares.UserIdField)
 
-		pats, err := app.PAT_db.Get_PATs(ctx, user_id)
-		if err == database.Error_Invalid {
-			c.JSON(bad_request(err))
+		pats, err := app.PATDb.GetPATs(ctx, userId)
+		if errors.Is(err, database.ErrInvalid) {
+			c.JSON(badRequest(err))
 			return
 		} else if err != nil {
-			c.JSON(internal_server_error())
+			c.JSON(internalServerError())
 			return
 		}
 

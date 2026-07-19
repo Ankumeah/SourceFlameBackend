@@ -11,11 +11,11 @@ import (
 type User struct {
 	bun.BaseModel `bun:"table:users"`
 
-	ID            uint64 `bun:"id,pk,autoincrement"`
-	Username      string `bun:"username,notnull,unique"`
-	Created_At    uint64 `bun:"created_at,notnull"`
-	Password_Hash []byte `bun:"password_hash,notnull"`
-	Salt          []byte `bun:"salt,notnull"`
+	ID           uint64 `bun:"id,pk,autoincrement"`
+	Username     string `bun:"username,notnull,unique"`
+	CreatedAt    uint64 `bun:"created_at,notnull"`
+	PasswordHash []byte `bun:"password_hash,notnull"`
+	Salt         []byte `bun:"salt,notnull"`
 }
 type Repo struct {
 	bun.BaseModel `bun:"table:repos"`
@@ -37,36 +37,36 @@ type PAT struct {
 	LastUsed  *int64 `bun:"last_used"`
 }
 
-type Sql_Config struct {
-	max_conns     int
-	max_idle      int
-	max_lifetime  time.Duration
-	max_idle_time time.Duration
+type SqlConfig struct {
+	maxConns    int
+	maxIdle     int
+	maxLifetime time.Duration
+	maxIdleTime time.Duration
 }
 
-func New_Sql_Config(
-	max_conn int,
-	max_idle int,
-	max_lifetime time.Duration,
-	max_idle_time time.Duration,
-) Sql_Config {
-	return Sql_Config{
-		max_conns:     max_conn,
-		max_idle:      max_idle,
-		max_lifetime:  max_lifetime,
-		max_idle_time: max_idle_time,
+func NewSqlConfig(
+	maxConn int,
+	maxIdle int,
+	maxLifetime time.Duration,
+	maxIdleTime time.Duration,
+) SqlConfig {
+	return SqlConfig{
+		maxConns:    maxConn,
+		maxIdle:     maxIdle,
+		maxLifetime: maxLifetime,
+		maxIdleTime: maxIdleTime,
 	}
 }
 
-func Get_DB_Connection(ctx context.Context, url string, config Sql_Config) (*sql.DB, error) {
-	db, err := sql.Open(driver_name, url)
+func GetDBConnection(ctx context.Context, url string, config SqlConfig) (*sql.DB, error) {
+	db, err := sql.Open(driverName, url)
 	if err != nil {
 		return nil, err
 	}
-	db.SetMaxOpenConns(config.max_conns)
-	db.SetMaxIdleConns(config.max_idle)
-	db.SetConnMaxLifetime(config.max_lifetime)
-	db.SetConnMaxIdleTime(config.max_idle_time)
+	db.SetMaxOpenConns(config.maxConns)
+	db.SetMaxIdleConns(config.maxIdle)
+	db.SetConnMaxLifetime(config.maxLifetime)
+	db.SetConnMaxIdleTime(config.maxIdleTime)
 
 	if err := db.Ping(); err != nil {
 		return nil, err
@@ -75,10 +75,10 @@ func Get_DB_Connection(ctx context.Context, url string, config Sql_Config) (*sql
 	return db, nil
 }
 
-func Exec_Schema(ctx context.Context, db *sql.DB) error {
-	bun_db := bun.NewDB(db, dia)
+func ExecSchema(ctx context.Context, db *sql.DB) error {
+	bunDb := bun.NewDB(db, dia)
 
-	tx, err := bun_db.BeginTx(ctx, &sql.TxOptions{})
+	tx, err := bunDb.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}

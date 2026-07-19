@@ -8,87 +8,87 @@ import (
 	"log"
 )
 
-func (d *Git_db) Create_Repo(
+func (d *GitDb) CreateRepo(
 	ctx context.Context,
-	owner_id uint64,
-	repo_name string,
+	ownerId uint64,
+	repoName string,
 ) (uint64, error) {
-	repo_id, err := d.db.Create_Repo(ctx, owner_id, repo_name)
-	if errors.Is(err, Safe_Error) {
+	repoId, err := d.db.CreateRepo(ctx, ownerId, repoName)
+	if errors.Is(err, ErrSafe) {
 		return 0, err
 	} else if err != nil {
 		log.Printf("Error while adding repo: %v\n", err.Error())
 		return 0, err
 	}
 
-	err = git.Create_Repo(repo_id)
+	err = git.CreateRepo(repoId)
 	if err != nil {
 		log.Printf("Error while creating repo dir: %v\n", err.Error())
-		d.db.Delete_Repo(ctx, repo_id)
+		d.db.DeleteRepo(ctx, repoId)
 
 		return 0, err
 	}
 
-	return repo_id, nil
+	return repoId, nil
 }
 
-func (d *Git_db) Get_Id(
+func (d *GitDb) GetId(
 	ctx context.Context,
-	owner_id uint64,
-	repo_name string,
+	ownerId uint64,
+	repoName string,
 ) (uint64, error) {
-	repo_id, err := d.db.Get_Id(ctx, owner_id, repo_name)
-	if !errors.Is(err, Error_Invalid) && err != nil {
+	repoId, err := d.db.GetId(ctx, ownerId, repoName)
+	if !errors.Is(err, ErrInvalid) && err != nil {
 		log.Printf("Error while getting repo id: %v\n", err.Error())
 	}
 
-	return repo_id, err
+	return repoId, err
 }
 
-func (d *Git_db) Delete_Repo(
+func (d *GitDb) DeleteRepo(
 	ctx context.Context,
-	repo_id uint64,
+	repoId uint64,
 ) error {
-	err := d.db.Delete_Repo(ctx, repo_id)
-	if !errors.Is(err, Error_Invalid) && err != nil {
-		log.Printf("Error while removeing repo: %v\n", err.Error())
+	err := d.db.DeleteRepo(ctx, repoId)
+	if !errors.Is(err, ErrInvalid) && err != nil {
+		log.Printf("Error while removing repo: %v\n", err.Error())
 		return err
 	}
 
-	err = git.Delete_Repo(repo_id)
+	err = git.DeleteRepo(repoId)
 	if err != nil {
-		log.Printf("Error while deleteing repo dir: %v\n", err.Error())
+		log.Printf("Error while deleting repo dir: %v\n", err.Error())
 		return err
 	}
 
 	return nil
 }
 
-func (d *Git_db) Get_Repos(
+func (d *GitDb) GetRepos(
 	ctx context.Context,
-	user_id uint64,
+	userId uint64,
 	limit uint8,
 	offset uint64,
 ) ([]string, error) {
-	var max_limit uint8 = 100
-	if limit > max_limit {
-		return nil, Error_limit_too_big
+	var maxLimit uint8 = 100
+	if limit > maxLimit {
+		return nil, ErrLimitTooLarge
 	}
 
-	repos, err := d.db.Get_Repos(ctx, user_id, limit, offset)
-	if !errors.Is(err, Error_Invalid) && err != nil {
+	repos, err := d.db.GetRepos(ctx, userId, limit, offset)
+	if !errors.Is(err, ErrInvalid) && err != nil {
 		log.Printf("Error while getting repos: %v\n", err.Error())
 	}
 
 	return repos, err
 }
 
-func (d *Git_db) Info(
+func (d *GitDb) Info(
 	ctx context.Context,
-	repo_id uint64,
-) (*Repo_Info, error) {
-	info, err := d.db.Info(ctx, repo_id)
-	if !errors.Is(err, Error_Invalid) && err != nil {
+	repoId uint64,
+) (*RepoInfo, error) {
+	info, err := d.db.Info(ctx, repoId)
+	if !errors.Is(err, ErrInvalid) && err != nil {
 		log.Printf("Error while getting repo info: %v\n", err.Error())
 		return nil, err
 	}

@@ -8,43 +8,43 @@ import (
 	"sync"
 )
 
-func (d *Session_store) Add_Session(ctx context.Context, username string) (string, error) {
+func (d *SessionStore) AddSession(ctx context.Context, username string) (string, error) {
 	var wg sync.WaitGroup
 
 	var count int
-	var count_err error
-	var token_err error
+	var countErr error
+	var tokenErr error
 	var token string
 
 	wg.Go(func() {
-		count, count_err = d.db.Get_Session_Count(ctx, d.token_namespace+username)
-		if count_err != nil {
-			log.Printf("Error while getting session count: %v\n", count_err.Error())
-		} else if count >= d.token_limit {
-			count_err = Error_too_many_tokens
+		count, countErr = d.db.GetSessionCount(ctx, d.tokenNamespace+username)
+		if countErr != nil {
+			log.Printf("Error while getting session count: %v\n", countErr.Error())
+		} else if count >= d.tokenLimit {
+			countErr = ErrTooManyTokens
 		}
 	})
 	wg.Go(func() {
-		_token := make([]byte, d.token_length)
-		if _, token_err = rand.Read(_token); token_err != nil {
-			log.Printf("Error while genrating token: %v\n", token_err.Error())
+		_token := make([]byte, d.tokenLength)
+		if _, tokenErr = rand.Read(_token); tokenErr != nil {
+			log.Printf("Error while generating token: %v\n", tokenErr.Error())
 			return
 		}
 		token = base64.RawURLEncoding.EncodeToString(_token)
 	})
 	wg.Wait()
-	if count_err != nil {
-		return "", count_err
+	if countErr != nil {
+		return "", countErr
 	}
-	if token_err != nil {
-		return "", token_err
+	if tokenErr != nil {
+		return "", tokenErr
 	}
 
-	if err := d.db.Add_Session(
+	if err := d.db.AddSession(
 		ctx,
-		d.token_namespace+username,
+		d.tokenNamespace+username,
 		token,
-		d.token_timeout,
+		d.tokenTimeout,
 	); err != nil {
 		log.Printf("Error while adding session: %v\n", err.Error())
 		return "", err
@@ -53,18 +53,18 @@ func (d *Session_store) Add_Session(ctx context.Context, username string) (strin
 	return token, nil
 }
 
-func (d *Session_store) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
-	valid, err := d.db.Validate_Session(ctx, d.token_namespace+username, token)
+func (d *SessionStore) ValidateSession(ctx context.Context, username string, token string) (bool, error) {
+	valid, err := d.db.ValidateSession(ctx, d.tokenNamespace+username, token)
 	if err != nil {
-		log.Printf("Error while validateing session: %v\n", err)
+		log.Printf("Error while validating session: %v\n", err)
 		return false, err
 	}
 
 	return valid, nil
 }
 
-func (d *Session_store) Delete_Session(ctx context.Context, username string, token string) error {
-	err := d.db.Delete_Session(ctx, d.token_namespace+username, token)
+func (d *SessionStore) DeleteSession(ctx context.Context, username string, token string) error {
+	err := d.db.DeleteSession(ctx, d.tokenNamespace+username, token)
 	if err != nil {
 		log.Printf("Error while deleting session: %v\n", err.Error())
 	}

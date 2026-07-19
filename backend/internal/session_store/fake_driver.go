@@ -5,24 +5,24 @@ import (
 	"time"
 )
 
-type fake_driver struct {
+type fakeDriver struct {
 	db map[string]string
 }
 
-func Get_Fake_Driver() *Session_store {
-	return &Session_store{
-		&fake_driver{map[string]string{}},
+func GetFakeDriver() *SessionStore {
+	return &SessionStore{
+		&fakeDriver{map[string]string{}},
 		time.Minute,
 		2, 8, "fake:",
 	}
 }
 
-func (d *fake_driver) Add_Session(ctx context.Context, username string, token string, timeout time.Duration) error {
+func (d *fakeDriver) AddSession(ctx context.Context, username string, token string, timeout time.Duration) error {
 	d.db[token] = username
 	return nil
 }
 
-func (d *fake_driver) Validate_Session(ctx context.Context, username string, token string) (bool, error) {
+func (d *fakeDriver) ValidateSession(ctx context.Context, username string, token string) (bool, error) {
 	val, ok := d.db[token]
 
 	if !ok {
@@ -34,10 +34,10 @@ func (d *fake_driver) Validate_Session(ctx context.Context, username string, tok
 	}
 }
 
-func (d *fake_driver) Delete_Session(ctx context.Context, username string, token string) error {
+func (d *fakeDriver) DeleteSession(ctx context.Context, username string, token string) error {
 	return nil
 }
 
-func (d *fake_driver) Get_Session_Count(ctx context.Context, username string) (int, error) {
+func (d *fakeDriver) GetSessionCount(ctx context.Context, username string) (int, error) {
 	return 1, nil
 }

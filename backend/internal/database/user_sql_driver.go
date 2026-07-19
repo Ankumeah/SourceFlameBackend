@@ -6,73 +6,74 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"context"
+  "errors"
 	"database/sql"
 	"time"
 )
 
-type user_sqlx_driver struct{ db *sqlx.DB }
+type userSqlxDriver struct{ db *sqlx.DB }
 
-func User_Sql_Driver(pool *sqlx.DB) *User_db {
-	return &User_db{
-		&user_sqlx_driver{pool},
+func UserSqlDriver(pool *sqlx.DB) *UserDb {
+	return &UserDb{
+		&userSqlxDriver{pool},
 	}
 }
 
-func (s *user_sqlx_driver) Add_User(
+func (s *userSqlxDriver) AddUser(
 	ctx context.Context,
 	username string,
-	password_hash *hash.Hash,
+	passwordHash *hash.Hash,
 ) (uint64, error) {
 	query := s.db.Rebind(`
     INSERT INTO users (username, created_at, password_hash, salt)
     VALUES (?, ?, ?, ?) RETURNING (id);
   `)
 
-	var user_id uint64
+	var userId uint64
 	now := time.Now().Unix()
 	err := s.db.QueryRowContext(ctx, query,
-		username, now, password_hash.Hash, password_hash.Salt,
-	).Scan(&user_id)
+		username, now, passwordHash.Hash, passwordHash.Salt,
+	).Scan(&userId)
 
-	if is_unique_violation(err) {
-		err = Error_user_exists
+	if isUniqueViolation(err) {
+		err = ErrUserExists
 	}
 
-	return user_id, err
+	return userId, err
 }
 
-func (s *user_sqlx_driver) Delete_User(
+func (s *userSqlxDriver) DeleteUser(
 	ctx context.Context,
-	user_id uint64,
+	userId uint64,
 ) error {
 	query := s.db.Rebind("DELETE FROM users WHERE (id = ?);")
 
-	_, err := s.db.ExecContext(ctx, query, user_id)
+	_, err := s.db.ExecContext(ctx, query, userId)
 	return err
 }
 
-func (s *user_sqlx_driver) Get_Hash(
+func (s *userSqlxDriver) GetHash(
 	ctx context.Context,
-	user_id uint64,
+	userId uint64,
 ) (*hash.Hash, error) {
 	query := s.db.Rebind("SELECT password_hash, salt FROM users WHERE (id = ?);")
 
-	var password_hash []byte
+	var passwordHash []byte
 	var salt []byte
-	err := s.db.QueryRowContext(ctx, query, user_id).Scan(&password_hash, &salt)
-	if err == sql.ErrNoRows {
-		return nil, Error_invalid_user
+	err := s.db.QueryRowContext(ctx, query, userId).Scan(&passwordHash, &salt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrInvalidUser
 	} else if err != nil {
 		return nil, err
 	} else {
 		return &hash.Hash{
-			Hash: password_hash,
+			Hash: passwordHash,
 			Salt: salt,
 		}, nil
 	}
 }
 
-func (s *user_sqlx_driver) Get_Id(
+func (s *userSqlxDriver) GetId(
 	ctx context.Context,
 	username string,
 ) (uint64, error) {
@@ -80,8 +81,8 @@ func (s *user_sqlx_driver) Get_Id(
 
 	var id uint64
 	err := s.db.QueryRowContext(ctx, query, username).Scan(&id)
-	if err == sql.ErrNoRows {
-		return 0, Error_invalid_user
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, ErrInvalidUser
 	} else if err != nil {
 		return 0, err
 	} else {
@@ -89,20 +90,20 @@ func (s *user_sqlx_driver) Get_Id(
 	}
 }
 
-func (s *user_sqlx_driver) Info(
+func (s *userSqlxDriver) Info(
 	ctx context.Context,
-	user_id uint64,
-) (*User_Info, error) {
+	userId uint64,
+) (*UserInfo, error) {
 	query := s.db.Rebind("SELECT created_at FROM users WHERE (id = ?);")
 
 	var creation uint64
-	err := s.db.QueryRowContext(ctx, query, user_id).Scan(&creation)
-	if err == sql.ErrNoRows {
-		return nil, Error_invalid_user
+	err := s.db.QueryRowContext(ctx, query, userId).Scan(&creation)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrInvalidUser
 	} else if err != nil {
 		return nil, err
 	} else {
-		return &User_Info{
+		return &UserInfo{
 			Creation: creation,
 		}, nil
 	}

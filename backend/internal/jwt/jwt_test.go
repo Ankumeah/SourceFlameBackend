@@ -5,18 +5,19 @@ import (
 
 	"testing"
 	"time"
+  "errors"
 )
 
-func Test_Issue_jwt(t *testing.T) {
+func TestIssueJwt(t *testing.T) {
 	tests := []struct {
 		username string
 	}{
 		{"beta"},
 	}
-	handler := jwt.Get_JWT_Handler(time.Second, time.Minute, []byte("key"))
+	handler := jwt.GetJWTHandler(time.Second, time.Minute, []byte("key"))
 
 	for _, test := range tests {
-		jwt, err := handler.Issue_jwt(test.username)
+		jwt, err := handler.IssueJwt(test.username)
 		if err != nil {
 			t.Errorf("Error: %v\n", err.Error())
 		} else if len(jwt) <= 0 {
@@ -27,22 +28,22 @@ func Test_Issue_jwt(t *testing.T) {
 	}
 }
 
-func Test_Validate_jwt(t *testing.T) {
+func TestValidateJwt(t *testing.T) {
 	tests := []struct {
 		username string
 	}{
 		{"beta"},
 	}
-	handler := jwt.Get_JWT_Handler(time.Second, time.Minute, []byte("key"))
+	handler := jwt.GetJWTHandler(time.Second, time.Minute, []byte("key"))
 
 	for _, test := range tests {
-		token, err := handler.Issue_jwt(test.username)
+		token, err := handler.IssueJwt(test.username)
 		if err != nil {
-			t.Error("Error while issueing JWT")
+			t.Error("Error while issuing JWT")
 		}
 
-		username, err := handler.Validate_jwt(token)
-		if err == jwt.Error_invalid_JWT {
+		username, err := handler.ValidateJwt(token)
+		if errors.Is(err, jwt.ErrInvalidJWT) {
 			t.Errorf("JWT was invalid")
 		} else if err != nil {
 			t.Errorf("Error: %v\n", err.Error())

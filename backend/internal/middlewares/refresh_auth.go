@@ -1,4 +1,4 @@
-package middlewars
+package middlewares
 
 import (
 	a "github.com/Ankumeah/SourceFlameBackend/internal/app"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func Refresh_Auth_Middleware(app *a.App) gin.HandlerFunc {
+func RefreshAuthMiddleware(app *a.App) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		username := c.GetHeader("X-Username")
@@ -21,14 +21,14 @@ func Refresh_Auth_Middleware(app *a.App) gin.HandlerFunc {
 			return
 		}
 
-		if segments[0] != refresh_auth_type {
+		if segments[0] != refreshAuthType {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect auth type"})
 			return
 		}
 
-		valid, err := app.Store.Validate_Session(ctx, username, segments[1])
+		valid, err := app.Store.ValidateSession(ctx, username, segments[1])
 		if err != nil {
-			log.Printf("Error while validateing session: %v\n", err.Error())
+			log.Printf("Error while validating session: %v\n", err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		} else if !valid {
@@ -36,8 +36,8 @@ func Refresh_Auth_Middleware(app *a.App) gin.HandlerFunc {
 			return
 		}
 
-		c.Set(Username_feild, username)
-		c.Set(Session_feild, segments[1])
+		c.Set(UsernameField, username)
+		c.Set(SessionField, segments[1])
 		c.Next()
 	}
 }

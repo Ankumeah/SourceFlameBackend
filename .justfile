@@ -50,47 +50,27 @@ _load archive:
 # Run go test
 [linux, macos]
 test *options = "-tags='sqlite3'":
-  #! /bin/env sh
+  @export $(cat ./env.d.example/*)
 
-  export $(cat ./env.d.example/*)
-
-  cd ./backend/
-  echo  "==> backend: go test {{ options }} ./..."
-  go test {{ options }} ./... | column -t -s $'\t'
-
-  cd ../db_init/
-  echo  "==> db_init: go test {{ options }} ./..."
-  go test {{ options }} ./... | column -t -s $'\t'
+  cd ./backend/ && go test {{ options }} ./... | column -t -s $'\t'
+  cd ./db_init/ && go test {{ options }} ./... | column -t -s $'\t'
 
 # Run go vet
 [linux, macos]
 vet *options = "-tags='sqlite3'":
-  #! /bin/env sh
+  @export $(cat ./env.d.example/*)
 
-  export $(cat ./env.d.example/*)
-
-  cd ./backend/
-  echo "==> backend: go vet {{ options }} ./..."
-  go vet {{ options }} ./...
-
-  cd ../db_init/
-  echo "==> db_init: go vet {{ options }} ./..."
-  go vet {{ options }} ./...
+  cd ./backend/ && go vet {{ options }} ./...
+  cd ./db_init/ && go vet {{ options }} ./...
 
 # Run go fmt
 [linux, macos]
 fmt *options = "":
-  #! /bin/env sh
+  @export $(cat ./env.d.example/*)
 
-  export $(cat ./env.d.example/*)
+  cd ./backend/ && go fmt {{ options }} ./...
 
-  cd ./backend/
-  echo "==> backend: go fmt {{ options }} ./..."
-  go fmt {{ options }} ./...
-
-  cd ../db_init/
-  echo "==> db_init: go fmt {{ options }} ./..."
-  go fmt {{ options }} ./...
+  cd ./db_init/ && go fmt {{ options }} ./...
 
 [linux, macos]
 _sanitize string:

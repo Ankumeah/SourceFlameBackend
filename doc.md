@@ -31,6 +31,7 @@
 > requires -H "X-Authorization: Bearer JWT"
 - POST("/:repo_name") -> null
 - DELETE("/:repo_name") -> null
+- POST("/:repo_name/transfer/:new_owner") -> null
 
 ## /session
 > requires -H "X-Authorization: Bearer refresh_token" -H "X-Username: username"

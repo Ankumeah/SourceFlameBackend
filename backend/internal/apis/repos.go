@@ -12,9 +12,10 @@ import (
 )
 
 func repos(r *gin.RouterGroup, app *a.App) {
-	group := r.Group("/repos", middlewares.JWTAuthMiddleware(app, true))
+	g := r.Group("/repos", middlewares.JWTAuthMiddleware(app, true))
+  group := g.Group("/:repo_name")
 
-	group.POST("/:repo_name", func(c *gin.Context) {
+	group.POST("", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		repoName := c.Param("repo_name")
 		userId := c.GetUint64(middlewares.UserIdField)
@@ -31,21 +32,17 @@ func repos(r *gin.RouterGroup, app *a.App) {
 		c.Status(http.StatusOK)
 	})
 
-	group.DELETE("/:repo_name", func(c *gin.Context) {
+	group.DELETE("", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		userId := c.GetUint64(middlewares.UserIdField)
 		repoName := c.Param("repo_name")
 
-		repoId, err := app.GitDb.GetId(ctx, userId, repoName)
-		if errors.Is(err, database.ErrInvalid) {
-			c.JSON(badRequest(err))
-			return
-		} else if err != nil {
-			c.JSON(internalServerError())
-			return
-		}
+    repoId, ok := getRepoId(c, app.GitDb, userId, repoName)
+    if !ok {
+      return
+    }
 
-		err = app.GitDb.DeleteRepo(ctx, repoId)
+    err := app.GitDb.DeleteRepo(ctx, repoId)
 		if errors.Is(err, database.ErrInvalid) {
 			c.JSON(badRequest(err))
 			return
@@ -56,4 +53,28 @@ func repos(r *gin.RouterGroup, app *a.App) {
 
 		c.Status(http.StatusOK)
 	})
+
+  group.POST("/transfer/:new_owner", func(c *gin.Context) {
+    ctx := c.Request.Context()
+    userId := c.GetUint64(middlewares.UserIdField)
+    repoName := c.Param("repo_name")
+    newOwner := c.Param("new_owner")
+
+    newOwnerId, ok := getUserId(c, app.UserDb, newOwner)
+    if !ok {
+      return
+    }
+    repoId, ok := getRepoId(c, app.GitDb, userId, repoName)
+    if !ok {
+      return
+    }
+
+    err := app.GitDb.TransferOwner(ctx, repoId, newOwnerId)
+    if errors.Is(err, database.ErrSafe) {
+      c.JSON(badRequest(err))
+    } else if err != nil {
+      c.JSON(internalServerError())
+      return
+    }
+  })
 }

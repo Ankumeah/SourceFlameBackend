@@ -20,6 +20,7 @@ type gitDriver interface {
 	DeleteRepo(ctx context.Context, repoId uint64) error
 	GetRepos(ctx context.Context, userId uint64, limit uint8, offset uint64) ([]string, error)
 	Info(ctx context.Context, repoId uint64) (*RepoInfo, error)
+  TransferOwner(ctx context.Context, repoId uint64, newOwnerId uint64) error
 }
 
 type patDriver interface {

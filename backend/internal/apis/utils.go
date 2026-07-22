@@ -30,3 +30,17 @@ func getUserId(c *gin.Context, userDb *database.UserDb, username string) (uint64
 		return userId, true
 	}
 }
+
+func getRepoId(c *gin.Context, gitDb *database.GitDb, userId uint64, repoName string) (uint64, bool) {
+  ctx := c.Request.Context()
+	repoId, err := gitDb.GetId(ctx, userId, repoName)
+	if errors.Is(err, database.ErrInvalid) {
+		c.JSON(badRequest(err))
+		return 0, false
+	} else if err != nil {
+		c.JSON(internalServerError())
+		return 0, false
+	}
+
+  return repoId, true
+}

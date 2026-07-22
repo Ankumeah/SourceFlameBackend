@@ -135,3 +135,27 @@ func (s *gitSqlxDriver) Info(
 
 	return &info, err
 }
+
+func (s *gitSqlxDriver) TransferOwner(
+  ctx context.Context,
+  repoId uint64,
+  newOwnerId uint64,
+) error {
+  query := s.db.Rebind(`
+    UPDATE repos
+    SET owner_id = ?
+    WHERE id = ?;
+  `)
+
+  tag, err := s.db.ExecContext(ctx, query, newOwnerId, repoId)
+	if err != nil {
+		return err
+	}
+
+	affected, err := tag.RowsAffected()
+	if affected == 0 {
+		return ErrInvalidRepo
+	}
+
+  return nil
+}

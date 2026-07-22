@@ -95,3 +95,15 @@ func (d *GitDb) Info(
 
 	return info, err
 }
+
+func (d *GitDb) TransferOwner(
+  ctx context.Context,
+  repoId uint64,
+  newOwnerId uint64,
+) error {
+  err := d.db.TransferOwner(ctx, repoId, newOwnerId)
+  if !errors.Is(err, ErrSafe) && err != nil {
+		log.Printf("Error while transfering repo owner: %v\n", err.Error())
+  }
+  return err
+}

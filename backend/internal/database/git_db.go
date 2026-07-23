@@ -69,7 +69,7 @@ func (d *GitDb) GetRepos(
 	userId uint64,
 	limit uint8,
 	offset uint64,
-) ([]string, error) {
+) ([]RepoInfo, error) {
 	var maxLimit uint8 = 100
 	if limit > maxLimit {
 		return nil, ErrLimitTooLarge

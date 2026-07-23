@@ -76,5 +76,7 @@ func repos(r *gin.RouterGroup, app *a.App) {
       c.JSON(internalServerError())
       return
     }
+
+    c.Status(http.StatusOK)
   })
 }

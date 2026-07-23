@@ -18,9 +18,12 @@ type gitDriver interface {
 	CreateRepo(ctx context.Context, ownerId uint64, repoName string) (uint64, error)
 	GetId(ctx context.Context, ownerId uint64, repoName string) (uint64, error)
 	DeleteRepo(ctx context.Context, repoId uint64) error
-	GetRepos(ctx context.Context, userId uint64, limit uint8, offset uint64) ([]string, error)
+	GetRepos(ctx context.Context, userId uint64, limit uint8, offset uint64) ([]RepoInfo, error)
 	Info(ctx context.Context, repoId uint64) (*RepoInfo, error)
   TransferOwner(ctx context.Context, repoId uint64, newOwnerId uint64) error
+//  AddMember(ctx context.Context, repoId uint64, memberId uint64) error
+//  RemoveMember(ctx context.Context, repoId uint64, memberId uint64) error
+//  GetMembers(ctx context.Context, repoId uint64, memberId uint64) []uint64
 }
 
 type patDriver interface {
@@ -42,6 +45,7 @@ type UserInfo struct {
 }
 
 type RepoInfo struct {
+  Name string `json:"name"`
 	Creation uint64 `json:"creation"`
 	Stars    uint64 `json:"stars"`
 	Owner    string `json:"owner"`

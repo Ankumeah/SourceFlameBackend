@@ -85,10 +85,12 @@ func (s *gitSqlxDriver) GetRepos(
 	userId uint64,
 	limit uint8,
 	offset uint64,
-) ([]string, error) {
+) ([]RepoInfo, error) {
 	query := s.db.Rebind(`
-    SELECT name FROM repos
-    WHERE (owner_id = ?)
+    SELECT repos.name, repos.created_at, repos.stars, users.username
+    FROM repos
+    INNER JOIN users on repos.owner_id = users.id
+    WHERE owner_id = ?
     LIMIT ? OFFSET ?
   `)
 
@@ -98,10 +100,10 @@ func (s *gitSqlxDriver) GetRepos(
 	}
 	defer rows.Close()
 
-	var repos []string
+	var repos []RepoInfo
 	for rows.Next() {
-		var repo string
-		err := rows.Scan(&repo)
+		var repo RepoInfo
+		err := rows.Scan(&repo.Name, &repo.Creation, &repo.Stars, &repo.Owner)
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +121,7 @@ func (s *gitSqlxDriver) Info(
 	repoId uint64,
 ) (*RepoInfo, error) {
 	query := s.db.Rebind(`
-    SELECT repos.created_at, repos.stars, users.username
+    SELECT repos.name, repos.created_at, repos.stars, users.username
     FROM repos
     INNER JOIN users ON repos.owner_id = users.id
     WHERE repos.id = ?;
@@ -127,7 +129,7 @@ func (s *gitSqlxDriver) Info(
 
 	var info RepoInfo
 	err := s.db.QueryRowContext(ctx, query, repoId).Scan(
-		&info.Creation, &info.Stars, &info.Owner,
+		&info.Name, &info.Creation, &info.Stars, &info.Owner,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrInvalidRepo

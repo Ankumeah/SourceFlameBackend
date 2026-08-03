@@ -76,6 +76,15 @@
   }
 }
 ```
+- GET("/:repo_owner/:repo_name/members") ->
+```json
+{
+  "members": []{
+    "username": string,
+    "addition": uint64
+  }
+}
+```
 > Git client use
   - GET("/:repo_owner/:repo_name/info/refs?service=(git-receive-pack|git-upload-pack)")
   - POST("/:repo_owner/:repo_name/git-upload-pack")
@@ -87,6 +96,8 @@
 - POST("/:repo_name") -> `null`
 - DELETE("/:repo_name") -> `null`
 - POST("/:repo_name/transfer/:new_owner") -> `null`
+- POST("/:repo_name/members/:member") -> `null`
+- DELETE("/:repo_name/members/:member") -> `null`
 
 ## /session
 > requires -H "X-Authorization: Bearer refresh_token" -H "X-Username: username"
@@ -95,7 +106,13 @@
 - DELETE("/") -> `null`
 
 ## /user
-- GET("/:username/meta") -> `{ "creation": uint64 }`
+- GET("/:username/meta") ->
+```json
+{
+  "creation": uint64,
+  "username": string
+}
+```
 - GET("/:username/repos?limit=uint8(default 10)&offset=uint64(default 0)") ->
 ```json
 {

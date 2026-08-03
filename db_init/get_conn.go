@@ -36,6 +36,14 @@ type PAT struct {
 	CreatedAt uint64 `bun:"created_at,notnull"`
 	LastUsed  *int64 `bun:"last_used"`
 }
+type Members struct {
+	bun.BaseModel `bun:"table:members"`
+
+	ID       uint64 `bun:"id,pk,autoincrement"`
+	MemberID uint64 `bun:"member_id,notnull,unique:repo_member"`
+	RepoID   uint64 `bun:"repo_id,notnull,unique:repo_member"`
+	Addition uint64 `bun:"addition,notnull"`
+}
 
 type SqlConfig struct {
 	maxConns    int
@@ -93,6 +101,10 @@ func ExecSchema(ctx context.Context, db *sql.DB) error {
 		return err
 	}
 	_, err = tx.NewCreateTable().Model((*PAT)(nil)).IfNotExists().Exec(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = tx.NewCreateTable().Model((*Members)(nil)).IfNotExists().Exec(ctx)
 	if err != nil {
 		return err
 	}

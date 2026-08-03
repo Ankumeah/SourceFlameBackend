@@ -178,4 +178,20 @@ func repo(r *gin.RouterGroup, app *a.App) {
 
 		c.JSON(http.StatusOK, gin.H{"blame": blame})
 	})
+
+	group.GET("/members", func(c *gin.Context) {
+		ctx := c.Request.Context()
+		repoId := c.GetUint64(middlewares.RepoIdField)
+
+		members, err := app.GitDb.GetMembers(ctx, repoId)
+		if errors.Is(err, database.ErrSafe) {
+			c.JSON(badRequest(err))
+			return
+		} else if err != nil {
+			c.JSON(internalServerError())
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"members": members})
+	})
 }

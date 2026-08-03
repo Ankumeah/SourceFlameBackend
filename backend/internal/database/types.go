@@ -20,10 +20,10 @@ type gitDriver interface {
 	DeleteRepo(ctx context.Context, repoId uint64) error
 	GetRepos(ctx context.Context, userId uint64, limit uint8, offset uint64) ([]RepoInfo, error)
 	Info(ctx context.Context, repoId uint64) (*RepoInfo, error)
-  TransferOwner(ctx context.Context, repoId uint64, newOwnerId uint64) error
-//  AddMember(ctx context.Context, repoId uint64, memberId uint64) error
-//  RemoveMember(ctx context.Context, repoId uint64, memberId uint64) error
-//  GetMembers(ctx context.Context, repoId uint64, memberId uint64) []uint64
+	TransferOwner(ctx context.Context, repoId uint64, newOwnerId uint64) error
+	AddMember(ctx context.Context, repoId uint64, memberId uint64) error
+	RemoveMember(ctx context.Context, repoId uint64, memberId uint64) error
+	GetMembers(ctx context.Context, repoId uint64) ([]MemberInfo, error)
 }
 
 type patDriver interface {
@@ -41,18 +41,23 @@ type GitDb struct{ db gitDriver }
 type PATDb struct{ db patDriver }
 
 type UserInfo struct {
-	Creation uint64 `json:"creation"`
+	Creation uint64 `json:"creation" binding:"required"`
 }
 
 type RepoInfo struct {
-  Name string `json:"name"`
-	Creation uint64 `json:"creation"`
-	Stars    uint64 `json:"stars"`
-	Owner    string `json:"owner"`
+	Name     string `json:"name" binding:"required"`
+	Creation uint64 `json:"creation" binding:"required"`
+	Stars    uint64 `json:"stars" binding:"required"`
+	Owner    string `json:"owner" binding:"required"`
 }
 
 type PATInfo struct {
-	Name     string  `json:"name"`
-	Creation uint64  `json:"creation"`
-	LastUsed *uint64 `json:"last_used"`
+	Name     string  `json:"name" binding:"required"`
+	Creation uint64  `json:"creation" binding:"required"`
+	LastUsed *uint64 `json:"last_used" binding:"required"`
+}
+
+type MemberInfo struct {
+	Username string `json:"username" binding:"required"`
+	Addition uint64 `json:"addition" binding:"required"`
 }

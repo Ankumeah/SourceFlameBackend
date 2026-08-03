@@ -97,13 +97,48 @@ func (d *GitDb) Info(
 }
 
 func (d *GitDb) TransferOwner(
-  ctx context.Context,
-  repoId uint64,
-  newOwnerId uint64,
+	ctx context.Context,
+	repoId uint64,
+	newOwnerId uint64,
 ) error {
-  err := d.db.TransferOwner(ctx, repoId, newOwnerId)
-  if !errors.Is(err, ErrSafe) && err != nil {
+	err := d.db.TransferOwner(ctx, repoId, newOwnerId)
+	if !errors.Is(err, ErrSafe) && err != nil {
 		log.Printf("Error while transfering repo owner: %v\n", err.Error())
-  }
-  return err
+	}
+	return err
+}
+
+func (d *GitDb) AddMember(
+	ctx context.Context,
+	repoId uint64,
+	memberId uint64,
+) error {
+	err := d.db.AddMember(ctx, repoId, memberId)
+	if !errors.Is(err, ErrSafe) && err != nil {
+		log.Printf("Error while adding repo member: %v\n", err.Error())
+	}
+	return err
+}
+
+func (d *GitDb) RemoveMember(
+	ctx context.Context,
+	repoId uint64,
+	memberId uint64,
+) error {
+	err := d.db.RemoveMember(ctx, repoId, memberId)
+	if !errors.Is(err, ErrSafe) && err != nil {
+		log.Printf("Error while removing repo member: %v\n", err.Error())
+	}
+	return err
+}
+
+func (d *GitDb) GetMembers(
+	ctx context.Context,
+	repoId uint64,
+) ([]MemberInfo, error) {
+	members, err := d.db.GetMembers(ctx, repoId)
+	if !errors.Is(err, ErrSafe) && err != nil {
+		log.Printf("Error while getting repo members: %v\n", err.Error())
+	}
+	return members, err
 }

@@ -20,7 +20,7 @@ func getUserId(c *gin.Context, userDb *database.UserDb, username string) (uint64
 	ctx := c.Request.Context()
 
 	userId, err := userDb.GetId(ctx, username)
-	if errors.Is(err, database.ErrInvalidUser) {
+	if errors.Is(err, database.ErrSafe) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user"})
 		return 0, false
 	} else if err != nil {
@@ -32,9 +32,9 @@ func getUserId(c *gin.Context, userDb *database.UserDb, username string) (uint64
 }
 
 func getRepoId(c *gin.Context, gitDb *database.GitDb, userId uint64, repoName string) (uint64, bool) {
-  ctx := c.Request.Context()
+	ctx := c.Request.Context()
 	repoId, err := gitDb.GetId(ctx, userId, repoName)
-	if errors.Is(err, database.ErrInvalid) {
+	if errors.Is(err, database.ErrSafe) {
 		c.JSON(badRequest(err))
 		return 0, false
 	} else if err != nil {
@@ -42,5 +42,5 @@ func getRepoId(c *gin.Context, gitDb *database.GitDb, userId uint64, repoName st
 		return 0, false
 	}
 
-  return repoId, true
+	return repoId, true
 }

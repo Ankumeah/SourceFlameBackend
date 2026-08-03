@@ -96,15 +96,13 @@ func (s *userSqlxDriver) Info(
 ) (*UserInfo, error) {
 	query := s.db.Rebind("SELECT created_at FROM users WHERE (id = ?);")
 
-	var creation uint64
-	err := s.db.QueryRowContext(ctx, query, userId).Scan(&creation)
+	var info UserInfo
+	err := s.db.QueryRowContext(ctx, query, userId).Scan(&info.Creation)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrInvalidUser
 	} else if err != nil {
 		return nil, err
-	} else {
-		return &UserInfo{
-			Creation: creation,
-		}, nil
 	}
+
+	return &info, nil
 }

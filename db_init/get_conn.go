@@ -13,7 +13,7 @@ type User struct {
 
 	ID           uint64 `bun:"id,pk,autoincrement"`
 	Username     string `bun:"username,notnull,unique"`
-	CreatedAt    uint64 `bun:"created_at,notnull"`
+	CreatedAt    int64  `bun:"created_at,notnull"`
 	PasswordHash []byte `bun:"password_hash,notnull"`
 	Salt         []byte `bun:"salt,notnull"`
 }
@@ -23,7 +23,7 @@ type Repo struct {
 	ID        uint64 `bun:"id,pk,autoincrement"`
 	Name      string `bun:"name,notnull,unique:repo_name"`
 	OwnerID   uint64 `bun:"owner_id,notnull,unique:repo_name"`
-	CreatedAt uint64 `bun:"created_at,notnull"`
+	CreatedAt int64  `bun:"created_at,notnull"`
 	Stars     uint64 `bun:"stars,notnull"`
 }
 type PAT struct {
@@ -33,7 +33,7 @@ type PAT struct {
 	Name      string `bun:"name,notnull,unique:pat_name"`
 	Hash      []byte `bun:"hash,notnull"`
 	OwnerID   uint64 `bun:"owner_id,notnull,unique:pat_name"`
-	CreatedAt uint64 `bun:"created_at,notnull"`
+	CreatedAt int64  `bun:"created_at,notnull"`
 	LastUsed  *int64 `bun:"last_used"`
 }
 type Members struct {
@@ -42,7 +42,7 @@ type Members struct {
 	ID       uint64 `bun:"id,pk,autoincrement"`
 	MemberID uint64 `bun:"member_id,notnull,unique:repo_member"`
 	RepoID   uint64 `bun:"repo_id,notnull,unique:repo_member"`
-	Addition uint64 `bun:"addition,notnull"`
+	Addition int64  `bun:"addition,notnull"`
 }
 
 type SqlConfig struct {

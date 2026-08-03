@@ -39,7 +39,7 @@ func GetCommits(repoId uint64, branch string) ([]Commit, error) {
 			},
 			Message:   commit.Message,
 			Hash:      commit.Hash.String(),
-			Timestamp: uint64(commit.Author.When.Unix()),
+			Timestamp: commit.Author.When.Unix(),
 		})
 		return nil
 	})

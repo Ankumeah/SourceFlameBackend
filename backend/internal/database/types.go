@@ -41,23 +41,23 @@ type GitDb struct{ db gitDriver }
 type PATDb struct{ db patDriver }
 
 type UserInfo struct {
-	Creation uint64 `json:"creation" binding:"required"`
+	Creation int64 `json:"creation" binding:"required"`
 }
 
 type RepoInfo struct {
 	Name     string `json:"name" binding:"required"`
-	Creation uint64 `json:"creation" binding:"required"`
+	Creation int64  `json:"creation" binding:"required"`
 	Stars    uint64 `json:"stars" binding:"required"`
 	Owner    string `json:"owner" binding:"required"`
 }
 
 type PATInfo struct {
-	Name     string  `json:"name" binding:"required"`
-	Creation uint64  `json:"creation" binding:"required"`
-	LastUsed *uint64 `json:"last_used" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Creation int64  `json:"creation" binding:"required"`
+	LastUsed *int64 `json:"last_used" binding:"required"`
 }
 
 type MemberInfo struct {
 	Username string `json:"username" binding:"required"`
-	Addition uint64 `json:"addition" binding:"required"`
+	Addition int64  `json:"addition" binding:"required"`
 }

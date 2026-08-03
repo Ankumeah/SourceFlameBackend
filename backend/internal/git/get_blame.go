@@ -40,7 +40,7 @@ func GetBlame(repoId uint64, commitHash string, path string) ([]BlameLine, error
 				Email: line.Author,
 			},
 			Text:      line.Text,
-			Timestamp: uint64(line.Date.Unix()),
+			Timestamp: line.Date.Unix(),
 			Hash:      line.Hash.String(),
 		})
 	}
